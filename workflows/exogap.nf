@@ -77,15 +77,14 @@ workflow EXOGAP {
     // // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // // ! There is currently no tooling to help you write a sample sheet schema
 
-    ch_genomes.view()
+    // SUBWORKFLOW: GENOME_PREPROCESS
     //
-    // // SUBWORKFLOW: GENOME_PREPROCESS
-    // //
-    // GENOME_PREPROCESS(ch_genomes)
+    GENOME_PREPROCESS(ch_genomes)
 
-    // //
-    // // SUBWORKFLOW: REPETITIVE_ELEMENTS
-    // //
+    //
+    // SUBWORKFLOW: REPETITIVE_ELEMENTS
+    //
+    REPETITIVE_ELEMENTS(GENOME_PREPROCESS.out.fasta)
 
     // REPETITIVE_ELEMENTS(GENOME_PREPROCESS.out.fasta)
     // REPETITIVE_ELEMENTS.out.view()
