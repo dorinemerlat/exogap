@@ -6,3 +6,6 @@ results/
 testing/
 testing*
 *.pyc
+dockerfile/*
+nextflow_template.config
+null/

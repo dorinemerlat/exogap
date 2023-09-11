@@ -1,4 +1,4 @@
-# nf-core/exogap: Citations
+# dorinemerlat/exogap: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
@@ -10,13 +10,31 @@
 
 ## Pipeline tools
 
-- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [Py Fasta Validator](https://github.com/linsalrob/py_fasta_validator)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.
+  > Edwards, R. (2019). linsalrob/fasta_validator : Initial Release (v0.1) [Logiciel]. Zenodo. https://doi.org/10.5281/ZENODO.2532044
 
-- [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
+- [BUSCO](https://busco.ezlab.org/)
 
-  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+  > Manni, M., Berkeley, M. R., Seppey, M., Simão, F. A., & Zdobnov, E. M. (2021). BUSCO Update : Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Molecular Biology and Evolution, 38(10), 4647‑4654. https://doi.org/10.1093/molbev/msab199
+
+- [RepeatModeler](url)
+
+  > reference
+
+- [RepeatMasker](url)
+
+  > reference
+
+- [PASTEC](url)
+
+  > reference
+
+- [RepBase](url)
+
+  > reference
+
+
 
 ## Software packaging/containerisation tools
 

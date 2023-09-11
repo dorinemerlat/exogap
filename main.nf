@@ -1,11 +1,10 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/exogap
+    dorinemerlat/exogap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/exogap
-    Website: https://nf-co.re/exogap
-    Slack  : https://nfcore.slack.com/channels/exogap
+    Github : https://github.com/dorinemerlat/exogap
+    Mail: dorine.merlat@etu.unistra.fr
 ----------------------------------------------------------------------------------------
 */
 
@@ -17,7 +16,11 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
+// params.genomes = WorkflowMain.getGenomeAttribute(params, 'genomes')
+// params.additional_transcripts = WorkflowMain.getGenomeAttribute(params, 'fasta')
+// params.additional_proteins = WorkflowMain.getGenomeAttribute(params, 'fasta')
+// params.repeats_librairy = WorkflowMain.getGenomeAttribute(params, 'fasta')
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,21 +28,21 @@ params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { validateParameters; paramsHelp } from 'plugin/nf-validation'
+// include { validateParameters; paramsHelp } from 'plugin/nf-validation'
 
-// Print help message if needed
-if (params.help) {
-    def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-    def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-    def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome GRCh37 -profile docker"
-    log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
-    System.exit(0)
-}
+// // Print help message if needed
+// if (params.help) {
+//     def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+//     def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+//     def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome GRCh37 -profile docker"
+//     log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
+//     System.exit(0)
+// }
 
-// Validate input parameters
-if (params.validate_params) {
-    validateParameters()
-}
+// // Validate input parameters
+// if (params.validate_params) {
+//     validateParameters()
+// }
 
 WorkflowMain.initialise(workflow, params, log)
 
