@@ -1,6 +1,7 @@
 process REPEATMODELER {
     tag "REPEATMODELER_$genome_id"
     cpus 32
+    time '20d'
 
     conda (params.enable_conda ? 'py_fasta_validator==0.5--py39h7d875b9_0' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
