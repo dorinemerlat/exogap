@@ -12,7 +12,7 @@ process REPEATMODELER {
     tuple val(genome_id), path(genome_path)
 
     output:
-    tuple val(genome_id), path("${genome_id}-families.fa")
+    tuple val("${genome_id}-families"), path("${genome_id}-families.fa")
 
     script:
     """

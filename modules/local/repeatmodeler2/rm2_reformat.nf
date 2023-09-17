@@ -1,6 +1,5 @@
 process RM2_REFORMAT {
-    tag "RM2_REFORMAT$genome_id"
-    cpus 1
+    tag "RM2_REFORMAT_$genome_id"
 
     input:
     tuple val(genome_id), path(genome_path)

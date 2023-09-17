@@ -18,9 +18,18 @@ workflow REPETITIVE_ELEMENTS{
         ch_repeats_lib
 
     main:
-        REPEATMODELER2(ch_genomes)
+        // TO DO: reuse as principal instruction
+        // REPEATMODELER2(ch_genomes)
 
-        ch_RM2_library = RM2_REFORMAT(REPEATMODELER2.out)
+        // ch_RM2_library = RM2_REFORMAT(REPEATMODELER2.out)
+
+        // TO Do: remove
+        ch_repeat_modeler2 = Channel
+            .fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
+            .map { file -> tuple(file.baseName, file) }
+
+        ch_RM2_library = RM2_REFORMAT(ch_repeat_modeler2)
+
 
         // concatenate libraries == yes
         if ( params.repeats_concat ) {
@@ -38,45 +47,46 @@ workflow REPETITIVE_ELEMENTS{
             ELIMINATE_REDUNDANCE_1(ch_RM2_library)
         }
 
-        // use a extern repeats library == yes
-        if (params.ch_repeats_lib ){
-            ch_repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(ch_genomes, params.ch_repeats_lib)
-            ch_masked = ch_repeatmasker.masked
-        }
-        // use a extern repeats library == no
-        else {
-            ch_masked = ch_genomes
-        }
+        // // use a extern repeats library == yes
+        // if (params.ch_repeats_lib ){
+        //     ch_repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(ch_genomes, params.ch_repeats_lib)
+        //     ch_masked = ch_repeatmasker.masked
+        // }
+        // // use a extern repeats library == no
+        // else {
+        //     ch_masked = ch_genomes
+        // }
 
-        // in all case: make one iteration with own library (all or specie-specific)
-        ch_repeatmasker = REPEATMASKER_WITH_OWN_LIB_1(
-                ch_masked,
-                ELIMINATE_REDUNDANCE_1.out)
+        // // in all case: make one iteration with own library (all or specie-specific)
+        // ch_repeatmasker = REPEATMASKER_WITH_OWN_LIB_1(
+        //         ch_masked,
+        //         ELIMINATE_REDUNDANCE_1.out)
 
-        // split repeats == yes
-        if ( params.repeats_split ) {
-            ch_repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
-                    ch_repeatmasker.masked,
-                    ELIMINATE_REDUNDANCE_2.out)
+        // // split repeats == yes
+        // if ( params.repeats_split ) {
+        //     ch_repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
+        //             ch_repeatmasker.masked,
+        //             ELIMINATE_REDUNDANCE_2.out)
 
-        }
+        // }
 
-        // TO DO: add PROCESS_REPEATS process
-            PROCESS_REPEATS(ch_repeatmasker)
+        // // TO DO: add PROCESS_REPEATS process
+        //     PROCESS_REPEATS(ch_repeatmasker)
 
-        // TO DO: add RM_OUTPUT_REFORMAT process
-            RM_REFORMAT(PROCESS_REPEATS.out)
+        // // TO DO: add RM_OUTPUT_REFORMAT process
+        //     RM_REFORMAT(PROCESS_REPEATS.out)
 
-        // TO DO: add PASTEC process
-            PASTEC(RM_REFORMAT.out)
+        // // TO DO: add PASTEC process
+        //     PASTEC(RM_REFORMAT.out)
 
-        // TO DO: add RE_STATISTICS process
-            STATS(PASTEC.out)
-            PLOTS(PASTEC.out)
+        // // TO DO: add RE_STATISTICS process
+        //     STATS(PASTEC.out)
+        //     PLOTS(PASTEC.out)
 
     emit:
-        re_stats = STATS.out
-        re_gff3 = repeats_ch.gff3
-        masked_genomes = repeats_ch.fasta
+        re = ELIMINATE_REDUNDANCE_1.output
+        // re_stats = STATS.out
+        // re_gff3 = repeats_ch.gff3
+        // masked_genomes = repeats_ch.fasta
 }
 
