@@ -28,6 +28,9 @@ ch_genomes                  = Channel.
 if ( params.repeats_lib ) {
     ch_repeats_lib          = Channel.fromPath( params.repeats_lib, checkIfExists: true )
 }
+else {
+    ch_repeats_lib          = null
+}
 
 /*    ch_genomes = Channel
                 .fromPath(params.input)

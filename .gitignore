@@ -10,3 +10,4 @@ dockerfile/*
 nextflow_template.config
 null/
 sample_sheet.tsv
+nextflow.config.*

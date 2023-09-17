@@ -46,14 +46,18 @@ workflow REPETITIVE_ELEMENTS{
             ELIMINATE_REDUNDANCE_1(ch_RM2_library)
         }
 
+
         // use a extern repeats library == yes
-        if (params.ch_repeats_lib ){
-            ch_repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(ch_genomes, params.ch_repeats_lib)
+        ch_genomes.view()
+        if (params.repeats_lib ){
+            ch_repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(ch_genomes, ch_repeats_lib)
             ch_masked = ch_repeatmasker.masked
+            ch_cat = ch_repeatmasker.cat
         }
         // use a extern repeats library == no
         else {
             ch_masked = ch_genomes
+            ch_cat = Channel.of('')
         }
 
         // in all case: make one iteration with own library (all or specie-specific)
@@ -61,16 +65,27 @@ workflow REPETITIVE_ELEMENTS{
                 ch_masked,
                 ELIMINATE_REDUNDANCE_1.out)
 
+        ch_cat = ch_cat.concat(ch_repeatmasker.cat)
+
         // split repeats == yes
         if ( params.repeats_split ) {
             ch_repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
                     ch_repeatmasker.masked,
                     ELIMINATE_REDUNDANCE_2.out)
 
+            ch_cat = ch_cat.concat(ch_repeatmasker.cat)
         }
 
-        // // TO DO: add PROCESS_REPEATS process
-        //     PROCESS_REPEATS(ch_repeatmasker)
+        ch_cat = ch_cat.collect()
+
+        TO DO: add PROCESS_REPEATS process
+            PROCESS_REPEATS(
+                    ch_repeatmasker.masked,
+                    ch_repeatmasker.out,
+                    ch_cat,
+                    ch_repeats_lib
+
+            )
 
         // // TO DO: add RM_OUTPUT_REFORMAT process
         //     RM_REFORMAT(PROCESS_REPEATS.out)

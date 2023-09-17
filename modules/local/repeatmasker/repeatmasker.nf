@@ -1,6 +1,6 @@
 process REPEATMASKER {
-    tag "REPEATMASKE_$genome_id"
-    cpus 32
+    tag "REPEATMASKER_$genome_id"
+    cpus 30
     time '20d'
 
     conda (params.enable_conda ? 'py_fasta_validator==0.5--py39h7d875b9_0' : null)
@@ -10,7 +10,7 @@ process REPEATMASKER {
 
     input:
     tuple val(genome_id), path(genome_path)
-    tuple val(library_id), path(library_path)
+    path library_path
 
     output:
     tuple val(genome_id), path("${genome_path}.masked"),    emit: masked
@@ -18,10 +18,13 @@ process REPEATMASKER {
     tuple val(genome_id), path("${genome_path}.tbl"),       emit: tbl
     tuple val(genome_id), path("${genome_path}.out"),       emit: out
     tuple val(genome_id), path("${genome_path}.align"),     emit: align
+    tuple val(genome_id), path("${genome_path}.cat"),       emit: cat
 
     script:
     """
-        RepeatMasker -pa $task.cpus -e ncbi -nolow -lib $library_path -a -gccalc -norna -excln \
+    RepeatMasker -pa $task.cpus -e ncbi -nolow -lib $library_path -a -gccalc -norna -excln \
         -gff -s -xsmall -gccalc -excln -gff -s -html $genome_path
+
+    gunzip *.gz
     """
 }
