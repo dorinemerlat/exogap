@@ -24,8 +24,7 @@ workflow REPETITIVE_ELEMENTS{
         // ch_RM2_library = RM2_REFORMAT(REPEATMODELER2.out)
 
         // TO Do: remove
-        ch_repeat_modeler2 = Channel
-            .fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
+        ch_repeat_modeler2 = Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
             .map { file -> tuple(file.baseName, file) }
 
         ch_RM2_library = RM2_REFORMAT(ch_repeat_modeler2)
