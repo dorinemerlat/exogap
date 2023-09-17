@@ -1,5 +1,5 @@
-process REPEATMODELER {
-    tag "REPEATMODELER_$genome_id"
+process LIBRARY_SPLIT {
+    tag "LIBRARY_SPLIT_$genome_id"
     cpus 32
     time '20d'
 
@@ -9,17 +9,15 @@ process REPEATMODELER {
         'quay.io/biocontainers/repeatmodeler:2.0.3--pl5321h9ee0642_0' }"
 
     input:
-    tuple val(genome_id), path(genome_path)
+    tuple val(library_id), path(library_path)
 
 
     output:
-    stdout
-    // path("${genome_id}.families"), emit: repeatmodeler_families
+    tuple val(library_id) path("${genome_id}-families-classified.fa"), emit: classified
+    tuple val(library_id) path("${genome_id}-unclassified.fa"),        emit: unclassifier
 
     script:
     """
-    BuildDatabase -name $genome_id -engine ncbi $genome_path
-
-    RepeatModeler -pa $task.cpus -engine ncbi -database $genome_id -LTRStruct
+    sorting_repeats.py -i $library_path -k "${genome_id}-classified.fa" -u "${genome_id}-unclassified.fa"
     """
 }
