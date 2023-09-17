@@ -21,12 +21,12 @@ WorkflowExogap.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_genomes                  = Channel
-                                .fromPath( params.genomes + '/*.fa', checkIfExists: true )
+ch_genomes                  = Channel.
+                                fromPath( params.genomes + '/*.fa', checkIfExists: true )
                                 .map { file -> tuple(file.baseName, file) }
 
 if ( params.repeats_lib ) {
-    ch_repeats_lib          = Channel.fromPath( params.ch_repeats_lib, checkIfExists: true )
+    ch_repeats_lib          = Channel.fromPath( params.repeats_lib, checkIfExists: true )
 }
 
 /*    ch_genomes = Channel

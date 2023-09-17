@@ -4,8 +4,8 @@ REFORMAT ASSEMBLY AND STATISTICS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FASTA_VALIDATOR } from '../../modules/local/fasta_validator'
-include { GENOME_FORMAT } from '../../modules/local/genome_format'
+include { FASTA_VALIDATOR }     from '../../modules/local/fasta_validator'
+include { GENOME_FORMAT }       from '../../modules/local/genome_format'
 
 workflow GENOME_PREPROCESS {
     take:

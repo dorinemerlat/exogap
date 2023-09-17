@@ -18,7 +18,7 @@ def sorting(input, unclassified_file, classified_file):
     classified = open(classified_file, 'w')
 
     for seq_record in SeqIO.parse(input, 'fasta'):
-        if re.match(r'.*#Unclassified', seq_record.id):
+        if seq_record.id.split('_')[-1] == "Unknown":
             unclassified.write(seq_record.format('fasta'))
         else :
             classified.write(seq_record.format('fasta'))

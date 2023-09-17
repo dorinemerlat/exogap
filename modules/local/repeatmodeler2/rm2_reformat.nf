@@ -5,10 +5,11 @@ process RM2_REFORMAT {
     tuple val(genome_id), path(genome_path)
 
     output:
-    tuple val(genome_id), path("${genome_id}-families-renamed.fa")
+    tuple val("${genome_id}-renamed"), path("${genome_id}-renamed.fa")
 
     script:
     """
-    rename_repeats.py.py -i g$enome_path -o ${genome_id}-families-renamed.fa -p repeats
+    prefix=\$(echo $genome_id |sed -e "s/-families//g")
+    rename_repeats.py -i $genome_path -o ${genome_id}-renamed.fa -p \$prefix
     """
 }

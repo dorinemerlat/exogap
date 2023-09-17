@@ -1,6 +1,6 @@
-process REPEATMODELER {
-    tag "REPEATMODELER_$genome_id"
-    cpus 32
+process REPEATMODELER2 {
+    tag "REPEATMODELER2_$genome_id"
+    cpus 30
     time '20d'
 
     conda (params.enable_conda ? 'py_fasta_validator==0.5--py39h7d875b9_0' : null)

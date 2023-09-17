@@ -3,10 +3,10 @@ process LIBRARY_CONCATENATION {
     path library_paths
 
     output:
-    tuple val("all_repeats_families"), path("all_repeats_families.fa")
+    tuple val("all-repeats-families"), path("all-repeats-families.fa")
 
     script:
     """
-    cat $library_paths > all_repeats_families.fa
+    more $library_paths > all-repeats-families.fa
     """
 }
