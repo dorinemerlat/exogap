@@ -78,14 +78,13 @@ workflow REPETITIVE_ELEMENTS{
 
         ch_cat = ch_cat.collect()
 
-        TO DO: add PROCESS_REPEATS process
-            PROCESS_REPEATS(
-                    ch_repeatmasker.masked,
-                    ch_repeatmasker.out,
-                    ch_cat,
-                    ch_repeats_lib
-
-            )
+        // TO DO: add PROCESS_REPEATS process
+        // PROCESS_REPEATS(
+        //         ch_repeatmasker.masked,
+        //         ch_repeatmasker.out,
+        //         ch_cat,
+        //         ch_repeats_lib
+        // )
 
         // // TO DO: add RM_OUTPUT_REFORMAT process
         //     RM_REFORMAT(PROCESS_REPEATS.out)

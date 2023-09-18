@@ -12,7 +12,7 @@ process ELIMINATE_REDUNDANCE {
     tuple val(library_id), path(library_path)
 
     output:
-    tuple val(library_id), path("${library_id}-noredundance.fa")
+    tuple val("${library_id}-noredundance"), path("${library_id}-noredundance.fa")
 
     script:
     """

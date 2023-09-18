@@ -14,7 +14,6 @@ process REPEATMASKER {
 
     output:
     tuple val(genome_id), path("${genome_path}.masked"),    emit: masked
-    tuple val(genome_id), path("${genome_path}.gff"),       emit: gff
     tuple val(genome_id), path("${genome_path}.tbl"),       emit: tbl
     tuple val(genome_id), path("${genome_path}.out"),       emit: out
     tuple val(genome_id), path("${genome_path}.align"),     emit: align
