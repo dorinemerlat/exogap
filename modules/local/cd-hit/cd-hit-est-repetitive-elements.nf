@@ -3,7 +3,7 @@ process ELIMINATE_REDUNDANCE {
     cpus 20
     time '1d'
 
-    conda (params.enable_conda ? 'py_fasta_validator==0.5--py39h7d875b9_0' : null)
+    conda (params.enable_conda ? 'cd-hit==4.8.1--h5b5514e_8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/cd-hit:4.8.1--h5b5514e_7':
         'biocontainers/cd-hit:v4.6.8-2-deb_cv1' }"
