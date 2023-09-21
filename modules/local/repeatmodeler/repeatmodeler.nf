@@ -1,5 +1,5 @@
-process REPEATMODELER2 {
-    tag "REPEATMODELER2_$genome_id"
+process REPEATMODELER {
+    tag "REPEATMODELER_$genome_id"
     cpus 30
     time '20d'
 
