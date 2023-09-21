@@ -21,18 +21,21 @@ WorkflowExogap.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_genomes                  = Channel.
-                                fromPath( params.genomes + '/*.fa', checkIfExists: true )
-                                .map { file -> tuple(file.baseName, file) }
+about_genomes = Channel.fromPath( params.input, checkIfExists: true )
+                    .splitCsv(header: true, sep: "\t")
+                    .map { it -> tuple(it.genome, it.taxid) }
+
+genomes = Channel.fromPath( params.genomes + '/*.fa', checkIfExists: true )
+            .map { file -> tuple(file.baseName, file) }
 
 if ( params.repeats_lib ) {
-    ch_repeats_lib          = Channel.fromPath( params.repeats_lib, checkIfExists: true )
+    repeats_lib = Channel.fromPath( params.repeats_lib, checkIfExists: true )
 }
 else {
-    ch_repeats_lib          = null
+    repeats_lib  = null
 }
 
-/*    ch_genomes = Channel
+/*    genomes = Channel
                 .fromPath(params.input)
                 .map { file -> tuple(file.baseName, file) }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,8 +46,8 @@ else {
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { GENOME_PREPROCESS } from '../subworkflows/local/genome_preprocess'
-include { REPETITIVE_ELEMENTS } from '../subworkflows/local/repetitive_elements'
+include {PREPROCESS_GENOMES } from '../subworkflows/local/preprocess-genomes'
+// include { ANNOTATE_REPEATS } from '../subworkflows/local/annotate-repeats'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,15 +88,15 @@ workflow EXOGAP {
 
     // SUBWORKFLOW: GENOME_PREPROCESS
     //
-    GENOME_PREPROCESS(ch_genomes)
+    PREPROCESS_GENOMES(genomes, about_genomes)
 
     //
-    // SUBWORKFLOW: REPETITIVE_ELEMENTS
+    // SUBWORKFLOW: ANNOTATE_REPEATS
     //
-    REPETITIVE_ELEMENTS(GENOME_PREPROCESS.out.fasta, ch_repeats_lib)
+    ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta, repeats_lib)
 
-    // REPETITIVE_ELEMENTS(GENOME_PREPROCESS.out.fasta)
-    // REPETITIVE_ELEMENTS.out.view()
+    // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
+    // ANNOTATE_REPEATS.out.view()
 }
 
 /*

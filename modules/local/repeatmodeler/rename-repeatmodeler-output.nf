@@ -1,5 +1,5 @@
-process RM2_REFORMAT {
-    tag "RM2_REFORMAT_$genome_id"
+process RENAME_REPEATMODELER_OUTPUT {
+    tag "RENAME_REPEATMODELER_OUTPUT_$genome_id"
 
     input:
     tuple val(genome_id), path(genome_path)
