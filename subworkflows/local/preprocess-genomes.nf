@@ -23,19 +23,19 @@ workflow PREPROCESS_GENOMES {
     // Reformat genomes
     RENAME_GENOMES(FASTA_VALIDATOR.out)
 
-    // Get the genome taxonomy
-    GET_TAXONOMIC_LINEAGE(about_genomes)
-    taxonomy = GET_TAXONOMIC_LINEAGE.out.splitCsv(header: true)
+    // // Get the genome taxonomy
+    // GET_TAXONOMIC_LINEAGE(about_genomes)
+    // taxonomy = GET_TAXONOMIC_LINEAGE.out.splitCsv(header: true)
 
-    // Busco on genome
-    DOWNLOAD_BUSCO_DATASETS()
+    // // Busco on genome
+    // DOWNLOAD_BUSCO_DATASETS()
 
-    SELECT_BUSCO_DATASETS(DOWNLOAD_BUSCO_DATASETS.out, GET_TAXONOMIC_LINEAGE.out)
-    // BUSCO(RENAME_GENOMES.out.fasta, SELECT_BUSCO_DATASETS.out.splitCsv(), 'genome')
+    // SELECT_BUSCO_DATASETS(DOWNLOAD_BUSCO_DATASETS.out, GET_TAXONOMIC_LINEAGE.out)
+    // // BUSCO(RENAME_GENOMES.out.fasta, SELECT_BUSCO_DATASETS.out.splitCsv(), 'genome')
 
     emit:
     fasta = RENAME_GENOMES.out.fasta
-    taxonomy = DOWNLOAD_BUSCO_DATASETS.out
+    // taxonomy = DOWNLOAD_BUSCO_DATASETS.out
     // busco = SELECT_BUSCO_DATASETS
     // stats = GENOME_STATISTICS.out.stats
 }

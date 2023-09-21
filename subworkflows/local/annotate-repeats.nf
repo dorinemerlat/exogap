@@ -1,8 +1,8 @@
 include {REPEATMODELER                                              } from '../../modules/local/repeatmodeler/repeatmodeler'
 include {RENAME_REPEATMODELER_OUTPUT                                } from '../../modules/local/repeatmodeler/rename-repeatmodeler-output'
 include {GATHER_LIBRARIES                                           } from '../../modules/local/repeatmodeler/gather-libraries'
-include {SEPARATE_LIBRARIES                                         } from '../../modules/local/repeatmodeler/separate-libraries'
-include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_1                 } from '../../modules/local/cd-hit/ccd-hit-for-repeats'
+include {SEPARATE_LIBRARIES                                         } from '../../modules/local/bioawk/separate-libraries'
+include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_1                 } from '../../modules/local/cd-hit/cd-hit-for-repeats'
 include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_2                 } from '../../modules/local/cd-hit/cd-hit-for-repeats'
 include {REPEATMASKER           as REPEATMASKER_WITH_EXISTING_LIB   } from '../../modules/local/repeatmasker/repeatmasker'
 include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_1      } from '../../modules/local/repeatmasker/repeatmasker'
@@ -21,35 +21,33 @@ workflow ANNOTATE_REPEATS {
         // TO DO: reuse as principal instruction
         // REPEATMODELER(genomes)
 
-        // rm2_library = RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
+        // rm_library = RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
 
         // TO Do: remove
-        rm2_library = Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
+        rm_library = Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
             .map { file -> tuple(file.baseName, file) }
 
-        rm2_library = RENAME_REPEATMODELER_OUTPUT(rm2_library)
+        rm_library = RENAME_REPEATMODELER_OUTPUT(rm_library)
 
         // concatenate libraries == yes
         if ( params.repeats_concat ) {
-            rm2_library = GATHER_LIBRARIES(
-                    rm2_library.map{ it -> it.last() }.collect())
+            rm_library = GATHER_LIBRARIES(
+                    rm_library.map{ it -> it.last() }.collect())
             }
 
         // split library == yes
         if ( params.repeats_split ) {
-            SEPARATE_LIBRARIES(rm2_library)
+            SEPARATE_LIBRARIES(rm_library)
             CD_HIT_FOR_REPEATS_1(SEPARATE_LIBRARIES.out.classified)
             CD_HIT_FOR_REPEATS_2(SEPARATE_LIBRARIES.out.unclassified)
         }
         else {
-            CD_HIT_FOR_REPEATS_1(rm2_library)
+            CD_HIT_FOR_REPEATS_1(rm_library)
         }
 
-
         // use a extern repeats library == yes
-        genomes.view()
         if (params.repeats_lib ){
-            repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(genomes, repeats_lib)
+            repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(genomes, repeats_lib.last())
             masked = repeatmasker.masked
             cat = repeatmasker.cat
         }
@@ -61,16 +59,16 @@ workflow ANNOTATE_REPEATS {
 
         // in all case: make one iteration with own library (all or specie-specific)
         repeatmasker = REPEATMASKER_WITH_OWN_LIB_1(
-                masked,
-                CD_HIT_FOR_REPEATS_1.out)
+                masked.last(),
+                CD_HIT_FOR_REPEATS_1.out.last())
 
         cat = cat.concat(repeatmasker.cat)
 
         // split repeats == yes
         if ( params.repeats_split ) {
             repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
-                    repeatmasker.masked,
-                    CD_HIT_FOR_REPEATS_2.out)
+                    REPEATMASKER_WITH_OWN_LIB_1.out.masked,
+                    CD_HIT_FOR_REPEATS_2.out.last())
 
             cat = cat.concat(repeatmasker.cat)
         }

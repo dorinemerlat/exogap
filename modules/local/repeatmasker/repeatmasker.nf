@@ -10,7 +10,7 @@ process REPEATMASKER {
 
     input:
     tuple val(genome_id), path(genome_path)
-    tuple val(library_id), path(library_path)
+    path(library_path)
 
     output:
     tuple val(genome_id), path("${genome_path}.masked"),    emit: masked
