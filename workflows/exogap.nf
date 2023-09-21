@@ -47,7 +47,7 @@ else {
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include {PREPROCESS_GENOMES } from '../subworkflows/local/preprocess-genomes'
-// include { ANNOTATE_REPEATS } from '../subworkflows/local/annotate-repeats'
+include { ANNOTATE_REPEATS } from '../subworkflows/local/annotate-repeats'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
