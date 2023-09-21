@@ -31,7 +31,7 @@ workflow PREPROCESS_GENOMES {
     DOWNLOAD_BUSCO_DATASETS()
 
     SELECT_BUSCO_DATASETS(DOWNLOAD_BUSCO_DATASETS.out, GET_TAXONOMIC_LINEAGE.out)
-    BUSCO(RENAME_GENOMES.out.fasta, SELECT_BUSCO_DATASETS.out.splitCsv(), 'genome')
+    // BUSCO(RENAME_GENOMES.out.fasta, SELECT_BUSCO_DATASETS.out.splitCsv(), 'genome')
 
     emit:
     fasta = RENAME_GENOMES.out.fasta
