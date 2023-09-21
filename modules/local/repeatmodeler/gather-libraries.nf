@@ -1,4 +1,4 @@
-process LIBRARY_CONCATENATION {
+process GATHER_LIBRARIES {
     input:
     path library_paths
 
