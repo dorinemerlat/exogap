@@ -1,4 +1,4 @@
-# ![nf-core/exogap](docs/images/exogap_logo_light.png#gh-light-mode-only) ![nf-core/exogap](docs/images/exogap_logo_dark.png#gh-dark-mode-only)
+# ![nf-core/exogap](./docs/images/exogap_logo_light.png#gh-light-mode-only) ![nf-core/exogap](./docs/images/exogap_logo_dark.png#gh-dark-mode-only)
 
 ## Introduction
 
