@@ -6,3 +6,10 @@ results/
 testing/
 testing*
 *.pyc
+dockerfile/*
+nextflow_template.config
+null/
+sample_sheet.tsv
+nextflow.config.*
+busco_downloads/
+about-genomes.tsv.myriapoda
