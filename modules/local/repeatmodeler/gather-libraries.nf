@@ -3,10 +3,10 @@ process GATHER_LIBRARIES {
     path library_paths
 
     output:
-    tuple val("all-repeats-families"), path("all-repeats-families.fa")
+    tuple val("all-repeats"), path("all-repeats.fa")
 
     script:
     """
-    more $library_paths > all-repeats-families.fa
+    cat $library_paths > all-repeats.fa
     """
 }

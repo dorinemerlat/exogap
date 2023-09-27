@@ -2,6 +2,7 @@ process REPEATMASKER {
     tag "REPEATMASKER_$genome_id"
     cpus 30
     time '20d'
+    publishDir "results/$genome_id/repeatmasker/$library_id"
 
     conda (params.enable_conda ? 'repeatmasker==4.1.5--pl5321hdfd78af_0' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -10,14 +11,11 @@ process REPEATMASKER {
 
     input:
     tuple val(genome_id), path(genome_path)
-    path(library_path)
+    tuple val(library_id), path(library_path)
 
     output:
     tuple val(genome_id), path("${genome_path}.masked"),    emit: masked
-    tuple val(genome_id), path("${genome_path}.tbl"),       emit: tbl
-    tuple val(genome_id), path("${genome_path}.out"),       emit: out
-    tuple val(genome_id), path("${genome_path}.align"),     emit: align
-    tuple val(genome_id), path("${genome_path}.cat"),       emit: cat
+    path "${genome_path}.cat",                              emit: cat
 
     script:
     """

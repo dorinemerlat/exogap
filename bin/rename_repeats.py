@@ -16,7 +16,7 @@ import re
 def rename(input, output, prefix):
     with open(output, 'w') as file:
         for record in SeqIO.parse(input, 'fasta'):
-            record.id = prefix + '_' + record.description.split("#")[1].split()[0]
+            record.id = prefix + '#' + record.description.split("#")[1].split()[0]
             record.description = ''
             file.write(record.format('fasta'))
 

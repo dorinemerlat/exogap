@@ -1,12 +1,12 @@
-include {REPEATMODELER                                  } from '../../modules/local/repeatmodeler/repeatmodeler'
-include {RENAME_REPEATMODELER_OUTPUT                    } from '../../modules/local/repeatmodeler/rename-repeatmodeler-output'
-include {GATHER_LIBRARIES                               } from '../../modules/local/repeatmodeler/gather-libraries'
-include {SEPARATE_LIBRARIES                             } from '../../modules/local/bioawk/separate-libraries'
-include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_1     } from '../../modules/local/cd-hit/cd-hit-for-repeats'
-include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_2     } from '../../modules/local/cd-hit/cd-hit-for-repeats'
-include {REPEATMASKER as REPEATMASKER_WITH_EXISTING_LIB } from '../../modules/local/repeatmasker/repeatmasker'
-include {REPEATMASKER as REPEATMASKER_WITH_OWN_LIB_1    } from '../../modules/local/repeatmasker/repeatmasker'
-include {REPEATMASKER as REPEATMASKER_WITH_OWN_LIB_2    } from '../../modules/local/repeatmasker/repeatmasker'
+include {REPEATMODELER                                              } from '../../modules/local/repeatmodeler/repeatmodeler'
+include {RENAME_REPEATMODELER_OUTPUT                                } from '../../modules/local/repeatmodeler/rename-repeatmodeler-output'
+include {GATHER_LIBRARIES                                           } from '../../modules/local/repeatmodeler/gather-libraries'
+include {SEPARATE_LIBRARIES                                         } from '../../modules/local/bioawk/separate-libraries'
+include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_1                 } from '../../modules/local/cd-hit/cd-hit-for-repeats'
+include {CD_HIT_FOR_REPEATS as CD_HIT_FOR_REPEATS_2                 } from '../../modules/local/cd-hit/cd-hit-for-repeats'
+include {REPEATMASKER           as REPEATMASKER_WITH_EXISTING_LIB   } from '../../modules/local/repeatmasker/repeatmasker'
+include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_1      } from '../../modules/local/repeatmasker/repeatmasker'
+include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_2      } from '../../modules/local/repeatmasker/repeatmasker'
 // include {PROCESS_REPEATS                                            } from '../../modules/local/repeatmasker/process-repeats'
 // include {PASTEC                                                     } from '../../modules/local/pastec'
 // include {STATS                                                      } from '../../modules/local/re_stats/stats'
@@ -37,7 +37,7 @@ workflow ANNOTATE_REPEATS {
 
         // split library == yes
         if ( params.repeats_split ) {
-            SEPARATE_LIBRARIES(GATHER_LIBRARIES.out)
+            SEPARATE_LIBRARIES(rm_library)
             CD_HIT_FOR_REPEATS_1(SEPARATE_LIBRARIES.out.classified)
             CD_HIT_FOR_REPEATS_2(SEPARATE_LIBRARIES.out.unclassified)
         }
@@ -45,31 +45,27 @@ workflow ANNOTATE_REPEATS {
             CD_HIT_FOR_REPEATS_1(rm_library)
         }
 
-        // // use a extern repeats library == yes
-        // if (params.repeats_lib ){
-        //     repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(genomes, repeats_lib)
-        //     masked = repeatmasker.masked
-        //     cat = repeatmasker.cat
-        // }
-        // // use a extern repeats library == no
-        // else {
-        //     masked = genomes
-        //     cat = Channel.of('')
-        // }
+        // use a extern repeats library == yes
+        if (params.repeats_lib ){
+            repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(genomes, repeats_lib)
+            masked = repeatmasker.masked
+            cat = repeatmasker.cat
+        }
+        // use a extern repeats library == no
+        else {
+            masked = genomes
+            cat = Channel.of('')
+        }
 
-        masked = Channel.fromPath("/gstock/user/merlat/myriapods/repeatmasker1_old/*masked", checkIfExists: true)
-            .map { file -> tuple(file.baseName, file) }
-
-        cat = Channel.fromPath("/gstock/user/merlat/myriapods/repeatmasker1_old/*.cat", checkIfExists: true)
-            .map { file -> tuple(file.baseName, file) }
-
+        // in all case: make one iteration with own library (all or specie-specific)
         repeatmasker = REPEATMASKER_WITH_OWN_LIB_1(
-                masked,
+                masked.last(),
                 CD_HIT_FOR_REPEATS_1.out)
 
         cat = cat.concat(repeatmasker.cat)
 
-             if ( params.repeats_split ) {
+        // split repeats == yes
+        if ( params.repeats_split ) {
             repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
                     REPEATMASKER_WITH_OWN_LIB_1.out.masked,
                     CD_HIT_FOR_REPEATS_2.out)
@@ -79,7 +75,7 @@ workflow ANNOTATE_REPEATS {
 
         cat = cat.collect()
 
-        // // TO DO: add PROCESS_REPEATS process
+        // TO DO: add PROCESS_REPEATS process
         // PROCESS_REPEATS(
         //         repeatmasker.masked,
         //         repeatmasker.out,
@@ -103,4 +99,3 @@ workflow ANNOTATE_REPEATS {
         // re_gff3 = repeats_ch.gff3
         // masked_genomes = repeats_ch.fasta
 }
-

@@ -30,6 +30,7 @@ genomes = Channel.fromPath( params.genomes + '/*.fa', checkIfExists: true )
 
 if ( params.repeats_lib ) {
     repeats_lib = Channel.fromPath( params.repeats_lib, checkIfExists: true )
+    .map { file -> tuple(file.baseName, file) }
 }
 else {
     repeats_lib  = null
@@ -93,7 +94,7 @@ workflow EXOGAP {
     //
     // SUBWORKFLOW: ANNOTATE_REPEATS
     //
-    ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta, repeats_lib)
+    // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta, repeats_lib)
 
     // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
     // ANNOTATE_REPEATS.out.view()

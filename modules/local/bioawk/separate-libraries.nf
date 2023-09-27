@@ -16,7 +16,7 @@ process SEPARATE_LIBRARIES {
 
     script:
     """
-    bioawk -c fastx '\$name !~ /#Unknown\$/ {print \$name; print \$seq}' $library_path > ${library_id}-classified.fa
-    bioawk -c fastx '\$name ~ /#Unknown\$/ {print \$name; print \$seq}' $library_path > ${library_id}-unclassified.fa
+    bioawk -c fastx '\$name !~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library_path |fold -w 60  > ${library_id}-classified.fa
+    bioawk -c fastx '\$name ~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library_path |fold -w 60 > ${library_id}-unclassified.fa
     """
 }

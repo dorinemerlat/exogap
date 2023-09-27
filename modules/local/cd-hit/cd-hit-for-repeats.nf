@@ -1,6 +1,6 @@
 process CD_HIT_FOR_REPEATS {
     tag "CD_HIT_FOR_REPEATS_$library_id"
-    cpus 20
+    cpus 10
     time '1d'
 
     conda (params.enable_conda ? 'cd-hit==4.8.1--h5b5514e_8' : null)
@@ -12,10 +12,10 @@ process CD_HIT_FOR_REPEATS {
     tuple val(library_id), path(library_path)
 
     output:
-    tuple val("${library_id}-noredundance"), path("${library_id}-noredundance.fa")
+    tuple val("${library_id}"), path("${library_id}-noredundance.fa")
 
     script:
     """
-    cd-hit-est -i $library_path -o "${library_id}-noredundance.fa" -c 0.95 -n 10 -g 1 -l 80 -aS 98 -d 10 -M 16000 -T 8
+    cd-hit-est -i $library_path -o ${library_id}-noredundance.fa -c 0.95 -n 10 -g 1 -l 80 -aS 98 -d 10 -M 16000 -T 8
     """
 }

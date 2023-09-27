@@ -1,0 +1,32 @@
+# conda environments:
+#
+annotation               /home/merlat/.conda/envs/annotation
+braker                   /home/merlat/.conda/envs/braker
+braker2                  /home/merlat/.conda/envs/braker2
+comparative              /home/merlat/.conda/envs/comparative
+comparative-genomics     /home/merlat/.conda/envs/comparative-genomics
+docker                   /home/merlat/.conda/envs/docker
+fasta_validator          /home/merlat/.conda/envs/fasta_validator
+funannotate              /home/merlat/.conda/envs/funannotate
+geneAnnotation           /home/merlat/.conda/envs/geneAnnotation
+jupyter-book             /home/merlat/.conda/envs/jupyter-book
+maker                    /home/merlat/.conda/envs/maker
+ncbi_datasets            /home/merlat/.conda/envs/ncbi_datasets
+nf-core                  /home/merlat/.conda/envs/nf-core
+nuncoding_genes          /home/merlat/.conda/envs/nuncoding_genes
+orthomcl                 /home/merlat/.conda/envs/orthomcl
+prepare_data             /home/merlat/.conda/envs/prepare_data
+python-stats          *  /home/merlat/.conda/envs/python-stats
+repeatmodeler            /home/merlat/.conda/envs/repeatmodeler
+repeatmodeler_test       /home/merlat/.conda/envs/repeatmodeler_test
+repeats                  /home/merlat/.conda/envs/repeats
+snakemake                /home/merlat/.conda/envs/snakemake
+sratool                  /home/merlat/.conda/envs/sratool
+sratool2                 /home/merlat/.conda/envs/sratool2
+toolbox                  /home/merlat/.conda/envs/toolbox
+trinity                  /home/merlat/.conda/envs/trinity
+base                     /usr/local/python/miniconda
+lown                     /usr/local/python/miniconda/envs/lown
+tf24                     /usr/local/python/miniconda/envs/tf24
+tf25                     /usr/local/python/miniconda/envs/tf25
+
