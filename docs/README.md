@@ -5,7 +5,7 @@
 
 ## Introduction
 
-**nf-core/exogap** is a bioinformatics pipeline that annotate one or several genomes of non-model species.
+**EXOGAP** is a bioinformatics pipeline that annotate one or several genomes of non-model species.
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
