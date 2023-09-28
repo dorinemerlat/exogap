@@ -21,24 +21,12 @@ WorkflowExogap.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-about_genomes = Channel.fromPath( params.input, checkIfExists: true )
-                    .splitCsv(header: true, sep: "\t")
-                    .map { it -> tuple(it.genome, it.taxid) }
+include { fromSamplesheet } from 'plugin/nf-validation'
 
-genomes = Channel.fromPath( params.genomes + '/*.fa', checkIfExists: true )
-            .map { file -> tuple(file.baseName, file) }
+genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
+            .map { meta, file -> [ meta + [id: meta.name.toLowerCase().replace(' ', '-')], file ] }
 
-if ( params.repeats_lib ) {
-    repeats_lib = Channel.fromPath( params.repeats_lib, checkIfExists: true )
-    .map { file -> tuple(file.baseName, file) }
-}
-else {
-    repeats_lib  = null
-}
-
-/*    genomes = Channel
-                .fromPath(params.input)
-                .map { file -> tuple(file.baseName, file) }
+/*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,8 +35,9 @@ else {
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include {PREPROCESS_GENOMES } from '../subworkflows/local/preprocess-genomes'
-include { ANNOTATE_REPEATS } from '../subworkflows/local/annotate-repeats'
+include { INPUT_CHECK           } from '../subworkflows/local/input_check'
+include { PREPROCESS_GENOMES    } from '../subworkflows/local/preprocess-genomes'
+include { ANNOTATE_REPEATS      } from '../subworkflows/local/annotate-repeats'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,25 +65,17 @@ workflow EXOGAP {
 
     ch_versions = Channel.empty()
 
-    // //
-    // // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    // //
-    // INPUT_CHECK (
-    //     file(params.input)
-    // )
-    // ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    // // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // // ! There is currently no tooling to help you write a sample sheet schema
-
-    // SUBWORKFLOW: GENOME_PREPROCESS
     //
-    PREPROCESS_GENOMES(genomes, about_genomes)
+    // SUBWORKFLOW: Preprocess the genomes
+    // Rename sequences in fasta, get some informations about genomes, calculate statistics and draw plots
+    //
+
+    PREPROCESS_GENOMES(genomes)
 
     //
     // SUBWORKFLOW: ANNOTATE_REPEATS
     //
-    // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta, repeats_lib)
+    // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
 
     // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
     // ANNOTATE_REPEATS.out.view()

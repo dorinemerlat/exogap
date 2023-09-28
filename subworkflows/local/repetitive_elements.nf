@@ -15,72 +15,67 @@ include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_2      } from '../.
 workflow ANNOTATE_REPEATS {
     take:
         genomes
-        repeats_lib
 
     main:
-        // TO DO: reuse as principal instruction
-        // REPEATMODELER(genomes)
+        // // TO DO: reuse as principal instruction
+        // // REPEATMODELER(genomes)
 
-        // rm_library = RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
+        // // rm_library = RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
 
-        // TO Do: remove
-        rm_library = Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
-            .map { file -> tuple(file.baseName, file) }
+        // // TO Do: remove
+        // rm_library = Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/*.fa", checkIfExists: true)
+        //     .map { file -> tuple(file.baseName, file) }
 
-        rm_library = RENAME_REPEATMODELER_OUTPUT(rm_library)
+        // rm_library = RENAME_REPEATMODELER_OUTPUT(rm_library)
 
-        // concatenate libraries == yes
-        if ( params.repeats_concat ) {
-            rm_library = GATHER_LIBRARIES(
-                    rm_library.map{ it -> it.last() }.collect())
-            }
+        // // use one library for all genomes == yes
+        // if ( params.repeats_concat ) {
+        //     rm_library = GATHER_LIBRARIES(
+        //             rm_library.map{ it -> it.last() }.collect())
+        //     }
 
-        // split library == yes
-        if ( params.repeats_split ) {
-            SEPARATE_LIBRARIES(rm_library)
-            CD_HIT_FOR_REPEATS_1(SEPARATE_LIBRARIES.out.classified)
-            CD_HIT_FOR_REPEATS_2(SEPARATE_LIBRARIES.out.unclassified)
-        }
-        else {
-            CD_HIT_FOR_REPEATS_1(rm_library)
-        }
+        // SEPARATE_LIBRARIES(rm_library)
+        // CD_HIT_FOR_REPEATS_1(SEPARATE_LIBRARIES.out.classified)
+        // CD_HIT_FOR_REPEATS_2(SEPARATE_LIBRARIES.out.unclassified)
 
-        // use a extern repeats library == yes
-        if (params.repeats_lib ){
-            repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(genomes, repeats_lib)
-            masked = repeatmasker.masked
-            cat = repeatmasker.cat
-        }
-        // use a extern repeats library == no
-        else {
-            masked = genomes
-            cat = Channel.of('')
-        }
+        // // use a extern repeats library == yes
+        // if (params.external_library ){
+        //     external_library = Channel.fromPath( params.external_library, checkIfExists: true )
+        //                                 .map { file -> tuple(file.baseName, file) }
 
-        // in all case: make one iteration with own library (all or specie-specific)
-        repeatmasker = REPEATMASKER_WITH_OWN_LIB_1(
-                masked.last(),
-                CD_HIT_FOR_REPEATS_1.out)
+        //     repeatmasker = REPEATMASKER_WITH_EXISTING_LIB(genomes, external_library)
+        //     masked = repeatmasker.masked
+        //     cat = repeatmasker.cat
+        // }
+        // // use a extern repeats library == no
+        // else {
+        //     masked = genomes
+        //     cat = Channel.of('')
+        // }
 
-        cat = cat.concat(repeatmasker.cat)
+        // // in all case: make one iteration with own library (all or specie-specific)
+        // repeatmasker = REPEATMASKER_WITH_OWN_LIB_1(
+        //         masked.last(),
+        //         CD_HIT_FOR_REPEATS_1.out)
 
-        // split repeats == yes
-        if ( params.repeats_split ) {
-            repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
-                    REPEATMASKER_WITH_OWN_LIB_1.out.masked,
-                    CD_HIT_FOR_REPEATS_2.out)
+        // cat = cat.concat(repeatmasker.cat)
 
-            cat = cat.concat(repeatmasker.cat)
-        }
 
-        cat = cat.collect()
+        // repeatmasker = REPEATMASKER_WITH_OWN_LIB_2(
+        //             REPEATMASKER_WITH_OWN_LIB_1.out.masked,
+        //             CD_HIT_FOR_REPEATS_2.out)
+
+        // cat = cat.concat(repeatmasker.cat)
+        // }
+
+        // cat = cat.collect()
 
         // TO DO: add PROCESS_REPEATS process
         // PROCESS_REPEATS(
         //         repeatmasker.masked,
         //         repeatmasker.out,
         //         cat,
-        //         repeats_lib
+        //         external_library
         // )
 
         // // TO DO: add RM_OUTPUT_REFORMAT process
