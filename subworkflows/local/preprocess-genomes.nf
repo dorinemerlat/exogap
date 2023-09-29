@@ -25,7 +25,7 @@ workflow PREPROCESS_GENOMES {
     genomes = GET_TAXONOMIC_LINEAGE.out
                 .splitJson()
                 .buffer( size: 11 )
-                .map{ it -> tuple( "${it[0].value}", [ 'lineage': tuple(
+                .map{ it -> tuple( file("${it[0].value}"), [ 'lineage': tuple(
                         ["${it[1].key}" :it[1].value ],
                         ["${it[2].key}" :it[2].value ],
                         ["${it[3].key}" :it[3].value ],
@@ -37,19 +37,19 @@ workflow PREPROCESS_GENOMES {
                         ["${it[9].key}" :it[9].value ],
                         ["${it[10].key}" :it[1].value ],
                         )])}
-                .combine(genomes.map { meta, it -> tuple(it, meta) })
-                .filter { file(it[0]) == file(it[2])  }
-                .map { file1, taxonomy, file2, meta -> [meta + taxonomy , file1 ] }
+                .join(genomes.map { meta, it -> tuple(file(it), meta) })
+                .map { fasta, taxonomy, meta -> [meta + taxonomy , file(fasta) ] }
+                .view()
 
-    GET_NEWICK(genomes.map{ meta, file -> [ "${meta.taxid}": meta.name ] }.collect(flat : false))
+    // GET_NEWICK(genomes.map{ meta, file -> [ "${meta.taxid}": meta.name ] }.collect(flat : false))
 
-    // Check if fasta file is valid
-    FASTA_VALIDATOR(genomes)
+    // // Check if fasta file is valid
+    // FASTA_VALIDATOR(genomes)
 
-    // Reformat genomes
-    RENAME_GENOMES(FASTA_VALIDATOR.out)
+    // // Reformat genomes
+    // RENAME_GENOMES(FASTA_VALIDATOR.out)
 
-    // Calculate the genome size
+    // // Calculate the genome size
     // CALCULATE_GENOME_SIZE(RENAME_GENOMES.out.fasta)
     // GATHER_GENOME_SIZE(CALCULATE_GENOME_SIZE.out.map{ it -> tuple('genome_sizes.tsv', it.last()) }.groupTuple())
 
