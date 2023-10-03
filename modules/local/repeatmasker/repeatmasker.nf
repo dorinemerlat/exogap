@@ -1,8 +1,7 @@
 process REPEATMASKER {
-    tag "REPEATMASKER_$genome_id"
+    tag "REPEATMASKER_${meta.id}"
     cpus 30
     time '20d'
-    publishDir "results/$genome_id/repeatmasker/$library_id"
 
     conda (params.enable_conda ? 'repeatmasker==4.1.5--pl5321hdfd78af_0' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -10,17 +9,17 @@ process REPEATMASKER {
         'quay.io/biocontainers/repeatmasker:4.1.5--pl5321hdfd78af_0' }"
 
     input:
-    tuple val(genome_id), path(genome_path)
+    tuple val(meta), path(genome)
     tuple val(library_id), path(library_path)
 
     output:
-    tuple val(genome_id), path("${genome_path}.masked"),    emit: masked
-    path "${genome_path}.cat",                              emit: cat
+    tuple val(meta), path("${genome}.masked"),    emit: masked
+    tuple val(meta), path("${genome}.cat"),       emit: cat
 
     script:
     """
     RepeatMasker -pa $task.cpus -e ncbi -nolow -lib $library_path -a -gccalc -norna -excln \
-        -gff -s -xsmall -gccalc -excln -gff -s -html $genome_path
+        -gff -s -xsmall -gccalc -excln -gff -s -html $genome
 
     gunzip *.gz
     """

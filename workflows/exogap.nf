@@ -37,7 +37,7 @@ genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
 //
 include { INPUT_CHECK           } from '../subworkflows/local/input_check'
 include { PREPROCESS_GENOMES    } from '../subworkflows/local/preprocess-genomes'
-include { ANNOTATE_REPEATS      } from '../subworkflows/local/annotate-repeats'
+include { REPETITIVE_ELEMENTS   } from '../subworkflows/local/repetitive-elements'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,7 +75,7 @@ workflow EXOGAP {
     //
     // SUBWORKFLOW: ANNOTATE_REPEATS
     //
-    // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
+    REPETITIVE_ELEMENTS(PREPROCESS_GENOMES.out.genomes)
 
     // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
     // ANNOTATE_REPEATS.out.view()

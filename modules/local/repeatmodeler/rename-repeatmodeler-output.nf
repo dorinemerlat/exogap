@@ -1,5 +1,5 @@
 process RENAME_REPEATMODELER_OUTPUT {
-    tag "RENAME_REPEATMODELER_OUTPUT_$genome_id"
+    tag "RENAME_REPEATMODELER_OUTPUT_${meta.id}"
 
         conda (params.enable_conda ? 'bioconda biopython==1.75' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

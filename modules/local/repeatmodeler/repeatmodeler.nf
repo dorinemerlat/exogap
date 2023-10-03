@@ -1,5 +1,5 @@
 process REPEATMODELER {
-    tag "REPEATMODELER_$genome_id"
+    tag "REPEATMODELER_${meta.id}"
     cpus 30
     time '20d'
 
@@ -9,15 +9,15 @@ process REPEATMODELER {
         'quay.io/biocontainers/repeatmodeler:2.0.3--pl5321h9ee0642_0' }"
 
     input:
-    tuple val(genome_id), path(genome_path)
+    tuple val(meta), path(genome)
 
     output:
-    tuple val("${genome_id}"), path("${genome_id}-families.fa")
+    tuple val(meta), path("${meta.id}-families.fa")
 
     script:
     """
-    BuildDatabase -name $genome_id -engine ncbi $genome_path
+    BuildDatabase -name $meta.id -engine ncbi $genome
 
-    RepeatModeler -pa $task.cpus -engine ncbi -database $genome_id -LTRStruct
+    RepeatModeler -pa $task.cpus -engine ncbi -database $meta.id -LTRStruct
     """
 }

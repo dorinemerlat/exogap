@@ -1,6 +1,6 @@
 process GET_NEWICK {
     debug
-    publishDir "results/"
+    publishDir "${params.outdir}/results/"
     // conda (params.enable_conda ? 'bioconda requests==2.26.0' : null)
     // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
     //     'https://depot.galaxyproject.org/singularity/requests:2.26.0':
@@ -8,7 +8,6 @@ process GET_NEWICK {
 
     input:
     val(IDs)
-
 
     output:
     path('*.tree'),             emit: newick

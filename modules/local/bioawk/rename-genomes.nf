@@ -1,6 +1,6 @@
 process RENAME_GENOMES {
-    tag "RENAME_GENOMES_$meta.name"
-    publishDir "results/$meta.id"
+    tag "RENAME_GENOMES_${meta.id}"
+    publishDir "${params.outdir}/results/${meta.id}"
 
     conda (params.enable_conda ? 'bioawk==1.0--h7132678_8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
