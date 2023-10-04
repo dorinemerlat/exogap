@@ -1,6 +1,8 @@
 ![nf-core/exogap](./docs/images/exogap_logo_light.png#gh-light-mode-only)
 ![nf-core/exogap](./docs/images/exogap_logo_dark.png#gh-dark-mode-only)
 
+[![DOI](https://zenodo.org/badge/675572907.svg)](https://zenodo.org/badge/latestdoi/675572907)
+
 ---
 
 ## Introduction
@@ -73,9 +75,7 @@ I thank the following people for their extensive assistance in the development o
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  nf-core/exogap for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+If you use EXOGAP for your analysis, please cite it using the following doi: [10.5281/zenodo.8407927](https://doi.org/10.5281/zenodo.8407927).
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
