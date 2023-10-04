@@ -9,6 +9,7 @@ include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_1      } from '../.
 include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_2      } from '../../modules/local/repeatmasker/repeatmasker'
 include {PROCESS_REPEATS                                            } from '../../modules/local/repeatmasker/process-repeats'
 include {REPEATLANDSCAPE                                            } from '../../modules/local/repeatmasker/repeatLanscape'
+include {EXTRACT_SEQUENCES                                          } from '../../modules/local/agat/extract-sequences'
 // include {STATS                                                      } from '../../modules/local/re_stats/stats'
 // include {PLOTS                                                      } from '../../modules/local/re_stats/plots'
 
@@ -19,7 +20,6 @@ workflow REPETITIVE_ELEMENTS {
     main:
         // // Run RepeatModeler and process results
         // REPEATMODELER(genomes)
-
         // RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
         //     .set { rm_library }
 
@@ -42,22 +42,17 @@ workflow REPETITIVE_ELEMENTS {
 
         // REPEATMASKER_WITH_EXISTING_LIB(genomes, external_library)
 
-        // REPEATMASKER_WITH_EXISTING_LIB.out.masked.set { masked }
-        // REPEATMASKER_WITH_EXISTING_LIB.out.cat.set { cat }
-
-        // // dont't use a extern repeats library
-        // else {
-        //     genomes.set { masked }
-        //     genomes.map { meta, fasta -> [ meta, '' ] }.set { cat }
-        // }
-
-        // // in all case: make one iteration with own library (all or specie-specific)
-        // REPEATMASKER_WITH_OWN_LIB_1(masked, CD_HIT_FOR_REPEATS_1.out)
-        // REPEATMASKER_WITH_OWN_LIB_1.out.cat.join(cat).set { cat }
-
+        // // make 2 iterations with own library (all or specie-specific)
+        // REPEATMASKER_WITH_OWN_LIB_1(REPEATMASKER_WITH_EXISTING_LIB.out.masked, CD_HIT_FOR_REPEATS_1.out)
         // REPEATMASKER_WITH_OWN_LIB_2(REPEATMASKER_WITH_OWN_LIB_1.out.masked, CD_HIT_FOR_REPEATS_2.out)
-        // REPEATMASKER_WITH_OWN_LIB_2.out.cat.join(cat).set { cat }
 
+        // // Group all .cat files
+        // REPEATMASKER_WITH_EXISTING_LIB.out.cat
+        //     .concat(REPEATMASKER_WITH_OWN_LIB_1.out.cat, REPEATMASKER_WITH_OWN_LIB_2.out.cat)
+        //     .groupTuple()
+        //     .set { cat }
+
+////////
         Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/repeatmasker1/*cat")
             .map { file -> tuple([id : file.simpleName], file) }
             .set { cat1}
@@ -94,7 +89,9 @@ workflow REPETITIVE_ELEMENTS {
         // Process repeats and landscape analysis
         PROCESS_REPEATS(masked_final, cat_final, external_library )
 
-        REPEATLANDSCAPE(PROCESS_REPEATS.out.align)
+        // REPEATLANDSCAPE(PROCESS_REPEATS.out.align)
+
+        // EXTRACT_SEQUENCES(PROCESS_REPEATS.out.masked, PROCESS_REPEATS.out.gff)
 
         // // Process repeats and landscape analysis
         // PROCESS_REPEATS(REPEATMASKER_WITH_OWN_LIB_2.masked, cat, external_library)
