@@ -1,5 +1,8 @@
 # dorinemerlat/exogap: Citations
 
+## [EXOGAP](https://github.com/dorinemerlat/exogap)
+
+  > Merlat, D. (2023) EXOGAP. doi: [10.5281/zenodo.8407927](https://doi.org/10.5281/zenodo.8407927).
 ## [Nextflow](https://www.nextflow.io/)
 
 > Di Tommaso P, Chatzou M, Floden EW, Barja PP, Palumbo E, Notredame C. Nextflow enables reproducible computational workflows. Nat Biotechnol. 2017 Apr 11;35(4):316-319. doi: [10.1038/nbt.3820](https://www.nature.com/articles/nbt.3820). PubMed PMID: [28398311](https://pubmed.ncbi.nlm.nih.gov/28398311/).
