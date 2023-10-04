@@ -1,12 +1,12 @@
 # dorinemerlat/exogap: Citations
 
-## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
-
-> Ewels PA, Peltzer A, Fillinger S, Patel H, Alneberg J, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol. 2020 Mar;38(3):276-278. doi: 10.1038/s41587-020-0439-x. PubMed PMID: 32055031.
-
 ## [Nextflow](https://pubmed.ncbi.nlm.nih.gov/28398311/)
 
 > Di Tommaso P, Chatzou M, Floden EW, Barja PP, Palumbo E, Notredame C. Nextflow enables reproducible computational workflows. Nat Biotechnol. 2017 Apr 11;35(4):316-319. doi: 10.1038/nbt.3820. PubMed PMID: 28398311.
+
+## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
+
+> Ewels PA, Peltzer A, Fillinger S, Patel H, Alneberg J, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol. 2020 Mar;38(3):276-278. doi: 10.1038/s41587-020-0439-x. PubMed PMID: 32055031.
 
 ## Pipeline tools
 
@@ -18,33 +18,13 @@
 
   > Li, H. (2015). Bioawk. GitHub. [https://github.com/lh3/bioawk](https://github.com/lh3/bioawk)
 
-- [Biopython](https://biopython.org/)
-
-  > Cock, P. J. A., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., Friedberg, I., Hamelryck, T., Kauff, F., Wilczynski, B., & De Hoon, M. J. L. (2009). Biopython : Freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics, 25(11), 1422‑1423. [https://doi.org/10.1093/bioinformatics/btp163](https://doi.org/10.1093/bioinformatics/btp163)
-
 - [BUSCO](https://busco.ezlab.org/)
 
   > Manni, M., Berkeley, M. R., Seppey, M., Simão, F. A., & Zdobnov, E. M. (2021). BUSCO Update : Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Molecular Biology and Evolution, 38(10), 4647‑4654. [https://doi.org/10.1093/molbev/msab199](https://doi.org/10.1093/molbev/msab199)
 
-- [Environment for Tree Exploration 3 (ETE3)](http://etetoolkit.org/)
+- [Python](https://www.python.org/)
 
-  > Huerta-Cepas, J., Serra, F., & Bork, P. (2016). ETE 3 : Reconstruction, Analysis, and Visualization of Phylogenomic Data. Molecular Biology and Evolution, 33(6), 1635‑1638. [(https://doi.org/10.1093/molbev/msw046](https://doi.org/10.1093/molbev/msw046)
-
-- [Pandas](https://pandas.pydata.org/)
-
-> Team, T. P. D. (2023). pandas-dev/pandas : Pandas (v2.1.1). Zenodo. [https://doi.org/10.5281/ZENODO.8364959](https://doi.org/10.5281/ZENODO.8364959)
-
-- [Python-newick](https://pypi.org/project/newick/)
-
-  > Forkel, R. (2023). Python-newick (1.9.0). Pypi. [https://pypi.org/project/newick/](https://pypi.org/project/newick/)
-
-- [Py Fasta Validator](https://github.com/linsalrob/py_fasta_validator)
-
-  > Edwards, R. (2019). linsalrob/fasta_validator : Initial Release (v0.1). Zenodo. [https://doi.org/10.5281/ZENODO.2532044](https://doi.org/10.5281/ZENODO.2532044)
-
-- [RepBase]([url](https://www.girinst.org/repbase/))
-
-  > Bao, W., Kojima, K. K., & Kohany, O. (2015). Repbase Update, a database of repetitive elements in eukaryotic genomes. Mobile DNA, 6(1), 11. [https://doi.org/10.1186/s13100-015-0041-9](https://doi.org/10.1186/s13100-015-0041-9)
+  > Van Rossum, G., & Drake, F. L. (2009). Python 3 Reference Manual. CreateSpace.
 
 - [RepeatMasker](http://www.repeatmasker.org)
 
@@ -54,9 +34,45 @@
 
   > Flynn, J. M., Hubley, R., Goubert, C., Rosen, J., Clark, A. G., Feschotte, C., & Smit, A. F. (2020). RepeatModeler2 for automated genomic discovery of transposable element families. Proceedings of the National Academy of Sciences, 117(17), 9451‑9457. [https://doi.org/10.1073/pnas.1921046117](https://doi.org/10.1073/pnas.1921046117)
 
-- [Request](https://pypi.org/project/requests/)
+## Python packages
 
-> Reitz, K. (2023). Requests (2.31.0). Pypi. [https://pypi.org/project/requests/](https://pypi.org/project/requests/)
+- [Biopython](https://biopython.org/)
+
+  > Cock, P. J. A., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., Friedberg, I., Hamelryck, T., Kauff, F., Wilczynski, B., & De Hoon, M. J. L. (2009). Biopython : Freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics, 25(11), 1422‑1423. [https://doi.org/10.1093/bioinformatics/btp163](https://doi.org/10.1093/bioinformatics/btp163)
+
+- [Environment for Tree Exploration 3 (ETE3)](http://etetoolkit.org/)
+
+  > Huerta-Cepas, J., Serra, F., & Bork, P. (2016). ETE 3 : Reconstruction, Analysis, and Visualization of Phylogenomic Data. Molecular Biology and Evolution, 33(6), 1635‑1638. [(https://doi.org/10.1093/molbev/msw046](https://doi.org/10.1093/molbev/msw046)
+
+- [Kaleido](https://github.com/plotly/Kaleido)
+
+  > Mease, J. (2021). Kaleido (v0.2.1.post1). GitHub. [https://github.com/plotly/Kaleido](https://github.com/plotly/Kaleido)
+
+- [Pandas](https://pandas.pydata.org/)
+
+> Team, T. P. D. (2023). pandas-dev/pandas : Pandas (v2.1.1). Zenodo. [https://doi.org/10.5281/ZENODO.8364959](https://doi.org/10.5281/ZENODO.8364959)
+
+- [Plotly](https://plot.ly)
+
+  > Inc, P. T. (2015). Collaborative data science [Logiciel]. Plotly Technologies Inc. [https://plot.ly](https://plot.ly)
+
+- [Py Fasta Validator](https://github.com/linsalrob/py_fasta_validator)
+
+  > Edwards, R. (2019). linsalrob/fasta_validator : Initial Release (v0.1). Zenodo. [https://doi.org/10.5281/ZENODO.2532044](https://doi.org/10.5281/ZENODO.2532044)
+
+- [Python-newick](https://pypi.org/project/newick/)
+
+  > Forkel, R. (2023). Python-newick (1.9.0). Pypi. [https://pypi.org/project/newick/](https://pypi.org/project/newick/)
+
+- [Request](https://github.com/psf/requests)
+
+> Reitz, K. (2023). Requests (2.31.0). GitHub. [https://github.com/psf/requests](https://github.com/psf/requests)
+
+## Database
+
+- [RepBase](https://www.girinst.org/repbase/)
+
+  > Bao, W., Kojima, K. K., & Kohany, O. (2015). Repbase Update, a database of repetitive elements in eukaryotic genomes. Mobile DNA, 6(1), 11. [https://doi.org/10.1186/s13100-015-0041-9](https://doi.org/10.1186/s13100-015-0041-9)
 
 ## Software packaging/containerisation tools
 

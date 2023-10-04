@@ -10,7 +10,7 @@ process REPEATMASKER {
 
     input:
     tuple val(meta), path(genome)
-    tuple val(library_id), path(library_path)
+    tuple val(meta), path(library)
 
     output:
     tuple val(meta), path("${genome}.masked"),    emit: masked
@@ -18,7 +18,7 @@ process REPEATMASKER {
 
     script:
     """
-    RepeatMasker -pa $task.cpus -e ncbi -nolow -lib $library_path -a -gccalc -norna -excln \
+    RepeatMasker -pa $task.cpus -e ncbi -nolow -lib $library -a -gccalc -norna -excln \
         -gff -s -xsmall -gccalc -excln -gff -s -html $genome
 
     gunzip *.gz
