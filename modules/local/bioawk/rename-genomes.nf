@@ -1,7 +1,6 @@
 process RENAME_GENOMES {
-    tag "RENAME_GENOMES_$genome_id"
-    publishDir "results/$genome_id"
-    debug
+    tag "RENAME_GENOMES_${meta.id}"
+    publishDir "${params.outdir}/results/${meta.id}"
 
     conda (params.enable_conda ? 'bioawk==1.0--h7132678_8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -9,16 +8,22 @@ process RENAME_GENOMES {
         'quay.io/biocontainers/bioawk:1.0--h7132678_8' }"
 
     input:
-    tuple val(genome_id), path(genome_path)
+    tuple val(meta), path(genome)
 
     output:
-    tuple val(genome_id), path(genome_path),            emit: fasta
-    tuple val(genome_id), path("${genome_id}.tsv"),    emit: json
+    tuple val(meta), path(genome),              emit: fasta
+    tuple val(meta), path("${meta.id}.tsv"),    emit: json
 
     script:
+    def unmodified_genome = "${meta.id}_unreformated.fa"
     """
-    mv $genome_path ${genome_id}_unreformated.fa
-    grep '>' ${genome_id}_unreformated.fa | sed -e "s/^>//g" | awk -v id=$genome_id '{print \$O, id"-seq"NR}' > ${genome_id}.tsv
-    bioawk -v id=$genome_id -c fastx '{print ">"id"-seq"NR; print \$seq}' ${genome_id}_unreformated.fa |fold -w 60 > $genome_path
+    # Name modification to avoid overwriting the original file (symbolic link)
+    mv $genome $unmodified_genome
+
+    # Saving old names (with the new names) in a csv file
+    bioawk  -v id=$meta.id -c fastx 'BEGIN{print "previous_IDs", "EXOGAP_IDs"} {print \$name, id"_seq"NR}' $unmodified_genome > ${meta.id}.tsv
+
+    # Modification of genome file
+    bioawk -v id=$meta.id -c fastx '{print ">"id"_seq"NR; print \$seq}' $unmodified_genome |fold -w 60 > $genome
     """
 }

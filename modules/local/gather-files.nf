@@ -1,14 +1,14 @@
 process GATHER_FILES {
-    debug
+    tag "GATHER_FILES_${name}"
 
     input:
-    tuple val(file_id), path(file_path)
+    tuple val(name), path(all_files)
 
     output:
-    tuple val(file_id), path("${file_id}.all")
+    tuple val(name), path("all-${name}")
 
     script:
     """
-    cat $file_path > ${file_id}.all
+    cat $all_files > "all-${name}"
     """
 }

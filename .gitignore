@@ -12,4 +12,4 @@ null/
 sample_sheet.tsv
 nextflow.config.*
 busco_downloads/
-about-genomes.tsv.myriapoda
+*myriapod*

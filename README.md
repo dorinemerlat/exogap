@@ -1,70 +1,75 @@
-# ![nf-core/exogap](./docs/images/exogap_logo_light.png#gh-light-mode-only) ![nf-core/exogap](./docs/images/exogap_logo_dark.png#gh-dark-mode-only)
+![nf-core/exogap](./docs/images/exogap_logo_light.png#gh-light-mode-only)
+![nf-core/exogap](./docs/images/exogap_logo_dark.png#gh-dark-mode-only)
+
+---
 
 ## Introduction
 
-**nf-core/exogap** is a bioinformatics pipeline that annotate one or several genomes of non-model species.
+**EXOGAP** (EXotic Organism Genome Annotation Pipeline) is a Nextflow workflow designed for the comprehensive annotation of genomes from non-model species. It integrates major tools for repetitive element identification, protein-coding gene and non-coding gene prediction. EXOGAP manages  data conversion and communication between all these tools, filters and selects the most reliable results, and generates insightful statistics and plots to facilitate easy analysis of annotation quality. It allows annotation of multiple genomes from a group of closely related species in a single run, while adapting the data to used for each genome and using the predictions of other genomes to enhance prediction quality of each genome. Moreover, It also ensures that all annotations are formatted for easy deposition in public databanks. As a Nextflow workflow, EXOGAP efficiently utilizes Docker or Singularity to install and configure all the necessary programs, simplifying the setup process for researchers.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+This is the major steps of EXOGAP:
+1. *Data Preparation*: Start by preparing the necessary data, calculating genome statistics, and obtaining taxonomic information.
+2. *Repetitive Element Annotation*: annotate repetitive elements within the genome using RepeatModeler and RepeatMasker.
+3. *Protein-Coding Gene Annotation*: annotate protein-coding genes using MAKER2, AUGUSTUS and SNAP, Blast and InterProScan (optionnaly: Blast2GO).
+4. *Non-Coding Gene Annotation*: annotate non-coding genes with tRNAscan-SE, RNAmmer, Barrnap, Infernal, SnoScan.
+5. *Annotation Formatting*: format the annotations and sequence files to meet the requirements of major public databanks.
+6. *Statistical Analysis*: generate informative statistics and analyses to assess the quality of genome annotation.
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+<!-- TODO: Add a metro map of EXOGAP -->
+## Installation
 
-1. Prepare the data, calculate some statistics about genomes and get taxonomic informations.
-2. Annotate the repetitive elements.
-3. Annotate the protein-coding genes.
-4. Annote the non conding genes.
-5. Formate the annotations and sequence files in the format of main public databank.
-6. Generate some statistics and analysis about genome annotation.
+1. To use EXOGAP, you must ensure that you have a functional installation of[Nextflow](https://www.nextflow.io/) (version >= 23.09.2-edge.5883) and [Singularity](https://sylabs.io/singularity/) (version >= 3.0).
+
+2. Once Nextflow is installed, you need to update it to use a *edge* release. Indeed, EXOGAP uses some features that are not yet available in the *stable* release of Nextflow. To do so, run the following command:
+```bash
+export NXF_EDGE=1
+nextflow self-update
+```
+Don't worry,, the *edge* release works very well with EXOGAP and will not cause any issues.
+
+3. Clone the GitHub repository of EXOGAP:
+```bash
+https://github.com/dorinemerlat/exogap.git
+```
 
 ## Usage
 
-> **Note**
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-> to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-> with `-profile test` before running the workflow on actual data.
+1. Begin by creating a samplesheet for the genome assemblies you wish to annotate. This samplesheet should be in a comma-separated format with three columns, where each row corresponds to a genome file to annotate. This is an example of `samplesheet.csv`.
 
-First, prepare a samplesheet information about the genome assemblies you would like to annotate before running the pipeline.  It has to be a comma-separated file with 3 columns, and each row represents a genome file to annotate.
+  ```csv
+  name,taxid,fasta
+  Polydesmus complanatus,510027,polydesmus-complanatus.fa
+  ```
 
-`samplesheet.csv`:
+  | **Column** | **Description** |
+  |------------|-----------------|
+  | `name`     | Genome to use. This is not necessarily the official name of the specie, but will be used in graphs and tables generated by the pipeline (alphnanumeric characters, spaces, - and _ accepted).  |
+  | `taxid`    | It must be valid and available in the NCBI taxonomic database. If no taxid is available for the species or strain, then enter the taxid of the nearest parent taxon. The same taxid can be entered in several lines, if several genomes to be annotated share the same taxon.      |
+  | `fasta`    | Name of the fasta file associated with the genome. By default, EXOGAP looks for this file in the `/data/genomes/` folder. If you wish to use a different location, please specify the full path of the file.        |
 
-```csv
-name,taxid,fasta
-Polydesmus complanatus,510027,polydesmus-complanatus.fa
-```
- | **Column** | **Description** |
-|------------|-----------------|
-| `name`     | Genome to use. This is not necessarily the official name of the species, but will be used in graphs and tables generated by the pipeline.  |
-| `taxid`    | It must be valid and available in the NCBI taxonomic database. If no taxid is available for the species or strain, then enter the taxid of the nearest parent taxon. The same taxid can be entered in several lines, if several genomes to be annotated share the same taxon.      |
-| `fasta`    | Name of the fasta file associated with the genome. By default, EXOGAP looks for this file in the `/data/genomes/` folder. If you wish to use a different location, please specify the full path of the file.        |
+  The order of the columns in the samplesheet doesn't matter, just update the header to match the order you prefer. In addition, it is mandatory to fill in all 3 columns for each genome. As for the rows, the file must at least contain the header and the information for one genome.
 
-Then, provide pipeline parameters via the config file `nextflow.config`. It allows to indicate the computing resources to use and to modularize the pipeline by giving additional databases, paying programs...
+2. Then, provide pipeline parameters via the config file `nextflow.config`.
 
-Now, you can run the pipeline using:
+3. Now, you can run the pipeline using:
 
-```bash
-nextflow exogap \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --config nextflow.config
-   --outdir <OUTDIR>
-```
+  ```bash
+  nextflow exogap \
+    -profile <docker/singularity/.../institute> \
+    --input samplesheet.csv \
+    --config nextflow.config
+    --outdir <OUTDIR>
+  ```
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/exogap/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/exogap/output).
+Coming soon.
 
 ## Credits
 
-EXOGAP was originally written by Dorine MERLAT.
+EXOGAP is written and maintained by Dorine MERLAT (dorine.merlat@etu.unistra.fr).
 
-We thank the following people for their extensive assistance in the development of this pipeline: Odile Lecompte and Arnaud Kress.
+I thank the following people for their extensive assistance in the development of EXOGAP: Odile Lecompte and Arnaud Kress.
 
 ## Citations
 

@@ -1,22 +1,19 @@
 process GET_NEWICK {
-    debug
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    'docker://dorinemerlat/python-exogap:v1.02':
+    'dorinemerlat/python-exogap:v1.02' }"
 
-    // conda (params.enable_conda ? 'bioconda requests==2.26.0' : null)
-    // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-    //     'https://depot.galaxyproject.org/singularity/requests:2.26.0':
-    //     'quay.io/biocontainers/requests:2.26.0' }"
+    publishDir "${params.outdir}/results/"
 
     input:
-    val(taxids)
-    val(about_genomes)
+    val(IDs)
 
     output:
-    path('.newick')
+    path('*.tree'),             emit: newick
+    path('*.tree.ascii_art'),   emit: ascii
 
     script:
     """
-    taxids=(echo $taxids |sed "s/[][,]//g")
-    about_genomes=(echo $about_genomes |sed "s/\], /\n/g" |sed -E "s/\[|\]//g" |sed "s/ //g" |tr '\n' ')
-    get-newick.py -t "$taxids" -i "$about_genomes"
+    get-newick.py -i '$IDs'
     """
 }
