@@ -25,7 +25,7 @@ This is the major steps of EXOGAP:
 export NXF_EDGE=1
 nextflow self-update
 ```
-Don't worry,, the *edge* release works very well with EXOGAP and will not cause any issues.
+Don't worry, the *edge* release works very well with EXOGAP and will not cause any issues.
 
 3. Clone the GitHub repository of EXOGAP:
 ```bash
