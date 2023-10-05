@@ -14,6 +14,9 @@ process REPEATLANDSCAPE {
 
     script:
     """
+    # Allow to find calcDivergenceFromAlign.pl and createRepeatLandscape.pl
+    export PERL5LIB=/usr/local/share/RepeatMasker/
+
     # Re-calculate divergence adapted to GC content
     calcDivergenceFromAlign.pl -s ${align}.divsum -a ${align}.with_div $align
 
