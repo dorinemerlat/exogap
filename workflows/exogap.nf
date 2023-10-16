@@ -24,7 +24,7 @@ WorkflowExogap.initialise(params, log)
 include { fromSamplesheet } from 'plugin/nf-validation'
 
 genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
-            .map { meta, file -> [ meta + [id: meta.name.toLowerCase().replace(' ', '-')], file ] }
+            .map { meta, fasta -> [ meta.name.toLowerCase().replace(' ', '-'), meta, file(fasta) ] }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +37,7 @@ genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
 //
 include { INPUT_CHECK           } from '../subworkflows/local/input_check'
 include { PREPROCESS_GENOMES    } from '../subworkflows/local/preprocess-genomes'
-include { REPETITIVE_ELEMENTS   } from '../subworkflows/local/repetitive-elements'
+// include { REPETITIVE_ELEMENTS   } from '../subworkflows/local/repetitive-elements'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,7 @@ workflow EXOGAP {
     // SUBWORKFLOW: ANNOTATE_REPEATS
     //
 
-    // REPETITIVE_ELEMENTS(PREPROCESS_GENOMES.out.genomes)
+    // REPETITIVE_ELEMENTS(PREPROCESS_GENOMES.out.genomes, PREPROCESS_GENOMES.out.newick)
 
     // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
     // ANNOTATE_REPEATS.out.view()

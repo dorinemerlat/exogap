@@ -16,6 +16,6 @@ process EXTRACT_SEQUENCES {
 
     script:
     """
-    agat_sp_extract_sequences.pl -g $gff -f $genome -t dispersed_repeat -o
+    agat_sp_extract_sequences.pl -g $gff -f $genome -t dispersed_repeat -o ${genome}-repetitive-elements.fa
     """
 }

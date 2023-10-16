@@ -9,13 +9,15 @@ include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_1      } from '../.
 include {REPEATMASKER           as REPEATMASKER_WITH_OWN_LIB_2      } from '../../modules/local/repeatmasker/repeatmasker'
 include {PROCESS_REPEATS                                            } from '../../modules/local/repeatmasker/process-repeats'
 include {REPEATLANDSCAPE                                            } from '../../modules/local/repeatmasker/repeatLanscape'
-include {EXTRACT_SEQUENCES                                          } from '../../modules/local/agat/extract-sequences'
+include {REFORMAT_OUT                                               } from '../../modules/local/repeatmasker/reformat-out'
+include {SUMMARIZE_REPEATS                                          } from '../../modules/local/stats-and-plots/summarize-repeats'
 // include {STATS                                                      } from '../../modules/local/re_stats/stats'
 // include {PLOTS                                                      } from '../../modules/local/re_stats/plots'
 
 workflow REPETITIVE_ELEMENTS {
     take:
         genomes
+        newick
 
     main:
         // // Run RepeatModeler and process results
@@ -52,50 +54,83 @@ workflow REPETITIVE_ELEMENTS {
         //     .groupTuple()
         //     .set { cat }
 
-////////
-        Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/repeatmasker1/*cat")
-            .map { file -> tuple([id : file.simpleName], file) }
-            .set { cat1}
-
-        Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/repeatmasker2/*cat")
-            .map { file -> tuple([id : file.simpleName], file) }
-            .set { cat2}
-
-        Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/repeatmasker3/*cat")
-            .map { file -> tuple([id : file.simpleName], file) }
-            .set { cat3}
-
-        cat1.concat(cat2,cat3).groupTuple().set {cat_final}
-
-        genomes.map { meta, file -> [ meta.id, meta, file ] }
-            .join( cat_final.map{ meta, files -> [ meta.id, files ] } )
-            .map { id, meta, genome, files -> [ meta, files ] }
-            .set {cat_final}
-
-        Channel.fromPath("/gstock/user/merlat/myriapods/repetitive_elements/repeatmasker3/*masked")
-            .map { file -> tuple([id : file.simpleName], file) }
-            .set { masked_final }
-
-        genomes.map { meta, file -> [ meta.id, meta, file ] }
-            .join( masked_final.map{ meta, file -> [ meta.id, file ] } )
-            .map { id, meta, genome, file -> [ meta, file ] }
-            .set { masked_final }
-
-        Channel.fromPath( params.external_library, checkIfExists: true )
-            .combine(masked_final.map {meta, file -> meta })
-            .map { library, meta -> [ meta, library ] }
-            .set { external_library }
-
-        // Process repeats and landscape analysis
-        PROCESS_REPEATS(masked_final, cat_final, external_library )
-
-        // REPEATLANDSCAPE(PROCESS_REPEATS.out.align)
-
-        // EXTRACT_SEQUENCES(PROCESS_REPEATS.out.masked, PROCESS_REPEATS.out.gff)
-
         // // Process repeats and landscape analysis
         // PROCESS_REPEATS(REPEATMASKER_WITH_OWN_LIB_2.masked, cat, external_library)
         // REPEATLANDSCAPE(PROCESS_REPEATS.out.align)
+
+/////////
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .set {genomes_for_join}
+
+        // Masked
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.masked")) }
+            .set {masked}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(masked).map { id, meta, genome, file -> [ meta, file ] }
+            .set {masked}
+
+        // gff
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.gff")) }
+            .set {gff}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(gff).map { id, meta, genome, file -> [ meta, file ] }
+            .set {gff}
+
+        // complex gff
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.-complex.gff")) }
+            .set {complex_gff}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(complex_gff).map { id, meta, genome, file -> [ meta, file ] }
+            .set {complex_gff}
+
+        // align
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.align")) }
+            .set {align}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(align).map { id, meta, genome, file -> [ meta, file ] }
+            .set {align}
+
+        // cat
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.cat")) }
+            .set {cat}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(cat).map { id, meta, genome, file -> [ meta, file ] }
+            .set {cat}
+
+        //out
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.out")) }
+            .set {out}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(out).map { id, meta, genome, file -> [ meta, file ] }
+            .set {out}
+
+        //tbl
+        Channel.fromPath('jolly_watson.log.workdir').map {it -> file(it).readLines()}.flatten().map {it -> [file("${it}*.align").simpleName, it]}
+            .map {name, it -> tuple(name[0], file("${it}${name[0]}.tbl")) }
+            .set {tbl}
+        genomes.map { meta, file -> [ meta.id, meta, file ] }
+            .join(tbl).map { id, meta, genome, file -> [ meta, file ] }
+            .set {tbl}
+
+//////////
+        Channel.fromPath('data/repetitive_elements/TEClasses.tsv').set {classification}
+        REFORMAT_OUT(out)
+
+        REFORMAT_OUT.out.out.map {meta, it -> [it]}.collect()
+
+        DOWNLOAD_TE_CLASSES()
+
+        SUMMARIZE_REPEATS(REFORMAT_OUT.out.out.map {meta, it -> [it]}.collect(), classification, newick)
+
+        // REPEATLANDSCAPE(align)
+
+        // EXTRACT_SEQUENCES(masked, gff)
 
         // PLOT_REPEATLANDSCAPE(REPEATLANDSCAPE.out) -> one by genome
         // PlOT_REPEAT_OVERVIEW() -> one for all
