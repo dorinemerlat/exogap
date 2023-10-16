@@ -25,6 +25,10 @@
 
   > Manni, M., Berkeley, M. R., Seppey, M., Simão, F. A., & Zdobnov, E. M. (2021). BUSCO Update : Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Molecular Biology and Evolution, 38(10), 4647‑4654. doi: [10.1093/molbev/msab199](https://doi.org/10.1093/molbev/msab199)
 
+- [Jupyter Notebook](https://jupyter.org/)
+
+  > Kluyver, T., Ragan-Kelley, B., Pérez, F., Granger, B., Bussonnier, M., Frederic, J., Kelley, K., Hamrick, J., Grout, J., Corlay, S., Ivanov, P., Avila, D., Abdalla, S., & Willing, C. (2016). Jupyter Notebooks – a publishing format for reproducible computational workflows. In F. Loizides & B. Schmidt (Éds.), Positioning and Power in Academic Publishing : Players, Agents and Agendas (p. 87‑90). IOS Press.
+
 - [Python](https://www.python.org/)
 
   > Van Rossum, G., & Drake, F. L. (2009). Python 3 Reference Manual. CreateSpace.
@@ -76,6 +80,10 @@
 - [RepBase](https://www.girinst.org/repbase/)
 
   > Bao, W., Kojima, K. K., & Kohany, O. (2015). Repbase Update, a database of repetitive elements in eukaryotic genomes. Mobile DNA, 6(1), 11. doi:[10.1186/s13100-015-0041-9](https://doi.org/10.1186/s13100-015-0041-9)
+
+- [Dfam](https://www.dfam.org/home)
+
+> Storer, J., Hubley, R., Rosen, J., Wheeler, T. J., & Smit, A. F. (2021). The Dfam community resource of transposable element families, sequence models, and genome annotations. Mobile DNA, 12(1). doi: [10.1186/S13100-020-00230-Y](https://doi.org/10.1186/S13100-020-00230-Y)
 
 ## Software packaging/containerisation tools
 
