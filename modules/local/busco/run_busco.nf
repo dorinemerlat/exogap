@@ -21,4 +21,10 @@ process BUSCO {
     busco -i $genome -l $dataset -o $id -m $mode -c $task.cpus
     mv ${id}/short_summary.* .
     """
+
+    stub:
+    """
+    touch short_summary.*.json
+    touch short_summary.*.txt
+    """
 }

@@ -3,7 +3,9 @@ process GET_NEWICK {
     'docker://dorinemerlat/python-exogap:v1.02':
     'dorinemerlat/python-exogap:v1.02' }"
 
-    publishDir "${params.outdir}/results/"
+    cache 'lenient'
+
+    publishDir "${params.outdir}/out/"
 
     input:
     tuple val(ids), val(metas), val(files)
@@ -15,5 +17,11 @@ process GET_NEWICK {
     script:
     """
     get-newick.py -i '$metas'
+    """
+
+    stub:
+    """
+    touch ${metas}.tree
+    touch ${metas}.tree.ascii_art
     """
 }

@@ -1,6 +1,7 @@
 process DOWNLOAD_BUSCO_DATASETS {
     tag "DOWNLOAD_BUSCO_DATASETS"
-    publishDir "${params.outdir}/results/programs-outputs/busco/", mode: 'symlink'
+
+    cache 'lenient'
 
     conda (params.enable_conda ? 'bioconda busco==5.5.0--pyhdfd78af_0' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -12,6 +13,6 @@ process DOWNLOAD_BUSCO_DATASETS {
 
     script:
     """
-    busco --list-datasets | grep " - " |  awk '{print \$NF}' > BUSCO_datasets.txt
+    busco --list-datasets | grep "_odb" |  awk '{print \$NF}' |awk -F '_' '{OFS=","; print \$1, \$1 "_" \$2}' > BUSCO_datasets.txt
     """
 }

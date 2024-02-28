@@ -15,7 +15,6 @@ process GATHER_FILES {
     elif [ $header == yes ]; then
         head -n 1 ${inputs[0]} > all_${name_output}.${ext_output}
         tail -n +2 $inputs >> all_${name_output}.${ext_output}
-
     fi
     """
 }

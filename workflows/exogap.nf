@@ -35,9 +35,14 @@ genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK           } from '../subworkflows/local/input_check'
-include { PREPROCESS_GENOMES    } from '../subworkflows/local/preprocess-genomes'
-// include { REPETITIVE_ELEMENTS   } from '../subworkflows/local/repetitive-elements'
+// include { INPUT_CHECK                       } from '../subworkflows/input_check'
+include { GET_INFORMATIONS_ABOUT_GENOMES    } from '../subworkflows/local/preprocess/get_informations_about_genomes'
+include { PREPARE_GENOMES                   } from '../subworkflows/local/preprocess/prepare_genomes'
+// include { ANALYSE_GENOME_QUALITY            } from '../subworkflows/preprocess/analyse_genome_quality'
+// include { ANNOTATE_REPEATS                  } from '../subworkflows/annotate_repeats'
+// include { ANNOTATE_PROTEIN_CODING_GENES     } from '../subworkflows/annotate_protein_coding_genes'
+// include { ANNOTATE_NON_CODING_GENES         } from '../subworkflows/annotate_non_coding_genes'
+// include { POSTPROCESS                       } from '../subworkflows/post_process'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,6 +57,26 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    DEFINE FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+def gather_genomes(genomes) {
+    return genomes
+        .map{it -> [it[0], it[1], it[2]]} // remove extra fiels
+        .map { id, meta, file -> [id, ["${meta.taxid}": meta.name], file] } // keep only the IDs and essential meta data
+        .flatten() // flat and list to get a destructed channel
+        .toList()
+        .map { genome -> genome.withIndex().collect { it, index -> [index % 3, it] } } // group by two: all the IDs, and all the meta data
+        .flatMap { it } // have an item for IDs and one for meta data
+        .groupTuple() // group to
+        .map { index, it -> it.unique().sort() }
+        .toList()
+}
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -65,21 +90,40 @@ workflow EXOGAP {
 
     ch_versions = Channel.empty()
 
-    //
-    // SUBWORKFLOW: Preprocess the genomes
-    // Rename sequences in fasta, get some informations about genomes, calculate statistics and draw plots
-    //
+    // get taxonomy, datasets...
+    GET_INFORMATIONS_ABOUT_GENOMES(genomes)
 
-    PREPROCESS_GENOMES(genomes)
+    // preprocess genomes
+    PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
 
-    //
-    // SUBWORKFLOW: ANNOTATE_REPEATS
-    //
+    // GET_INFORMATIONS_ABOUT_GENOMES(genomes)
+    // PREPARE_GENOMES(genomes)
+    // // ... .set { genomes } // add genomes size from PREPARE_GENOMES in the genomes of GET_INFORMATIONS_ABOUT_GENOMES
+    // ANALYSE_GENOME_QUALITY(genomes)
 
-    // REPETITIVE_ELEMENTS(PREPROCESS_GENOMES.out.genomes, PREPROCESS_GENOMES.out.newick)
+    // //
+    // // SUBWORKFLOW: ANNOTATE_REPEATS
+    // //
 
-    // ANNOTATE_REPEATS(PREPROCESS_GENOMES.out.fasta)
-    // ANNOTATE_REPEATS.out.view()
+    // // execute repeats annotation
+    // if (params.annotate_repeats) {
+    //     // ANNOTATE_REPEATS(genomes)
+    //     //     REPETITIVE_ELEMENTS(PREPROCESS_GENOMES.out.genomes, PREPROCESS_GENOMES.out.newick)
+
+    //    // -> masked_genomes
+    // }
+    // else {
+    //     // ... .set{ genomes } // use masked genomes
+    //     // integrate gff
+    //     // ... .gff
+
+    //     // -> masked_genomes
+    // }
+
+    // // ANNOTATE_PROTEIN_CODING_GENES(masked_genomes)
+    // // ANNOTATE_NON_CODING_GENES(masked_genomes)
+
+    // // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)
 }
 
 /*
