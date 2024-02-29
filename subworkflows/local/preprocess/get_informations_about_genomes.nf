@@ -66,29 +66,53 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
 
         COUNT_PROTEINS_IN_PROTEOMES(parents)
 
-        COUNT_PROTEINS_IN_PROTEOMES.out.proteins_count
-            .map { taxid, name, count -> [taxid, name, count.readLines()[0].split(',')[2].toInteger() ] }
-            .filter { it[2] < params.max_proteins_from_a_large_set_of_species } // keep only those a minimal number of proteins
-            .max { it[2] }
-            .view()
+        COUNT_PROTEINS_IN_PROTEOMES.out
+            .map { taxid, name, id_list, count, other  -> [taxid, name, id_list, count.readLines()[0].split(',')[2].toInteger(), other ] }
+            .filter { it[3] < params.max_proteins_from_a_large_set_of_species } // keep only those a minimal number of proteins
+            .filter { it[3] != 0 }
+            // .view()
+            .set { proteins_in_proteomes_set }
 
         COUNT_PROTEINS(parents)
 
-        COUNT_PROTEINS.out.proteins_count
-            .map { taxid, name, count -> [taxid, name, count.readLines()[0].split(',')[2].toInteger()] }
-            .filter { it[2] < params.max_proteins_from_relatively_close_species } // keep only those a minimal number of proteins
-            .max { it[2] }
+        COUNT_PROTEINS.out
+            .map { taxid, name, id_list, count, other  -> [taxid, name, id_list, count.readLines()[0].split(',')[2].toInteger(), other ] }
+            .filter { it[3] < params.max_proteins_from_relatively_close_species } // keep only those a minimal number of proteins
+            .filter { it[3] != 0 }
+            .set { proteins_set }
+
+        genomes
+            .map { id, meta, fasta -> [meta.lineage.taxid, id, meta, fasta ] }
+            .transpose()
+            .set { genomes_by_lineage }
+
+        genomes_by_lineage.combine(proteins_set, by : 0)
+            .map { clade_taxid, id, meta, fasta, clade_name, clade_ids, clade_count, clade_other -> [ [id, meta, fasta], [clade_taxid, clade_name, clade_ids, clade_count, clade_other] ]}
+            .groupTuple()
+            .map { genome, set -> [genome, set.max { a,b -> a[3] <=> b[3] } ]}
+            .map { genome, set -> [ genome[0], genome[1], genome[2], [ close_proteins_set : [ 'name': set[1], 'taxid': set[0], 'id_list': set[2], 'count': set[3], 'other': set[4] ]]]}
             .view()
+        //     // .set{ genomes_by_lineage }
 
-        parents
-            .combine( parents.count() )
-            .set { parents_with_count }
+        // genomes.combine( proteins_set )
+        //     // .first()
+        //     // check if the third element is in the list in the second element
+        //     .map { id, meta, fasta, taxid, name, count -> [id, meta, fasta, taxid, name, count, meta.lineage.taxid ] }
+        //     .filter { it[6].find { element -> elemement = it[3] } }
+        //     // .map { it[3].instanceof() }
+        //     // .filter { it[3] instanceof it[1].lineage.map { it.taxid }}
+        //     // .map { it[1].lineage }.map { it.taxid }
+        //     .view()
 
-        COUNT_TRANSCRIPTOMES(parents_with_count)
+        // parents
+        //     .combine( parents.count() )
+        //     .set { parents_with_count }
 
-        COUNT_TRANSCRIPTOMES.out.transcriptomes_count
-            .map { taxid, name, count -> [taxid, name, count.readLines()[0].split(',')[2].toInteger() ] }
-            .view()
+        // COUNT_TRANSCRIPTOMES(parents_with_count)
+
+        // COUNT_TRANSCRIPTOMES.out.transcriptomes_count
+        //     .map { taxid, name, count -> [taxid, name, count.readLines()[0].split(',')[2].toInteger() ] }
+        //     .view()
 
         // COUNT_PROTEINS_IN_PROTEOMES.out.view()
         // GATHER_PUBLIC_DATA(

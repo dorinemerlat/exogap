@@ -7,8 +7,7 @@ process COUNT_PROTEINS {
     tuple val(taxid), val(name)
 
     output:
-    tuple val(taxid), val(name), path{"${taxid}_proteins.list.zip"},         emit: proteins
-    tuple val(taxid), val(name), path{"${taxid}_proteins_count.list"},   emit: proteins_count
+    tuple val(taxid), val(name), path{"${taxid}_proteins.list.zip"}, path{"${taxid}_proteins_count.list"}, path{"${taxid}_proteins_empty.txt"}
 
     script:
     """
@@ -33,8 +32,11 @@ process COUNT_PROTEINS {
         fi
     fi
 
+    # zcat ${taxid}_proteins.list.zip > ${taxid}_proteins.list
+
     proteins_count=\$(wc -l < ${taxid}_proteins.list)
     echo "${taxid},${name},\${proteins_count}" > ${taxid}_proteins_count.list
+    touch "${taxid}_proteins_empty.txt"
     """
 
     // # stub:

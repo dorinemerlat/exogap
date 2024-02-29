@@ -9,9 +9,7 @@ process COUNT_PROTEINS_IN_PROTEOMES {
     tuple val(taxid), val(name)
 
     output:
-    tuple val(taxid), val(name), path{"${taxid}_UPIDs.list.zip"},                        emit: UPIDs
-    tuple val(taxid), val(name), path{"${taxid}_proteins_id_in_proteomes.list"},         emit: proteins
-    tuple val(taxid), val(name), path{"${taxid}_proteins_id_in_proteomes_count.list"},   emit: proteins_count
+    tuple val(taxid), val(name), path{"${taxid}_proteomes.list"}, path{"${taxid}_proteomes_count.list"}, path{"${taxid}_UPIDs.list.zip"}
 
     script:
     """
@@ -32,23 +30,23 @@ process COUNT_PROTEINS_IN_PROTEOMES {
         wait
 
         # merge all protein IDs
-        zcat proteomes/* > ${taxid}_proteins_id_in_proteomes.list
+        zcat proteomes/* > ${taxid}_proteomes.list
 
         # count number of proteins for the given clade
-        proteins_count=\$(wc -l < ${taxid}_proteins_id_in_proteomes.list)
-        echo "${taxid},${name},\${proteins_count}" > ${taxid}_proteins_id_in_proteomes_count.list
+        proteins_count=\$(wc -l < ${taxid}_proteomes.list)
+        echo "${taxid},${name},\${proteins_count}" > ${taxid}_proteomes_count.list
 
     else
 
-        touch ${taxid}_proteins_id_in_proteomes.list
-        echo "${taxid},${name},0" > ${taxid}_proteins_id_in_proteomes_count.list
+        touch ${taxid}_proteomes.list
+        echo "${taxid},${name},0" > ${taxid}_proteomes_count.list
     fi
     """
 
     // stub:
     // """
     // echo "0" > ${taxid}_UPIDs.list && zip ${taxid}_UPIDs.list.zip ${taxid}_UPIDs.list
-    // touch ${taxid}_proteins_id_in_proteomes.list
-    // echo "${taxid},${name},0" > ${taxid}_proteins_id_in_proteomes_count.list
+    // touch ${taxid}_proteomes.list
+    // echo "${taxid},${name},0" > ${taxid}_proteomes_count.list
     // """
 }

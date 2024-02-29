@@ -14,8 +14,7 @@ process COUNT_TRANSCRIPTOMES {
     tuple val(taxid), val(name), val(parents_count)
 
     output:
-    tuple val(taxid), val(name), path{"${taxid}_transcriptomes.list"},       emit: transcriptomes
-    tuple val(taxid), val(name), path{"${taxid}_transcriptomes_count.list"}, emit: transcriptomes_count
+    tuple val(taxid), val(name), path{"${taxid}_transcriptomes.list"}, path{"${taxid}_transcriptomes_count.list"}, path{"${taxid}_transcriptomes_taxids.list"}
 
     script:
     """
@@ -34,13 +33,16 @@ process COUNT_TRANSCRIPTOMES {
     if [[ \$count != 0 ]] ; then
         timer=\$((3 * (1 + \$RANDOM % $parents_count)))
         sleep \${timer}
-        efetch -format gb < esearch.out | grep "^ACCESSION" |awk '{ print \$2}' > ${taxid}_transcriptomes.list
+        efetch -format gb < esearch.out > efetch.out
+        grep "^ACCESSION" efetch.out |awk '{ print \$2}' > ${taxid}_transcriptomes.list
+        grep -o '/db_xref="taxon:[0-9]*"' efetch.out | cut -d':' -f2 | cut -d'"' -f1 > ${taxid}_transcriptomes_taxids.list
 
-            transcriptomes_count=\$(wc -l < ${taxid}_transcriptomes.list)
-            echo "${taxid},${name},\${transcriptomes_count}" > ${taxid}_transcriptomes_count.list
+        transcriptomes_count=\$(wc -l < ${taxid}_transcriptomes.list)
+        echo "${taxid},${name},\${transcriptomes_count}" > ${taxid}_transcriptomes_count.list
 
     else
         touch ${taxid}_transcriptomes.list
+        touch ${taxid}_transcriptomes_taxids.list
         echo "${taxid},${name},0" > ${taxid}_transcriptomes_count.list
     fi
     """
