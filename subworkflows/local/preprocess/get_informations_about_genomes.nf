@@ -91,6 +91,7 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
             .groupTuple()
             .map { genome, set -> [genome, set.max { a,b -> a[3] <=> b[3] } ]}
             .map { genome, set -> [ genome[0], genome[1], genome[2], [ close_proteins_set : [ 'name': set[1], 'taxid': set[0], 'id_list': set[2], 'count': set[3], 'other': set[4] ]]]}
+            .map { genome, meta, fasta, set -> [ genome, meta + set, fasta ]}
             .view()
         //     // .set{ genomes_by_lineage }
 
