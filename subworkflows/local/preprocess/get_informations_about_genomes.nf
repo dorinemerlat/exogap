@@ -14,6 +14,7 @@ include { GATHER_PUBLIC_DATA }          from '../../../modules/local/gather_publ
 include { DOWNLOAD_BUSCO_DATASETS }     from '../../../modules/local/busco/download_busco_datasets'
 include { SELECT_PUBLIC_DATA }          from '../../../modules/local/select_public_data'
 
+
 def gather_genomes(genomes) {
     return genomes
         .map{it -> [it[0], it[1], it[2]]} // remove extra fiels
@@ -21,10 +22,45 @@ def gather_genomes(genomes) {
         .flatten() // flat and list to get a destructed channel
         .toList()
         .map { genome -> genome.withIndex().collect { it, index -> [index % 3, it] } } // group by two: all the IDs, and all the meta data
-        .flatMap { it } // have an item for IDs and one for meta data
+        .flatMap { it } // have an it for IDs and one for meta data
         .groupTuple() // group to
         .map { index, it -> it.unique().sort() }
         .toList()
+}
+
+def index_genomes_by_lineage(genomes) {
+    return genomes
+        .map { id, meta, fasta -> [meta.lineage.taxid, id, meta, fasta ] }
+        .transpose()
+}
+
+
+def set_selection(genomes, datasets, dataset_name, max_sequence_number) {
+    genomes_index_by_lineage = index_genomes_by_lineage(genomes)
+
+    dataset_index_by_taxid = datasets.map { taxid, name, id_list, count, other  -> [taxid, name, id_list, count.readLines()[0].split(',')[2].toInteger(), other ] }
+        .filter { it[3] < max_sequence_number } // keep only those a minimal number of proteins
+        .filter { it[3] != 0 }
+
+    genomes = genomes_index_by_lineage.combine(dataset_index_by_taxid, by : 0)
+        .map { clade_taxid, id, meta, fasta, clade_name, clade_ids, clade_count, clade_other -> [ [id, meta, fasta], [clade_taxid, clade_name, clade_ids, clade_count, clade_other] ]}
+        .groupTuple()
+        .map { genome, dataset -> [genome, dataset.max { a,b -> a[3] <=> b[3] } ]}
+        .map { genome, dataset -> [ genome[0], genome[1], genome[2], ['name': dataset[1], 'taxid': dataset[0], 'id_list': dataset[2], 'count': dataset[3], 'other': dataset[4] ]]}
+
+    if (dataset_name == "proteins_in_proteomes_set") {
+        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ proteins_in_proteomes_set : set ], fasta]}
+    } else if (dataset_name == "proteins_set") {
+        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ proteins_set : set ], fasta]}
+    } else if (dataset_name == "closed_proteins_set") {
+        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ closed_proteins_set : set ], fasta]}
+    } else if (dataset_name == "transcriptomes_set") {
+        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ transcriptomes_set : set ], fasta]}
+    }
+}
+
+def set_extraction(meta) {
+    return meta.map { it -> [it.name, it.taxid, it.id_list] }.unique()
 }
 
 workflow GET_INFORMATIONS_ABOUT_GENOMES {
@@ -48,7 +84,7 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
         // choose which busco dataset to use for each specie
         DOWNLOAD_BUSCO_DATASETS()
 
-        genomes.map { id, meta, fasta -> meta.lineage.collect{[it.name.toLowerCase(), id, meta, fasta]} } // create an item for each parent of each genome
+        genomes.map { id, meta, fasta -> meta.lineage.collect{[it.name.toLowerCase(), id, meta, fasta]} } // create an it for each parent of each genome
             .flatMap{ it }
             .combine(DOWNLOAD_BUSCO_DATASETS.out.splitCsv(), by: 0) // -> [taxon, id, meta, fasta, busco_dataset]
             .map { taxon, id, meta, fasta, busco_dataset -> [id, meta, fasta, busco_dataset] }
@@ -56,83 +92,44 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
             .map { id, meta, file, busco_datasets -> [id, meta[0] + [ "busco_dataset": busco_datasets ], file[0]] }
             .set { genomes }
 
-        // select set about data to download
-        genomes.map { id, meta, fasta -> meta.lineage.collect{["taxid": it.taxid, "name": it.name, "rank": it.rank]} } // create an item for each parent of each genome
+        // select set about data to download (proteins and transcripts)
+        genomes.map { id, meta, fasta -> meta.lineage.collect{["taxid": it.taxid, "name": it.name, "rank": it.rank]} } // create an it for each parent of each genome
             .map { it.findAll { it.rank != "superkingdom"} .findAll {it.rank != "species"} } // keep only those with rank different of superkingdom or species
             .flatMap { it }
             .map { [it.taxid, it.name] }
             .unique()
             .set { parents }
 
-        COUNT_PROTEINS_IN_PROTEOMES(parents)
+        genomes_index_by_lineage = index_genomes_by_lineage(genomes)
 
-        COUNT_PROTEINS_IN_PROTEOMES.out
-            .map { taxid, name, id_list, count, other  -> [taxid, name, id_list, count.readLines()[0].split(',')[2].toInteger(), other ] }
-            .filter { it[3] < params.max_proteins_from_a_large_set_of_species } // keep only those a minimal number of proteins
-            .filter { it[3] != 0 }
-            // .view()
-            .set { proteins_in_proteomes_set }
+        COUNT_PROTEINS_IN_PROTEOMES(parents)
+        genomes = set_selection(genomes, COUNT_PROTEINS_IN_PROTEOMES.out, "proteins_in_proteomes_set", params.max_proteins_from_a_large_set_of_species)
 
         COUNT_PROTEINS(parents)
+        genomes = set_selection(genomes, COUNT_PROTEINS.out, "proteins_set", params.max_proteins_from_relatively_close_species)
+        genomes = set_selection(genomes, COUNT_PROTEINS.out, "closed_proteins_set", params.max_proteins_from_close_species)
 
-        COUNT_PROTEINS.out
-            .map { taxid, name, id_list, count, other  -> [taxid, name, id_list, count.readLines()[0].split(',')[2].toInteger(), other ] }
-            .filter { it[3] < params.max_proteins_from_relatively_close_species } // keep only those a minimal number of proteins
-            .filter { it[3] != 0 }
-            .set { proteins_set }
+        parents.combine( parents.count() ).set { parents_with_count }
+        COUNT_TRANSCRIPTOMES(parents_with_count)
+        genomes = set_selection(genomes, COUNT_TRANSCRIPTOMES.out, "transcriptomes_set", params.max_transcriptomes)
 
-        genomes
-            .map { id, meta, fasta -> [meta.lineage.taxid, id, meta, fasta ] }
-            .transpose()
-            .set { genomes_by_lineage }
+        // select complementary transcriptomes (SRA)
+        genomes.map { id, meta, fasta -> [[meta.transcriptomes_set.taxid, meta.transcriptomes_set.other.readLines()], [id, meta.taxid]] }
+            .filter { !(it[0][1].contains(it[1][1])) }
+            .map { tsa_set, genome -> [tsa_set[0], genome] }
+            .set { sra_to_download }
 
-        genomes_by_lineage.combine(proteins_set, by : 0)
-            .map { clade_taxid, id, meta, fasta, clade_name, clade_ids, clade_count, clade_other -> [ [id, meta, fasta], [clade_taxid, clade_name, clade_ids, clade_count, clade_other] ]}
-            .groupTuple()
-            .map { genome, set -> [genome, set.max { a,b -> a[3] <=> b[3] } ]}
-            .map { genome, set -> [ genome[0], genome[1], genome[2], [ close_proteins_set : [ 'name': set[1], 'taxid': set[0], 'id_list': set[2], 'count': set[3], 'other': set[4] ]]]}
-            .map { genome, meta, fasta, set -> [ genome, meta + set, fasta ]}
-            .view()
-        //     // .set{ genomes_by_lineage }
-
-        // genomes.combine( proteins_set )
-        //     // .first()
-        //     // check if the third element is in the list in the second element
-        //     .map { id, meta, fasta, taxid, name, count -> [id, meta, fasta, taxid, name, count, meta.lineage.taxid ] }
-        //     .filter { it[6].find { element -> elemement = it[3] } }
-        //     // .map { it[3].instanceof() }
-        //     // .filter { it[3] instanceof it[1].lineage.map { it.taxid }}
-        //     // .map { it[1].lineage }.map { it.taxid }
-        //     .view()
-
-        // parents
-        //     .combine( parents.count() )
-        //     .set { parents_with_count }
-
-        // COUNT_TRANSCRIPTOMES(parents_with_count)
-
-        // COUNT_TRANSCRIPTOMES.out.transcriptomes_count
-        //     .map { taxid, name, count -> [taxid, name, count.readLines()[0].split(',')[2].toInteger() ] }
-        //     .view()
-
-        // COUNT_PROTEINS_IN_PROTEOMES.out.view()
-        // GATHER_PUBLIC_DATA(
-        //     COUNT_PROTEINS_PROTEOMES.out.proteins_count.map {taxid, name, csv -> csv }.collect(),
-        //     COUNT_PROTEINS.out.proteins_count.map {taxid, name, csv -> csv }.collect(),
-        //     COUNT_TRANSCRIPTOMES.out.transcriptomes_count.map {taxid, name, csv -> csv }.collect())
-
-        // genomes
-        //     .map {id, meta, fasta -> [ id, meta, fasta, meta.lineage.collect{it. taxid}.join(" ") ] }
-        //     .combine (GATHER_PUBLIC_DATA.out)
-        //     .set { genomes_with_taxonomic_informations }
-
-        // SELECT_PUBLIC_DATA(genomes_with_taxonomic_informations)
+        // // extract datasets
+        large_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_in_proteomes_set })
+        close_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_set })
+        very_close_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.closed_proteins_set })
+        transcriptome_set = set_extraction(genomes.map { id, meta, fasta -> meta.transcriptomes_set })
 
     emit:
-        genomes                   = genomes
-    //     proteins_from_proteomes   = SELECT_PROTEINS_FROM_PROTEOMES.out
-    //     proteins_from_closest     = SELECT_PROTEINS_FROM_CLOSEST_SPECIES.out
-    //     transcripts_from_sra      = SELECT_TRANSCRIPTS_FROM_SRA.out
-    //     transcripts_from_tsa      = SELECT_TRANSCRIPTS_FROM_TSA.out
-
+        genomes                 = genomes
+        sra_to_download         = sra_to_download
+        large_protein_set       = large_protein_set
+        close_protein_set       = close_protein_set
+        very_close_protein_set  = very_close_protein_set
+        transcriptome_set       = transcriptome_set
 }
