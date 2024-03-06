@@ -7,10 +7,20 @@ DOWNLOAD SELECTED PUBLIC DATA TO USE FOR ANNOTATION
 //include modules
 
 // include {} from '../../../modules/local/api/'
+include { DOWNLOAD_SRA }                            from '../../../modules/local/ncbi/download_sra'
+include { RUN_TRINITY }                             from '../../../modules/local/trinity/run_trinity'
+include { DOWNLOAD_TSA }                            from '../../../modules/local/ncbi/download_tsa'
+include { GATHER_FILES as GATHER_TRANSCRIPT_FILES } from '../../../modules/local/gather_files'
+include { GATHER_FILES as GATHER_PROTEIN_FILES }    from '../../../modules/local/gather_files'
+include { RUN_CD_HIT_EST }                          from '../../../modules/local/cd-hit/run_cd-hit-est'
+include { RUN_CD_HIT as RUN_CD_HIT1 }               from '../../../modules/local/cd-hit/run_cd-hit'
+include { RUN_CD_HIT as RUN_CD_HIT2 }               from '../../../modules/local/cd-hit/run_cd-hit'
+include { DOWNLOAD_PROTEINS_IN_PROTEOMES }          from '../../../modules/local/api/download_proteins_in_proteomes'
+include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS1 } from '../../../modules/local/api/download_proteins'
+include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS2 } from '../../../modules/local/api/download_proteins'
 
 workflow DOWNLOAD_DATASETS {
     take:
-        genomes
         sra_to_download
         large_protein_set
         close_protein_set
@@ -18,24 +28,36 @@ workflow DOWNLOAD_DATASETS {
         transcriptome_set
 
     main:
-        genomes.view()
-        // download the selected proteins (large set, close set, very close)
-        // DOWNLOAD_PROTEINS()
-        // download the selected transcriptomes
+        // Transcripts set
+        DOWNLOAD_TSA(transcriptome_set)
 
-        // download the selected SRA data
+        DOWNLOAD_SRA(sra_to_download)
+        RUN_TRINITY(DOWNLOAD_SRA.out)
 
-        // add SRA to transcriptomes
+        DOWNLOAD_TSA.out.join(RUN_TRINITY.out)
+            .map { id, tsa, trinity -> [id, [tsa[2], trinity[3]], "transcripts_set.fa", 'no']}
+            .set { transcriptome_set }
+        GATHER_TRANSCRIPT_FILES(transcriptome_set)
 
-        // eliminate redundancy in transcripts sets
+        RUN_CD_HIT_EST(GATHER_TRANSCRIPT_FILES.out)
 
-        // eliminate redundancy in main proteins sets
-        // 1. Concatenate large protein set + close protein set
-        // 2. Eliminate redundancy in concatenated set
+        // // Main protein set
+        // DOWNLOAD_PROTEINS_IN_PROTEOMES(large_protein_set)
+        // DOWNLOAD_PROTEINS1(close_protein_set)
 
-        // eliminate redundancy in closed proteins set
+        // DOWNLOAD_PROTEINS_IN_PROTEOMES.out.join(DOWNLOAD_PROTEINS1.out)
+        //     .map { id, large, close -> [id, [large[2], close[2]], "main_proteins_set.fa", 'no']}
+        //     .set { main_protein_set }
+        // GATHER_PROTEIN_FILES(main_protein_set)
 
+        // RUN_CD_HIT1(GATHER_PROTEIN_FILES.out.map{id, input -> [id, input, "${id}_main_proteins_set.fa"]})
+
+        // // Parallele protein set
+        // DOWNLOAD_PROTEINS2(very_close_protein_set)
+        // RUN_CD_HIT2(DOWNLOAD_PROTEINS2.out.map{id, input -> [id, input, "${id}_parallele_proteins_set.fa"]})
 
     // emit:
-
+    transcripts = RUN_CD_HIT_EST.out
+    // main_proteins = RUN_CD_HIT1.out
+    // parallele_proteins = RUN_CD_HIT2.out
 }

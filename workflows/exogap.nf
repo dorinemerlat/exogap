@@ -99,7 +99,6 @@ workflow EXOGAP {
 
     // download datasets
     DOWNLOAD_DATASETS(
-        GET_INFORMATIONS_ABOUT_GENOMES.out.genomes,
         GET_INFORMATIONS_ABOUT_GENOMES.out.sra_to_download,
         GET_INFORMATIONS_ABOUT_GENOMES.out.large_protein_set,
         GET_INFORMATIONS_ABOUT_GENOMES.out.close_protein_set,

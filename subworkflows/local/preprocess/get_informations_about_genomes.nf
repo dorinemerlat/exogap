@@ -9,11 +9,10 @@ include { GET_TAXONOMIC_LINEAGE }       from '../../../modules/local/api/get_tax
 include { GET_NEWICK }                  from '../../../modules/local/api/get_newick'
 include { COUNT_PROTEINS_IN_PROTEOMES } from '../../../modules/local/api/count_proteins_in_proteomes'
 include { COUNT_PROTEINS }              from '../../../modules/local/api/count_proteins'
-include { COUNT_TRANSCRIPTOMES }        from '../../../modules/local/api/count_transcriptomes'
-include { GATHER_PUBLIC_DATA }          from '../../../modules/local/gather_public_data'
+include { COUNT_TRANSCRIPTOMES }        from '../../../modules/local/ncbi/count_transcriptomes'
 include { DOWNLOAD_BUSCO_DATASETS }     from '../../../modules/local/busco/download_busco_datasets'
 include { SELECT_PUBLIC_DATA }          from '../../../modules/local/select_public_data'
-
+include { SEARCH_SRA }                  from '../../../modules/local/ncbi/search_sra'
 
 def gather_genomes(genomes) {
     return genomes
@@ -113,17 +112,27 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
         COUNT_TRANSCRIPTOMES(parents_with_count)
         genomes = set_selection(genomes, COUNT_TRANSCRIPTOMES.out, "transcriptomes_set", params.max_transcriptomes)
 
-        // select complementary transcriptomes (SRA)
-        genomes.map { id, meta, fasta -> [[meta.transcriptomes_set.taxid, meta.transcriptomes_set.other.readLines()], [id, meta.taxid]] }
-            .filter { !(it[0][1].contains(it[1][1])) }
-            .map { tsa_set, genome -> [tsa_set[0], genome] }
-            .set { sra_to_download }
-
-        // // extract datasets
+        // extract datasets
         large_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_in_proteomes_set })
         close_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_set })
         very_close_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.closed_proteins_set })
         transcriptome_set = set_extraction(genomes.map { id, meta, fasta -> meta.transcriptomes_set })
+
+        // select complementary transcriptomes (SRA)
+        genomes.map { id, meta, fasta -> [[meta.transcriptomes_set.taxid, meta.transcriptomes_set.other.readLines()], [id, meta.taxid]] }
+            .filter { !(it[0][1].contains(it[1][1])) }
+            .map { tsa_set, genome -> [tsa_set[0], genome[0], genome[1]] }
+            .set { sra_to_download }
+
+        sra_to_download.combine( sra_to_download.count() ).set { sra_to_download }
+
+        SEARCH_SRA(sra_to_download)
+
+        SEARCH_SRA.out
+            // .map{ clade, specie_name, specie_taxid, out -> [clade, specie_name, specie_taxid, out] }
+            .filter { it[3].readLines().size() != 0 }
+            .map{ clade, specie_name, specie_taxid, out -> [clade, specie_name, specie_taxid, out, out.readLines().size()] }
+            .set { sra_to_download }
 
     emit:
         genomes                 = genomes
