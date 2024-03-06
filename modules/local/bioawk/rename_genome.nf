@@ -1,6 +1,7 @@
-process RENAME_GENOMES {
-    tag "RENAME_GENOMES_$id"
-    publishDir "${params.outdir}/results/$id"
+process RENAME_GENOME {
+    tag "RENAME_GENOME_$id"
+    publishDir "${params.outdir}/out/$id"
+    cache 'lenient'
 
     conda (params.enable_conda ? 'bioawk==1.0--h7132678_8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -12,7 +13,7 @@ process RENAME_GENOMES {
 
     output:
     tuple val(id), val(meta), path(genome),              emit: fasta
-    tuple val(id), val(meta), path("${id}.tsv"),    emit: json
+    tuple val(id), val(meta), path("${id}.tsv"),         emit: json
 
     script:
     def unmodified_genome = "${id}_unreformated.fa"
@@ -25,5 +26,11 @@ process RENAME_GENOMES {
 
     # Modification of genome file
     bioawk -v id=$id -c fastx '{print ">"id"_seq"NR; print \$seq}' $unmodified_genome |fold -w 60 > $genome
+    """
+
+    stub:
+    """
+    touch $genome
+    touch ${id}.tsv
     """
 }

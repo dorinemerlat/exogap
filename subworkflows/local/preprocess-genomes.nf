@@ -4,12 +4,12 @@ REFORMAT ASSEMBLY AND STATISTICS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FASTA_VALIDATOR }                     from '../../modules/local/fasta_validator/run_fasta_validator'
+include { RUN_FASTA_VALIDATOR }                 from '../../../modules/local/fasta_validator/run_fasta_validator'
 include { RENAME_GENOMES }                      from '../../modules/local/bioawk/rename_genomes'
 include { BUSCO }                               from '../../modules/local/busco/run_busco'
 include { DOWNLOAD_BUSCO_DATASETS }             from '../../modules/local/busco/download_busco_datasets'
 include { REFORMAT_BUSCO }                      from '../../modules/local/busco/reformat_busco'
-include { GET_TAXONOMIC_LINEAGE }               from '../../modules/local/api/get_taxonomic-lineage'
+include { GET_TAXONOMIC_LINEAGE }               from '../../modules/local/api/get_taxonomic_lineage'
 include { GET_NEWICK as GET_NEWICK_FOR_ALL }    from '../../modules/local/api/get_newick'
 include { GET_NEWICK as GET_NEWICK_FOR_BUSCO }  from '../../modules/local/api/get_newick'
 include { CALCULATE_GENOME_SIZE }               from '../../modules/local/bioawk/calculate_genome_size'
@@ -34,68 +34,54 @@ workflow PREPROCESS_GENOMES {
     genomes
 
     main:
-    // Get the lineage taxonomy of each genome (one by genome)
-    GET_TAXONOMIC_LINEAGE(genomes)
+    // // Check if fasta file is valid
+    // RUN_FASTA_VALIDATOR(genomes)
 
-    GET_TAXONOMIC_LINEAGE.out
-        .map{ it -> it.split('\n') }
-        .map{ it -> [ it[0], it[1..-1].collect{ it.split(',') }]}
-        .map{ id, lineage -> [ id, ["lineage": lineage.collect{ [ "rank": "${it[0]}", "name": "${it[2]}", "id": "${it[1]}"]}]]}
-        .join(genomes)
-        .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
-        .set { genomes }
+    // // Reformat genomes
+    // RENAME_GENOMES(RUN_FASTA_VALIDATOR.out)
 
-    // Get the entire taxonomy tree (one for all genomes)
-    GET_NEWICK_FOR_ALL(gather_genomes(genomes))
+    // RENAME_GENOMES.out.fasta
+    //     .set { genomes }
 
-    // Check if fasta file is valid
-    FASTA_VALIDATOR(genomes)
+    // // Calculate the genome size
+    // CALCULATE_GENOME_SIZE(genomes)
 
-    // Reformat genomes
-    RENAME_GENOMES(FASTA_VALIDATOR.out)
+    // CALCULATE_GENOME_SIZE.out
+    //     .map{id, meta, fasta, csv -> [ id, meta + ['assembly_size' : file(csv).readLines()[0].split(",")[1]], fasta ] }
+    //     .set { genomes }
 
-    RENAME_GENOMES.out.fasta
-        .set { genomes }
+    // // Busco on genome
+    // DOWNLOAD_BUSCO_DATASETS()
 
-    // Calculate the genome size
-    CALCULATE_GENOME_SIZE(genomes)
+    // genomes.map { id, meta, fasta -> meta.lineage.collect{[it.name.toLowerCase(), id, meta, fasta]} } // collect all parents of each genome
+    //     .flatMap{ it }
+    //     .combine(DOWNLOAD_BUSCO_DATASETS.out.splitCsv().map{ it -> [it[0].split('_')[0], it[0]] }, by:0) // combine with busco datasets
+    //     .map{parent, id, meta, fasta, busco_set -> [id, meta, fasta, busco_set, 'genome']}
+    //     .set{ genomes_for_busco }
 
-    CALCULATE_GENOME_SIZE.out
-        .map{id, meta, fasta, csv -> [ id, meta + ['assembly_size' : file(csv).readLines()[0].split(",")[1]], fasta ] }
-        .set { genomes }
+    // genomes_for_busco.groupTuple()
+    //     .map{ it -> [ it[0], it[1][0] + ['busco_sets': it[3]], it[2][0] ]}
+    //     .set{ genomes }
 
-    // Busco on genome
-    DOWNLOAD_BUSCO_DATASETS()
+    // BUSCO(genomes_for_busco)
+    // REFORMAT_BUSCO(BUSCO.out.json)
 
-    genomes.map { id, meta, fasta -> meta.lineage.collect{[it.name.toLowerCase(), id, meta, fasta]} } // collect all parents of each genome
-        .flatMap{ it }
-        .combine(DOWNLOAD_BUSCO_DATASETS.out.splitCsv().map{ it -> [it[0].split('_')[0], it[0]] }, by:0) // combine with busco datasets
-        .map{parent, id, meta, fasta, busco_set -> [id, meta, fasta, busco_set, 'genome']}
-        .set{ genomes_for_busco }
+    // gather_genomes(REFORMAT_BUSCO.out)
+    //     .set { genomes_for_busco_plotting }
 
-    genomes_for_busco.groupTuple()
-        .map{ it -> [ it[0], it[1][0] + ['busco_sets': it[3]], it[2][0] ]}
-        .set{ genomes }
+    // GATHER_BUSCO(genomes_for_busco_plotting.map{ ids, metas, files -> [ids, files, "busco", "csv", 'yes'] })
+    // GET_NEWICK_FOR_BUSCO(genomes_for_busco_plotting)
 
-    BUSCO(genomes_for_busco)
-    REFORMAT_BUSCO(BUSCO.out.json)
+    // // GATHER_BUSCO.out.view()
+    // // GET_NEWICK_FOR_BUSCO.out.newick.view()
+    // GET_NEWICK_FOR_BUSCO.out.newick
+    //     .concat(GATHER_BUSCO.out)
+    //     .map{it -> ["${it[0]}", it[1..-1]]}
+    //     .groupTuple()
+    //     .map{it -> [it[0], it[1][0][0], it[1][0][1], it[1][1]] }
+    //     .set { genomes_for_busco_plotting }
 
-    gather_genomes(REFORMAT_BUSCO.out)
-        .set { genomes_for_busco_plotting }
-
-    GATHER_BUSCO(genomes_for_busco_plotting.map{ ids, metas, files -> [ids, files, "busco", "csv", 'yes'] })
-    GET_NEWICK_FOR_BUSCO(genomes_for_busco_plotting)
-
-    // GATHER_BUSCO.out.view()
-    // GET_NEWICK_FOR_BUSCO.out.newick.view()
-    GET_NEWICK_FOR_BUSCO.out.newick
-        .concat(GATHER_BUSCO.out)
-        .map{it -> ["${it[0]}", it[1..-1]]}
-        .groupTuple()
-        .map{it -> [it[0], it[1][0][0], it[1][0][1], it[1][1]] }
-        .set { genomes_for_busco_plotting }
-    // GET_NEWICK_FOR_BUSCO.out.newick.view()
-    // PLOT_BUSCO_SUMMARY(GATHER_BUSCO.out, )
+    // // PLOT_BUSCO_SUMMARY( genomes_for_busco_plotting )
 
     // emit:
     // genomes     = genomes

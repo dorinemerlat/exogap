@@ -1,6 +1,6 @@
 process DFAM_CLASSIFICATION {
     output:
-    tuple path("dfam_classification.csv")
+    path("dfam_classification.csv")
 
     script:
     """

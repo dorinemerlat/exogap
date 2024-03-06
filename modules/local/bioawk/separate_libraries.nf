@@ -1,5 +1,5 @@
-process SEPARATE_LIBRARIES {
-    tag "SEPARATE_LIBRARIES_$library_id"
+process BIOAWK_TO_SEPARATE_REPEAT_LIBRARIES {
+    tag "BIOAWK_TO_SEPARATE_REPEAT_LIBRARIES_$library_id"
 
     conda (params.enable_conda ? 'bioawk==1.0--h7132678_8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

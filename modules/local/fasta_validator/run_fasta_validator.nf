@@ -1,5 +1,6 @@
-process FASTA_VALIDATOR {
-    tag "FASTA_VALIDATOR_${id}"
+process RUN_FASTA_VALIDATOR {
+    tag "RUN_FASTA_VALIDATOR_${id}"
+    cache 'lenient'
 
     conda (params.enable_conda ? 'py_fasta_validator==0.5--py39h7d875b9_0' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -15,5 +16,10 @@ process FASTA_VALIDATOR {
     script:
     """
     py_fasta_validator -f $genome
+    """
+
+    stub:
+    """
+    touch run_fasta_validator.stub
     """
 }

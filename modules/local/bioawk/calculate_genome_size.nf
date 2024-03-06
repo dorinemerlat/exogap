@@ -1,5 +1,6 @@
 process CALCULATE_GENOME_SIZE {
     tag "CALCULATE_GENOME_SIZE_$id"
+    cache 'lenient'
 
     conda (params.enable_conda ? 'bioawk==1.0--h7132678_8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -16,5 +17,10 @@ process CALCULATE_GENOME_SIZE {
     script:
     """
     bioawk -c fastx '{print length(\$seq)}' $genome |awk -v id=$id 'BEGIN{OFS=",";} {sum+=\$1} END {print id, sum;}' > "${id}.csv"
+    """
+
+    stub:
+    """
+    echo "${id}, 0;" > ${id}.csv
     """
 }

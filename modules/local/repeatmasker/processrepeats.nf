@@ -16,7 +16,6 @@ process PROCESS_REPEATS {
     output:
     tuple val(meta), path("${meta.id}.masked"),      emit: masked
     tuple val(meta), path("${meta.id}.gff"),         emit: gff
-    tuple val(meta), path("${meta.id}-complex.gff"), emit: gff_complex
     tuple val(meta), path("${meta.id}.align"),       emit: align
     tuple val(meta), path("${meta.id}.cat"),         emit: cat
     tuple val(meta), path("${meta.id}.out"),         emit: out
@@ -28,12 +27,5 @@ process PROCESS_REPEATS {
     cp $masked ${meta.id}.masked
 
     ProcessRepeats -a -gff -lib $library -xsmall ${meta.id}.cat
-
-    # Isolation of complex repeats
-    mv ${meta.id}.out.gff ${meta.id}.gff
-    grep -v -e "Satellite" -e ")n" -e "-rich"  ${meta.id}.gff > ${meta.id}-complex.gff.unreformated
-
-    # Reformatting to make it work with Maker
-    reformat-repeats-gff.sh ${meta.id}-complex.gff.unreformated ${meta.id}-complex.gff
     """
 }
