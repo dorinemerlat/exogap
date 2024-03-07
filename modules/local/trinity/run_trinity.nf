@@ -13,7 +13,7 @@ process RUN_TRINITY {
     tuple val(clade_taxid), val(specie_name), val(specie_taxid), path(fastq1), path(fastq2)
 
     output:
-    tuple val(clade_taxid), val(specie_name), val(specie_taxid), path("trinity_out_dir/Trinity.fasta")
+    tuple val(clade_taxid), val(specie_name), val(specie_taxid), path("trinity_${specie_name}.Trinity.fasta")
 
     script:
     """
@@ -25,7 +25,7 @@ process RUN_TRINITY {
     fastq2_comma=\$(replace_spaces_with_commas $fastq2)
     memory=\$(echo $task.memory | sed 's/ GB/G/')
 
-    Trinity --seqType fq --left \$fastq1_comma --right \$fastq2_comma --CPU $task.cpus --max_memory \$memory
+    Trinity --seqType fq --left \$fastq1_comma --right \$fastq2_comma ---output trinity_${specie_name} -CPU $task.cpus --max_memory \$memory
     """
 
     // stub:

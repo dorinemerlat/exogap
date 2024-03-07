@@ -17,7 +17,8 @@ process RUN_CD_HIT {
 
     script:
     """
-    memory=\$(echo $task.memory | sed 's/Gb/* 1024/' | bc)
+    memory=\$(echo $task.memory | sed 's/Gb//')
+    memory=\$((\$memory * 1024))
 
     cd-hit -i $input -o $output -c 0.95 -n 5 -g 1 -d 0 -M \$memory -T $task.cpus
     """
