@@ -7,17 +7,17 @@ DOWNLOAD SELECTED PUBLIC DATA TO USE FOR ANNOTATION
 //include modules
 
 // include {} from '../../../modules/local/api/'
-include { DOWNLOAD_SRA }                            from '../../../modules/local/sratools/download_sra'
-include { DOWNLOAD_TSA }                            from '../../../modules/local/sratools/download_tsa'
-include { TRINITY }                                 from '../../../modules/local/trinity/trinity'
+include { DOWNLOAD_SRA }                            from '../../../modules/local/download_sra'
+include { DOWNLOAD_TSA }                            from '../../../modules/local/download_tsa'
+include { TRINITY }                                 from '../../../modules/local/trinity'
 include { GATHER_FILES as GATHER_TRANSCRIPT_FILES } from '../../../modules/local/gather_files'
 include { GATHER_FILES as GATHER_PROTEIN_FILES }    from '../../../modules/local/gather_files'
-include { CD_HIT_EST }                              from '../../../modules/local/cd_hit/run_cd_hit_est'
-include { CD_HIT as CD_HIT1 }                       from '../../../modules/local/cd_hit/run_cd_hit'
-include { CD_HIT as CD_HIT2 }                       from '../../../modules/local/cd_hit/run_cd_hit'
-include { DOWNLOAD_PROTEINS_IN_PROTEOMES }          from '../../../modules/local/uniprot/download_proteins_in_proteomes'
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS1 } from '../../../modules/local/uniprot/download_proteins'
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS2 } from '../../../modules/local/uniprot/download_proteins'
+include { CD_HIT_EST }                              from '../../../modules/local/cd_hit_est'
+include { CD_HIT as CD_HIT1 }                       from '../../../modules/local/cd_hit'
+include { CD_HIT as CD_HIT2 }                       from '../../../modules/local/cd_hit'
+include { DOWNLOAD_PROTEINS_IN_PROTEOMES }          from '../../../modules/local/download_proteins_in_proteomes'
+include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS1 } from '../../../modules/local/download_proteins'
+include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS2 } from '../../../modules/local/download_proteins'
 
 workflow DOWNLOAD_DATASETS {
     take:

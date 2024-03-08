@@ -9,13 +9,6 @@ include { AB_INITIO_ANNOTATION as AB_INITIO_ANNOTATION_1 }                  from
 include { AB_INITIO_ANNOTATION as AB_INITIO_ANNOTATION_2 }                  from 'ab_initio_annotation.nf'
 
 // include modules
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS_FROM_PROTEINS }            from '../../modules/local/api/download_proteins'
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS_FROM_CLOSEST_PROTEINS }    from '../../modules/local/api/download_proteins'
-include { DOWNLOAD_TSA_TRANSCRIPTS }                                        from '../../modules/local/api/download_tsa_transcripts'
-include { DOWNLOAD_SRA_TRANSCRIPTS }                                        from '../../modules/local/api/download_sra_transcripts'
-include { ASSEMBLE_SRA_READS }                                              from '../../modules/local/star/assemble_sra_reads'
-include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_PROTEINS }        from '../../modules/local/cd-hit/cd-hit_for_genes'
-include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_TRANSCRIPTS }     from '../../modules/local/cd-hit/cd-hit-est'
 include { MAKER_BY_SIMILARITY }                                             from '../../modules/local/maker/maker_by_similarity'
 include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_PROTEINS }        from '../../modules/local/cd-hit/cd-hit_for_genes'
 include { REFORMAT_MAKER_GFF }                                              from '../../modules/local/maker/reformat_maker_gff'
