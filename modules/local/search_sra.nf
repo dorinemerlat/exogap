@@ -1,5 +1,5 @@
-process SEARCH_SRA {
-    tag "SEARCH_SRA_${specie_name}"
+process search_sra {
+    tag "search_sra_${specie_name}"
     cache 'lenient'
     label 'entrez_direct'
 

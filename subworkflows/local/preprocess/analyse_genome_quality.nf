@@ -6,11 +6,11 @@ CALCULATE STATISTICS ABOUT GENOME QUALITY
 
 
 // icnlude subworkflows
-include { BUSCO                             } from '../busco'
+include { busco                             } from '../busco'
 
 // include modules
 
-workflow PREPROCESS_GENOMES {
+workflow preprocess_genomes {
     take:
         genomes
 

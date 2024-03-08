@@ -1,5 +1,5 @@
-process RUN_TRINITY {
-    tag "RUN_TRINITY_${specie_name}"
+process run_trinity {
+    tag "run_trinity_${specie_name}"
     cpus 40
     memory "20 GB"
     time '5d'

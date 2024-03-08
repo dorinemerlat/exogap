@@ -1,5 +1,5 @@
-process DOWNLOAD_PROTEINS_IN_PROTEOMES {
-    tag "DOWNLOAD_PROTEINS_IN_PROTEOMES_${name}"
+process download_proteins_in_proteomes {
+    tag "download_proteins_in_proteomes_${name}"
 
     publishDir "out/data/proteins_in_proteomes/${taxid}/*", mode: 'copy'
 

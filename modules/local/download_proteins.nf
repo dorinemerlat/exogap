@@ -1,5 +1,5 @@
-process DOWNLOAD_PROTEINS {
-    tag "DOWNLOAD_PROTEINS_${name}"
+process download_proteins {
+    tag "download_proteins_${name}"
     publishDir "out/data/proteins/${taxid}/*", mode: 'copy'
     cache 'lenient'
 

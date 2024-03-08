@@ -1,5 +1,5 @@
-process SEARCH_PROTEINS {
-    tag "SEARCH_PROTEINS_${name}"
+process search_proteins {
+    tag "search_proteins_${name}"
     publishDir "out/data/proteins/${taxid}/*", mode: 'copy'
     cache 'lenient'
 

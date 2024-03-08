@@ -1,5 +1,5 @@
-process FASTA_VALIDATOR {
-    tag "FASTA_VALIDATOR_${id}"
+process fasta_validator {
+    tag "fasta_validator_${id}"
     cache 'lenient'
     label 'fasta_validator'
 

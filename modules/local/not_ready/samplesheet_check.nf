@@ -1,4 +1,4 @@
-process samplesheet_check {
+process SAMPLESHEET_CHECK {
     tag "$samplesheet"
     label 'python_phylo'
 

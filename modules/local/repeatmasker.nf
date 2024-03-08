@@ -1,5 +1,5 @@
-process REPEATMASKER {
-    tag "REPEATMASKER_${meta.id}"
+process repeatmasker {
+    tag "repeatmasker_${meta.id}"
     cpus 30
     time '20d'
     label 'repeatmasker'

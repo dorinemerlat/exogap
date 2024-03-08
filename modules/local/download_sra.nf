@@ -1,5 +1,5 @@
-process DOWNLOAD_SRA {
-    tag "DOWNLOAD_SRA_${specie_name}"
+process download_sra {
+    tag "download_sra_${specie_name}"
 
     publishDir "out/data/sra/${specie_taxid}/*"
 

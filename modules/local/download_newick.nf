@@ -1,4 +1,4 @@
-process DOWNLOAD_NEWICK {
+process download_newick {
     cache 'lenient'
     publishDir "${params.outdir}/out/"
     label 'python_phylo'

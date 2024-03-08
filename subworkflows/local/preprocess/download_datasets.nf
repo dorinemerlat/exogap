@@ -7,19 +7,19 @@ DOWNLOAD SELECTED PUBLIC DATA TO USE FOR ANNOTATION
 //include modules
 
 // include {} from '../../../modules/local/api/'
-include { DOWNLOAD_SRA }                            from '../../../modules/local/sratools/download_sra'
-include { DOWNLOAD_TSA }                            from '../../../modules/local/sratools/download_tsa'
-include { TRINITY }                                 from '../../../modules/local/trinity/trinity'
-include { GATHER_FILES as GATHER_TRANSCRIPT_FILES } from '../../../modules/local/gather_files'
-include { GATHER_FILES as GATHER_PROTEIN_FILES }    from '../../../modules/local/gather_files'
-include { CD_HIT_EST }                              from '../../../modules/local/cd_hit/run_cd_hit_est'
-include { CD_HIT as CD_HIT1 }                       from '../../../modules/local/cd_hit/run_cd_hit'
-include { CD_HIT as CD_HIT2 }                       from '../../../modules/local/cd_hit/run_cd_hit'
-include { DOWNLOAD_PROTEINS_IN_PROTEOMES }          from '../../../modules/local/uniprot/download_proteins_in_proteomes'
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS1 } from '../../../modules/local/uniprot/download_proteins'
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS2 } from '../../../modules/local/uniprot/download_proteins'
+include { download_sra }                            from '../../../modules/local/sratools/download_sra'
+include { download_tsa }                            from '../../../modules/local/sratools/download_tsa'
+include { trinity }                                 from '../../../modules/local/trinity/trinity'
+include { gather_files as gather_transcript_files } from '../../../modules/local/gather_files'
+include { gather_files as gather_protein_files }    from '../../../modules/local/gather_files'
+include { cd_hit_est }                              from '../../../modules/local/cd_hit/run_cd_hit_est'
+include { cd_hit as cd_hit1 }                       from '../../../modules/local/cd_hit/run_cd_hit'
+include { cd_hit as cd_hit2 }                       from '../../../modules/local/cd_hit/run_cd_hit'
+include { download_proteins_in_proteomes }          from '../../../modules/local/uniprot/download_proteins_in_proteomes'
+include { download_proteins as download_proteins1 } from '../../../modules/local/uniprot/download_proteins'
+include { download_proteins as download_proteins2 } from '../../../modules/local/uniprot/download_proteins'
 
-workflow DOWNLOAD_DATASETS {
+workflow download_datasets {
     take:
         sra_to_download
         large_protein_set

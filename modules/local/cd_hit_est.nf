@@ -1,5 +1,5 @@
-process CD_HIT_EST {
-    tag "CD_HIT_EST_$library_id"
+process cd_hit_est {
+    tag "cd_hit_est_$library_id"
     cpus 10
     time '1d'
     label 'cd_hit'

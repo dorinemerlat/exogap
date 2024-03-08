@@ -1,5 +1,5 @@
-process REPEATLANDSCAPE {
-    tag "REPEATLANDSCAPE_${meta.id}"
+process repeatlandscape {
+    tag "repeatlandscape_${meta.id}"
     label 'repeatmasker'
 
     input:

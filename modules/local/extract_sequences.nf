@@ -1,5 +1,5 @@
-process EXTRACT_SEQUENCES {
-    tag "EXTRACT_SEQUENCES_${meta.id}"
+process extract_sequences {
+    tag "extract_sequences_${meta.id}"
     publishDir "${params.outdir}/results/${meta.id}/repetitive-elements"
 
     label 'agat'

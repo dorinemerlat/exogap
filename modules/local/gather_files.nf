@@ -1,5 +1,5 @@
-process GATHER_FILES {
-    tag "GATHER_FILES_${name_output}"
+process gather_files {
+    tag "gather_files_${name_output}"
 
     input:
     tuple val(id), path(inputs), val(name_output), val(header)

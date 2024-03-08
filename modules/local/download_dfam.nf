@@ -1,4 +1,4 @@
-process DOWNLOAD_DFAM {
+process download_dfam {
     output:
     path("dfam_classification.csv")
 

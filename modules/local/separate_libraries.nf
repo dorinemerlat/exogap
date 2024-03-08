@@ -1,5 +1,5 @@
-process BIOAWK_TO_SEPARATE_REPEAT_LIBRARIES {
-    tag "BIOAWK_TO_SEPARATE_REPEAT_LIBRARIES_$library_id"
+process bioawk_to_separate_repeat_libraries {
+    tag "bioawk_to_separate_repeat_libraries_$library_id"
     label 'bioawk'
 
     input:

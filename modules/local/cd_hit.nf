@@ -1,5 +1,5 @@
-process CD_HIT {
-    tag "CD_HIT_$input"
+process cd_hit {
+    tag "cd_hit_$input"
     cpus 10
     memory '16 GB'
     time '1d'

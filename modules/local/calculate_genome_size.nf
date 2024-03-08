@@ -1,5 +1,5 @@
-process CALCULATE_GENOME_SIZE {
-    tag "CALCULATE_GENOME_SIZE_$id"
+process calculate_genome_size {
+    tag "calculate_genome_size_$id"
     cache 'lenient'
     label 'bioawk'
 

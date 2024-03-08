@@ -1,4 +1,4 @@
-process PLOT_BUSCO_SUMMARY {
+process plot_busco_summary {
     publishDir "${params.outdir}/results/programs-outputs/busco/", mode: 'symlink'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

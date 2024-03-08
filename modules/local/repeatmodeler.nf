@@ -1,5 +1,5 @@
-process REPEATMODELER {
-    tag "REPEATMODELER_${meta.id}"
+process repeatmodeler {
+    tag "repeatmodeler_${meta.id}"
     cpus 30
     time '20d'
     label 'repeatmodeler'

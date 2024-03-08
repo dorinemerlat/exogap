@@ -5,27 +5,27 @@ ANNOTATE PROTEIN CODING GENES
 */
 
 // include subworkflows
-include { AB_INITIO_ANNOTATION as AB_INITIO_ANNOTATION_1 }                  from 'ab_initio_annotation.nf'
-include { AB_INITIO_ANNOTATION as AB_INITIO_ANNOTATION_2 }                  from 'ab_initio_annotation.nf'
+include { ab_initio_annotation as ab_initio_annotation_1 }                  from 'ab_initio_annotation.nf'
+include { ab_initio_annotation as ab_initio_annotation_2 }                  from 'ab_initio_annotation.nf'
 
 // include modules
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS_FROM_PROTEINS }            from '../../modules/local/api/download_proteins'
-include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS_FROM_CLOSEST_PROTEINS }    from '../../modules/local/api/download_proteins'
-include { DOWNLOAD_TSA_TRANSCRIPTS }                                        from '../../modules/local/api/download_tsa_transcripts'
-include { DOWNLOAD_SRA_TRANSCRIPTS }                                        from '../../modules/local/api/download_sra_transcripts'
-include { ASSEMBLE_SRA_READS }                                              from '../../modules/local/star/assemble_sra_reads'
-include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_PROTEINS }        from '../../modules/local/cd-hit/cd-hit_for_genes'
-include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_TRANSCRIPTS }     from '../../modules/local/cd-hit/cd-hit-est'
-include { MAKER_BY_SIMILARITY }                                             from '../../modules/local/maker/maker_by_similarity'
-include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_PROTEINS }        from '../../modules/local/cd-hit/cd-hit_for_genes'
-include { REFORMAT_MAKER_GFF }                                              from '../../modules/local/maker/reformat_maker_gff'
-include { BLAST }                                                           from '../../modules/local/blast/blast'
-include { INTERPROSCAN }                                                    from '../../modules/local/interproscan/interproscan'
-include { FUNCTIONAL_ANNOTATION_BLAST2GO }                                  from '../../modules/local/blast2go/blast2go'
-include { FUNCTIONAL_ANNOTATION_WITH_MAKER }                                from '../../modules/local/maker/functional_annotation_with_maker'
+include { download_proteins as download_proteins_from_proteins }            from '../../modules/local/api/download_proteins'
+include { download_proteins as download_proteins_from_closest_proteins }    from '../../modules/local/api/download_proteins'
+include { download_tsa_transcripts }                                        from '../../modules/local/api/download_tsa_transcripts'
+include { download_sra_transcripts }                                        from '../../modules/local/api/download_sra_transcripts'
+include { assemble_sra_reads }                                              from '../../modules/local/star/assemble_sra_reads'
+include { eliminate_redundance as eliminate_redundance_in_proteins }        from '../../modules/local/cd-hit/cd-hit_for_genes'
+include { eliminate_redundance as eliminate_redundance_in_transcripts }     from '../../modules/local/cd-hit/cd-hit-est'
+include { maker_by_similarity }                                             from '../../modules/local/maker/maker_by_similarity'
+include { eliminate_redundance as eliminate_redundance_in_proteins }        from '../../modules/local/cd-hit/cd-hit_for_genes'
+include { reformat_maker_gff }                                              from '../../modules/local/maker/reformat_maker_gff'
+include { blast }                                                           from '../../modules/local/blast/blast'
+include { interproscan }                                                    from '../../modules/local/interproscan/interproscan'
+include { functional_annotation_blast2go }                                  from '../../modules/local/blast2go/blast2go'
+include { functional_annotation_with_maker }                                from '../../modules/local/maker/functional_annotation_with_maker'
 
 
-workflow ANNOTATE_PROTEIN_CODING_GENES {
+workflow annotate_protein_coding_genes {
     take:
         genomes
 

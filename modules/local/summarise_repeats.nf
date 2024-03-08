@@ -1,5 +1,5 @@
 
-process SUMMARISE_REPEATS {
+process summarise_repeats {
     input:
     tuple val(meta), path(out)
 

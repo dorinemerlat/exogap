@@ -1,5 +1,5 @@
-process DOWNLOAD_TSA {
-    tag "DOWNLOAD_TSA_${clade_name}"
+process download_tsa {
+    tag "download_tsa_${clade_name}"
     publishDir "out/data/sra/${clade_name}/*"
     cache 'lenient'
     label 'sratools'

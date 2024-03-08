@@ -1,4 +1,4 @@
-process PLOT_REPEATS {
+process plot_repeats {
     input:
     tuple val(meta), val(genomes)
 

@@ -1,5 +1,5 @@
-process SEARCH_PROTEINS_IN_PROTEOMES {
-    tag "SEARCH_PROTEINS_IN_PROTEOMES_${name}"
+process search_proteins_in_proteomes {
+    tag "search_proteins_in_proteomes_${name}"
 
     publishDir "out/data/proteins_in_proteomes/${taxid}/*", mode: 'copy'
 

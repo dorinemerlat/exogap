@@ -1,5 +1,5 @@
-process CHANGE_TE_NAME {
-    tag "CHANGE_TE_NAME_${meta.id}"
+process change_te_name {
+    tag "change_te_name_${meta.id}"
 
     input:
     tuple val(meta), path(out)

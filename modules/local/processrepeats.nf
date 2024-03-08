@@ -1,5 +1,5 @@
-process PROCESS_REPEATS {
-    tag "PROCESS_REPEATS_${meta.id}"
+process process_repeats {
+    tag "process_repeats_${meta.id}"
     publishDir path: "${params.outdir}/results/${meta.id}/repetitive-elements", pattern: "*{masked,gff,tbl}"
     time '5d'
     label 'repeatmasker'

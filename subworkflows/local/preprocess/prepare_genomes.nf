@@ -5,11 +5,11 @@ CHECK IF FASTA FILES ARE VALIDS, REFORMATE THEM AND CALCULATE THEIR SIZE
 */
 
 
-include { FASTA_VALIDATOR }                     from '../../../modules/local/fasta_validator/fasta_validator'
-include { RENAME_GENOME }                       from '../../../modules/local/bioawk/rename_genome'
-include { CALCULATE_GENOME_SIZE }               from '../../../modules/local/bioawk/calculate_genome_size'
+include { fasta_validator }                     from '../../../modules/local/fasta_validator/fasta_validator'
+include { rename_genome }                       from '../../../modules/local/bioawk/rename_genome'
+include { calculate_genome_size }               from '../../../modules/local/bioawk/calculate_genome_size'
 
-workflow PREPARE_GENOMES {
+workflow prepare_genomes {
     take:
         genomes
 

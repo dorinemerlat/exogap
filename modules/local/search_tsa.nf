@@ -1,5 +1,5 @@
-process SEARCH_TSA {
-    tag "SEARCH_TSA_${name}"
+process search_tsa {
+    tag "search_tsa_${name}"
     publishDir "out/data/transcriptomes/${taxid}/*", mode: 'copy'
     cache 'lenient'
     label 'entrez_direct'

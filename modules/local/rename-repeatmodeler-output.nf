@@ -1,5 +1,5 @@
-process RENAME_REPEATMODELER_OUTPUT {
-    tag "RENAME_REPEATMODELER_OUTPUT_${meta.id}"
+process rename_repeatmodeler_output {
+    tag "rename_repeatmodeler_output_${meta.id}"
     label 'biopython'
 
     input:

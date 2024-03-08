@@ -1,5 +1,5 @@
-process REFORMAT_BUSCO {
-    tag "REFORMAT_BUSCO_${id}_${dataset}_${mode}"
+process reformat_busco {
+    tag "reformat_busco_${id}_${dataset}_${mode}"
 
     input:
     tuple val (id), val(meta), path(genome), path(json), val(dataset), val(mode)

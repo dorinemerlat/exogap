@@ -1,5 +1,5 @@
-process DOWNLOAD_LINEAGE {
-    tag "DOWNLOAD_LINEAGE_${id}"
+process download_lineage {
+    tag "download_lineage_${id}"
     cache 'lenient'
 
     input:

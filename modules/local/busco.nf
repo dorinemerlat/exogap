@@ -1,5 +1,5 @@
-process BUSCO {
-    tag "BUSCO_${id}_${dataset}_${mode}"
+process busco {
+    tag "busco_${id}_${dataset}_${mode}"
     cpus 15
     time '1d'
     publishDir "${params.outdir}/results/programs-outputs/busco/", mode: 'symlink'
