@@ -29,35 +29,35 @@ workflow download_datasets {
 
     main:
         // Transcripts set
-        DOWNLOAD_TSA(transcriptome_set)
+        download_tsa(transcriptome_set)
 
-        DOWNLOAD_SRA(sra_to_download)
-        TRINITY(DOWNLOAD_SRA.out)
+        download_sra(sra_to_download)
+        trinity(download_sra.out)
 
-        DOWNLOAD_TSA.out.join(TRINITY.out)
+        download_tsa.out.join(trinity.out)
             .map { id, tsa, trinity -> [id, [tsa[2], trinity[3]], "transcripts_set.fa", 'no']}
             .set { transcriptome_set }
-        GATHER_TRANSCRIPT_FILES(transcriptome_set)
+        gather_transcript_files(transcriptome_set)
 
-        CD_HIT_EST(GATHER_TRANSCRIPT_FILES.out)
+        cd_hit_est(gather_transcript_files.out)
 
         // // Main protein set
-        // DOWNLOAD_PROTEINS_IN_PROTEOMES(large_protein_set)
-        // DOWNLOAD_PROTEINS1(close_protein_set)
+        // download_proteins_in_proteomes(large_protein_set)
+        // download_proteins1(close_protein_set)
 
-        // DOWNLOAD_PROTEINS_IN_PROTEOMES.out.join(DOWNLOAD_PROTEINS1.out)
+        // download_proteins_in_proteomes.out.join(download_proteins1.out)
         //     .map { id, large, close -> [id, [large[2], close[2]], "main_proteins_set.fa", 'no']}
         //     .set { main_protein_set }
-        // GATHER_PROTEIN_FILES(main_protein_set)
+        // gather_protein_files(main_protein_set)
 
-        // CD_HIT1(GATHER_PROTEIN_FILES.out.map{id, input -> [id, input, "${id}_main_proteins_set.fa"]})
+        // cd_hit1(gather_protein_files.out.map{id, input -> [id, input, "${id}_main_proteins_set.fa"]})
 
         // // Parallele protein set
-        // DOWNLOAD_PROTEINS2(very_close_protein_set)
-        // CD_HIT2(DOWNLOAD_PROTEINS2.out.map{id, input -> [id, input, "${id}_parallele_proteins_set.fa"]})
+        // download_proteins2(very_close_protein_set)
+        // cd_hit2(download_proteins2.out.map{id, input -> [id, input, "${id}_parallele_proteins_set.fa"]})
 
     // emit:
-    transcripts = CD_HIT_EST.out
-    // main_proteins = CD_HIT1.out
-    // parallele_proteins = CD_HIT2.out
+    transcripts = cd_hit_est.out
+    // main_proteins = cd_hit1.out
+    // parallele_proteins = cd_hit2.out
 }

@@ -67,9 +67,9 @@ workflow get_informations_about_genomes {
 
     main:
         // Get the lineage taxonomy of each genome (one by genome)
-        DOWNLOAD_LINEAGE(genomes)
+        download_lineage(genomes)
 
-        DOWNLOAD_LINEAGE.out
+        download_lineage.out
             .map { it -> [ it[0], file(it[1]).splitText() ] }
             .map{ id, lineage -> [ id, lineage.collect { it.split(',') } ] }
             .map{ id, lineage -> [ id, ["lineage": lineage.collect { [ "rank": "${it[0]}", "name": "${it[2]}".replace('\n', ''), "taxid": "${it[1]}" ] }]]}
@@ -77,14 +77,14 @@ workflow get_informations_about_genomes {
             .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
             .set { genomes }
 
-        DOWNLOAD_NEWICK(gather_genomes(genomes))
+        download_newick(gather_genomes(genomes))
 
         // choose which busco dataset to use for each specie
-        DOWNLOAD_BUSCO_DATASETS()
+        download_busco_datasets()
 
         genomes.map { id, meta, fasta -> meta.lineage.collect{[it.name.toLowerCase(), id, meta, fasta]} } // create an it for each parent of each genome
             .flatMap{ it }
-            .combine(DOWNLOAD_BUSCO_DATASETS.out.splitCsv(), by: 0) // -> [taxon, id, meta, fasta, busco_dataset]
+            .combine(download_busco_datasets.out.splitcsv(), by: 0) // -> [taxon, id, meta, fasta, busco_dataset]
             .map { taxon, id, meta, fasta, busco_dataset -> [id, meta, fasta, busco_dataset] }
             .groupTuple()
             .map { id, meta, file, busco_datasets -> [id, meta[0] + [ "busco_dataset": busco_datasets ], file[0]] }
@@ -100,16 +100,16 @@ workflow get_informations_about_genomes {
 
         genomes_index_by_lineage = index_genomes_by_lineage(genomes)
 
-        DOWNLOAD_PROTEINS_IN_PROTEOMES(parents)
-        genomes = set_selection(genomes, DOWNLOAD_PROTEINS_IN_PROTEOMES.out, "proteins_in_proteomes_set", params.max_proteins_from_a_large_set_of_species)
+        download_proteins_in_proteomes(parents)
+        genomes = set_selection(genomes, download_proteins_in_proteomes.out, "proteins_in_proteomes_set", params.max_proteins_from_a_large_set_of_species)
 
-        DOWNLOAD_PROTEINS(parents)
-        genomes = set_selection(genomes, DOWNLOAD_PROTEINS.out, "proteins_set", params.max_proteins_from_relatively_close_species)
-        genomes = set_selection(genomes, DOWNLOAD_PROTEINS.out, "closed_proteins_set", params.max_proteins_from_close_species)
+        download_proteins(parents)
+        genomes = set_selection(genomes, download_proteins.out, "proteins_set", params.max_proteins_from_relatively_close_species)
+        genomes = set_selection(genomes, download_proteins.out, "closed_proteins_set", params.max_proteins_from_close_species)
 
         parents.combine( parents.count() ).set { parents_with_count }
-        SEARCH_TSA(parents_with_count)
-        genomes = set_selection(genomes, SEARCH_TSA.out, "transcriptomes_set", params.max_transcriptomes)
+        search_tsa(parents_with_count)
+        genomes = set_selection(genomes, search_tsa.out, "transcriptomes_set", params.max_transcriptomes)
 
         // extract datasets
         large_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_in_proteomes_set })
@@ -125,12 +125,12 @@ workflow get_informations_about_genomes {
 
         sra_to_download.combine( sra_to_download.count() ).set { sra_to_download }
 
-        SEARCH_SRA(sra_to_download)
+        search_sra(sra_to_download)
 
-        SEARCH_SRA.out
+        search_sra.out
             // .map{ clade, specie_name, specie_taxid, out -> [clade, specie_name, specie_taxid, out] }
             .filter { it[3].readLines().size() != 0 }
-            .map{ clade, specie_name, specie_taxid, out -> [clade, specie_name, specie_taxid, out, out.readLines().size()] }
+            .map{ clade, specie_name, specie_taxid, out -> [clade, specie_name, specie_taxid, out, out.readlines().size()] }
             .set { sra_to_download }
 
     emit:

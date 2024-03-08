@@ -17,35 +17,35 @@ workflow preprocess_genomes {
     main:
     // check if there is key called busco_set in meta of genomes channel
     if ( ! genomes.meta[0].containsKey('busco_set')) {
-        DOWNLOAD_BUSCO_DATASETS()
+        download_busco_datasets()
 
     }
 
     BUSCO(genomes_for_busco)
-    REFORMAT_BUSCO(BUSCO.out.json)
+    reformat_busco(busco.out.json)
 
-    gather_genomes(REFORMAT_BUSCO.out)
+    gather_genomes(reformat_busco.out)
         .set { genomes_for_busco_plotting }
 
     GATHER_BUSCO(genomes_for_busco_plotting.map{ ids, metas, files -> [ids, files, "busco", "csv", 'yes'] })
     GET_NEWICK_FOR_BUSCO(genomes_for_busco_plotting)
 
-    // GATHER_BUSCO.out.view()
-    // GET_NEWICK_FOR_BUSCO.out.newick.view()
-    GET_NEWICK_FOR_BUSCO.out.newick
-        .concat(GATHER_BUSCO.out)
+    // gather_busco.out.view()
+    // get_newick_for_busco.out.newick.view()
+    get_newick_for_busco.out.newick
+        .concat(gather_busco.out)
         .map{it -> ["${it[0]}", it[1..-1]]}
         .groupTuple()
         .map{it -> [it[0], it[1][0][0], it[1][0][1], it[1][1]] }
         .set { genomes_for_busco_plotting }
-    // GET_NEWICK_FOR_BUSCO.out.newick.view()
-    // PLOT_BUSCO_SUMMARY(GATHER_BUSCO.out, )
+    // get_newick_for_busco.out.newick.view()
+    // plot_busco_summary(gather_busco.out, )
 
     if (params.analysis_genome_quality ) {
         // add other statistics
     }
 
     emit:
-    busco_on_assembly = REFORMAT_BUSCO.out
+    busco_on_assembly = reformat_busco.out
     all_busco_on_assembly = genomes_for_busco_plotting
 }
