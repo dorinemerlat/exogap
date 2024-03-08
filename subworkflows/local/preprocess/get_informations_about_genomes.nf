@@ -5,14 +5,13 @@ GET TAXONOMIC INFORMATIONS AND SELECT PUBLIC DATA TO USE FOR ANNOTATION
 */
 
 // include modules
-include { GET_TAXONOMIC_LINEAGE }       from '../../../modules/local/api/get_taxonomic_lineage'
-include { GET_NEWICK }                  from '../../../modules/local/api/get_newick'
-include { COUNT_PROTEINS_IN_PROTEOMES } from '../../../modules/local/api/count_proteins_in_proteomes'
-include { COUNT_PROTEINS }              from '../../../modules/local/api/count_proteins'
-include { COUNT_TRANSCRIPTOMES }        from '../../../modules/local/ncbi/count_transcriptomes'
-include { DOWNLOAD_BUSCO_DATASETS }     from '../../../modules/local/busco/download_busco_datasets'
-include { SELECT_PUBLIC_DATA }          from '../../../modules/local/select_public_data'
-include { SEARCH_SRA }                  from '../../../modules/local/ncbi/search_sra'
+include { DOWNLOAD_LINEAGE }                from '../../../modules/local/download_lineage.nf'
+include { DOWNLOAD_NEWICK }                 from '../../../modules/local/python-phylo/download_newick'
+include { DOWNLOAD_PROTEINS_IN_PROTEOMES }  from '../../../modules/local/uniprot/download_proteins_in_proteomes.nf'
+include { DOWNLOAD_PROTEINS }               from '../../../modules/local/uniprot/download_proteins'
+include { SEARCH_TSA }                      from '../../../modules/local/entrez_direct/search_tsa'
+include { SEARCH_SRA }                      from '../../../modules/local/entrez_direct/search_sra'
+include { DOWNLOAD_BUSCO_DATASETS }         from '../../../modules/local/busco/download_busco_datasets'
 
 def gather_genomes(genomes) {
     return genomes
@@ -68,9 +67,9 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
 
     main:
         // Get the lineage taxonomy of each genome (one by genome)
-        GET_TAXONOMIC_LINEAGE(genomes)
+        DOWNLOAD_LINEAGE(genomes)
 
-        GET_TAXONOMIC_LINEAGE.out
+        DOWNLOAD_LINEAGE.out
             .map { it -> [ it[0], file(it[1]).splitText() ] }
             .map{ id, lineage -> [ id, lineage.collect { it.split(',') } ] }
             .map{ id, lineage -> [ id, ["lineage": lineage.collect { [ "rank": "${it[0]}", "name": "${it[2]}".replace('\n', ''), "taxid": "${it[1]}" ] }]]}
@@ -78,7 +77,7 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
             .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
             .set { genomes }
 
-        GET_NEWICK(gather_genomes(genomes))
+        DOWNLOAD_NEWICK(gather_genomes(genomes))
 
         // choose which busco dataset to use for each specie
         DOWNLOAD_BUSCO_DATASETS()
@@ -101,16 +100,16 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
 
         genomes_index_by_lineage = index_genomes_by_lineage(genomes)
 
-        COUNT_PROTEINS_IN_PROTEOMES(parents)
-        genomes = set_selection(genomes, COUNT_PROTEINS_IN_PROTEOMES.out, "proteins_in_proteomes_set", params.max_proteins_from_a_large_set_of_species)
+        DOWNLOAD_PROTEINS_IN_PROTEOMES(parents)
+        genomes = set_selection(genomes, DOWNLOAD_PROTEINS_IN_PROTEOMES.out, "proteins_in_proteomes_set", params.max_proteins_from_a_large_set_of_species)
 
-        COUNT_PROTEINS(parents)
-        genomes = set_selection(genomes, COUNT_PROTEINS.out, "proteins_set", params.max_proteins_from_relatively_close_species)
-        genomes = set_selection(genomes, COUNT_PROTEINS.out, "closed_proteins_set", params.max_proteins_from_close_species)
+        DOWNLOAD_PROTEINS(parents)
+        genomes = set_selection(genomes, DOWNLOAD_PROTEINS.out, "proteins_set", params.max_proteins_from_relatively_close_species)
+        genomes = set_selection(genomes, DOWNLOAD_PROTEINS.out, "closed_proteins_set", params.max_proteins_from_close_species)
 
         parents.combine( parents.count() ).set { parents_with_count }
-        COUNT_TRANSCRIPTOMES(parents_with_count)
-        genomes = set_selection(genomes, COUNT_TRANSCRIPTOMES.out, "transcriptomes_set", params.max_transcriptomes)
+        SEARCH_TSA(parents_with_count)
+        genomes = set_selection(genomes, SEARCH_TSA.out, "transcriptomes_set", params.max_transcriptomes)
 
         // extract datasets
         large_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_in_proteomes_set })
