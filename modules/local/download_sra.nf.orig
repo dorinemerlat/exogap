@@ -1,5 +1,11 @@
+<<<<<<< HEAD
+process download_sra {
+    tag "download_sra_${specie_name}"
+
+=======
 process DOWNLOAD_SRA {
     tag "DOWNLOAD_SRA_${specie_name}"
+>>>>>>> 0c4051866b2975435aaaa11b29d237292abee0a3
     publishDir "out/data/sra/${specie_taxid}/*"
     cache 'lenient'
     label 'sratools'

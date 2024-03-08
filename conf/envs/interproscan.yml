@@ -1,7 +1,7 @@
-name: agat
+name: interproscan
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - anaconda::agat=1.3.0
+  - anaconda::interproscan=5.52_86.0

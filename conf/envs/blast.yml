@@ -1,7 +1,7 @@
-name: agat
+name: blast
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - anaconda::agat=1.3.0
+  - anaconda::blast=2.15.0
