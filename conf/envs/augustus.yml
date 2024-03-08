@@ -1,7 +1,7 @@
-name: agat
+name: augustus
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - anaconda::agat=1.3.0
+  - anaconda::augustus=3.5.0
