@@ -1,8 +1,6 @@
 process DOWNLOAD_PROTEINS_IN_PROTEOMES {
     tag "DOWNLOAD_PROTEINS_IN_PROTEOMES_${name}"
-
     publishDir "out/data/proteins_in_proteomes/${taxid}/*", mode: 'copy'
-
     cache 'lenient'
 
     input:
@@ -29,10 +27,8 @@ s
     zcat proteomes/* > ${taxid}_proteins.fa
     """
 
-    // stub:
-    // """
-    // echo "0" > ${taxid}_UPIDs.fa && zip ${taxid}_UPIDs.fa.zip ${taxid}_UPIDs.fa
-    // touch ${taxid}_proteomes.fa
-    // echo "${taxid},${name},0" > ${taxid}_proteomes_count.fa
-    // """
+    stub:
+    """
+    touch ${taxid}_proteins.fa
+    """
 }

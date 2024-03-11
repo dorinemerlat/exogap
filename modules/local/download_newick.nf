@@ -1,14 +1,14 @@
 process DOWNLOAD_NEWICK {
-    cache 'lenient'
-    publishDir "${params.outdir}/out/"
+    // publishDir "${params.outdir}"
     label 'python_phylo'
+    tag "DOWNLOAD_NEWICK"
 
     input:
-    tuple val(ids), val(metas), val(files)
+    tuple val(ids), val(meta), val(files)
 
     output:
-    tuple val(ids), val(metas), path('*.tree'),             emit: newick
-    tuple val(ids), val(metas), path('*.tree.ascii_art'),   emit: ascii
+    tuple val(ids), val(meta), path('*.tree'),             emit: newick
+    tuple val(ids), val(meta), path('*.tree.ascii_art'),   emit: ascii
 
     script:
     """
@@ -17,7 +17,7 @@ process DOWNLOAD_NEWICK {
 
     stub:
     """
-    touch ${metas}.tree
-    touch ${metas}.tree.ascii_art
+    touch ${meta}.tree
+    touch ${meta}.tree.ascii_art
     """
 }

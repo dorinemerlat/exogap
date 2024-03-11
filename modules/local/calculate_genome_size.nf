@@ -16,6 +16,6 @@ process CALCULATE_GENOME_SIZE {
 
     stub:
     """
-    echo "${id}, 0;" > ${id}.csv
+    echo "${id}, 0" > ${id}.csv
     """
 }

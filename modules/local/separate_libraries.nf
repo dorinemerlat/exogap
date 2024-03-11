@@ -15,4 +15,9 @@ process BIOAWK_TO_SEPARATE_REPEAT_LIBRARIES {
     bioawk -c fastx '\$name !~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library_path |fold -w 60  > ${library_id}-classified.fa
     bioawk -c fastx '\$name ~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library_path |fold -w 60 > ${library_id}-unclassified.fa
     """
+
+    stub:
+    """
+    touch ${library_id}-classified.fa ${library_id}-unclassified.fa
+    """
 }

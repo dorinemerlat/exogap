@@ -1,6 +1,6 @@
 process RENAME_GENOME {
     tag "RENAME_GENOME_$id"
-    publishDir "${params.outdir}/out/$id"
+    // publishDir "${params.outdir}/out/$id"
     cache 'lenient'
     label 'bioawk'
 

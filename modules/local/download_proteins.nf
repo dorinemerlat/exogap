@@ -27,10 +27,9 @@ process DOWNLOAD_PROTEINS {
     fi
     """
 
-    // # stub:
-    // # """
-    // # touch ${taxid}_proteins.list.zip
-    // # echo "${taxid},${name},0" > ${taxid}_proteins_count.list
-    // # """
+    stub:
+    """
+    touch ${taxid}_proteins.fa
+    """
 }
 

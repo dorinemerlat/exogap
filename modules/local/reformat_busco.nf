@@ -16,4 +16,9 @@ process REFORMAT_BUSCO {
     | sed "s/\\"//g" \
     > busco_${id}.${dataset}.tsv
     """
+
+    stub:
+    """
+    touch "busco_${id}.${dataset}.tsv"
+    """
 }

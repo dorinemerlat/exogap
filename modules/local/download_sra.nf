@@ -21,9 +21,8 @@ process DOWNLOAD_SRA {
     done
     """
 
-    // stub:
-    // """
-    //     touch ${taxid}_transcriptomes.list
-    //     echo "${taxid},${name},0" > ${taxid}_transcriptomes_count.list
-    // """
+    stub:
+    """
+    touch sra_1.fastq sra_2.fastq
+    """
 }

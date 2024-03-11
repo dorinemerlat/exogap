@@ -16,4 +16,9 @@ process REPEATMODELER {
 
     RepeatModeler -pa $task.cpus -engine ncbi -database $meta.id -LTRStruct
     """
+
+    stub:
+    """
+    touch ${meta.id}-families.fa
+    """
 }

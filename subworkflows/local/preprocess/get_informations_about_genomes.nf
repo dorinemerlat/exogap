@@ -7,8 +7,8 @@ GET TAXONOMIC INFORMATIONS AND SELECT PUBLIC DATA TO USE FOR ANNOTATION
 // include modules
 include { DOWNLOAD_LINEAGE }                from '../../../modules/local/download_lineage.nf'
 include { DOWNLOAD_NEWICK }                 from '../../../modules/local/download_newick'
-include { DOWNLOAD_PROTEINS_IN_PROTEOMES }  from '../../../modules/local/download_proteins_in_proteomes.nf'
-include { DOWNLOAD_PROTEINS }               from '../../../modules/local/download_proteins'
+include { SEARCH_PROTEINS_IN_PROTEOMES }    from '../../../modules/local/search_proteins_in_proteomes.nf'
+include { SEARCH_PROTEINS }                 from '../../../modules/local/search_proteins'
 include { SEARCH_TSA }                      from '../../../modules/local/search_tsa'
 include { SEARCH_SRA }                      from '../../../modules/local/search_sra'
 include { DOWNLOAD_BUSCO_DATASETS }         from '../../../modules/local/download_busco_datasets'
@@ -33,7 +33,7 @@ def index_genomes_by_lineage(genomes) {
 }
 
 
-def set_selection(genomes, datasets, dataset_name, max_sequence_number) {
+def set_selection(genomes, datasets, max_sequence_number) {
     genomes_index_by_lineage = index_genomes_by_lineage(genomes)
 
     dataset_index_by_taxid = datasets.map { taxid, name, id_list, count, other  -> [taxid, name, id_list, count.readLines()[0].split(',')[2].toInteger(), other ] }
@@ -46,15 +46,7 @@ def set_selection(genomes, datasets, dataset_name, max_sequence_number) {
         .map { genome, dataset -> [genome, dataset.max { a,b -> a[3] <=> b[3] } ]}
         .map { genome, dataset -> [ genome[0], genome[1], genome[2], ['name': dataset[1], 'taxid': dataset[0], 'id_list': dataset[2], 'count': dataset[3], 'other': dataset[4] ]]}
 
-    if (dataset_name == "proteins_in_proteomes_set") {
-        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ proteins_in_proteomes_set : set ], fasta]}
-    } else if (dataset_name == "proteins_set") {
-        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ proteins_set : set ], fasta]}
-    } else if (dataset_name == "closed_proteins_set") {
-        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ closed_proteins_set : set ], fasta]}
-    } else if (dataset_name == "transcriptomes_set") {
-        return genomes.map { genome, meta, fasta, set -> [ genome, meta + [ transcriptomes_set : set ], fasta]}
-    }
+    return genomes
 }
 
 def set_extraction(meta) {
@@ -100,21 +92,33 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
 
         genomes_index_by_lineage = index_genomes_by_lineage(genomes)
 
-        DOWNLOAD_PROTEINS_IN_PROTEOMES(parents)
-        genomes = set_selection(genomes, DOWNLOAD_PROTEINS_IN_PROTEOMES.out, "proteins_in_proteomes_set", params.max_proteins_from_a_large_set_of_species)
+        // main proteins set
+        SEARCH_PROTEINS_IN_PROTEOMES(parents)
+        genomes = set_selection(genomes, SEARCH_PROTEINS_IN_PROTEOMES.out, params.max_proteins_from_a_large_set_of_species)
+        genomes.map { genome, meta, fasta, set -> [ genome, meta + [ 'main_proteins_set' : [set.taxid, set] ], fasta]}
+            .set { genomes }
 
-        DOWNLOAD_PROTEINS(parents)
-        genomes = set_selection(genomes, DOWNLOAD_PROTEINS.out, "proteins_set", params.max_proteins_from_relatively_close_species)
-        genomes = set_selection(genomes, DOWNLOAD_PROTEINS.out, "closed_proteins_set", params.max_proteins_from_close_species)
+        SEARCH_PROTEINS(parents)
+        genomes = set_selection(genomes, SEARCH_PROTEINS.out, params.max_proteins_from_relatively_close_species)
+        genomes.map { genome, meta, fasta, set -> [ genome, meta + ['main_proteins_set': ['id': [meta.main_proteins_set[0], set.taxid].sort(), 'from_proteomes': meta.main_proteins_set[1], 'from_proteins' : set]], fasta ]}
+            .set { genomes }
 
+        // training proteins set
+        genomes = set_selection(genomes, SEARCH_PROTEINS.out, params.max_proteins_from_close_species)
+        genomes.map { genome, meta, fasta, set -> [ genome, meta + [ 'training_proteins_set' : set ], fasta]}
+            .set { genomes }
+
+        // transcripts set
         parents.combine( parents.count() ).set { parents_with_count }
         SEARCH_TSA(parents_with_count)
-        genomes = set_selection(genomes, SEARCH_TSA.out, "transcriptomes_set", params.max_transcriptomes)
+        genomes = set_selection(genomes, SEARCH_TSA.out, params.max_transcriptomes)
+        genomes.map { genome, meta, fasta, set -> [ genome, meta + [ 'transcriptomes_set' : set ], fasta]}
+            .set { genomes }
 
         // extract datasets
-        large_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_in_proteomes_set })
-        close_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.proteins_set })
-        very_close_protein_set = set_extraction(genomes.map { id, meta, fasta -> meta.closed_proteins_set })
+        large_proteins_set = set_extraction(genomes.map { id, meta, fasta -> meta.main_proteins_set.from_proteomes })
+        small_proteins_set = set_extraction(genomes.map { id, meta, fasta -> meta.main_proteins_set.from_proteins })
+        training_proteins_set = set_extraction(genomes.map { id, meta, fasta -> meta.training_proteins_set })
         transcriptome_set = set_extraction(genomes.map { id, meta, fasta -> meta.transcriptomes_set })
 
         // select complementary transcriptomes (SRA)
@@ -135,9 +139,12 @@ workflow GET_INFORMATIONS_ABOUT_GENOMES {
 
     emit:
         genomes                 = genomes
+
         sra_to_download         = sra_to_download
-        large_protein_set       = large_protein_set
-        close_protein_set       = close_protein_set
-        very_close_protein_set  = very_close_protein_set
         transcriptome_set       = transcriptome_set
+
+        large_proteins_set      = large_proteins_set
+        small_proteins_set      = small_proteins_set
+
+        training_proteins_set   = training_proteins_set
 }

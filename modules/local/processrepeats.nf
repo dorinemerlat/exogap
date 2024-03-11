@@ -24,4 +24,9 @@ process PROCESS_REPEATS {
 
     ProcessRepeats -a -gff -lib $library -xsmall ${meta.id}.cat
     """
+
+    stub:
+    """
+    touch ${meta.id}.masked ${meta.id}.gff ${meta.id}.align ${meta.id}.cat ${meta.id}.out ${meta.id}.tbl
+    """
 }

@@ -1,5 +1,6 @@
 process GATHER_FILES {
-    tag "GATHER_FILES_${name_output}"
+    // in tag, replace characters: [, ] by nothing
+    tag "GATHER_FILES_${id}"
 
     input:
     tuple val(id), path(inputs), val(name_output), val(header)
@@ -16,5 +17,10 @@ process GATHER_FILES {
         head -n 1 ${inputs[0]} > ${name_output}
         tail -n +2 $inputs >> ${name_output}
     fi
+    """
+
+    stub:
+    """
+    touch ${name_output}
     """
 }

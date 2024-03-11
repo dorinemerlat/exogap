@@ -1,4 +1,6 @@
 process DOWNLOAD_DFAM {
+    tag "DOWNLOAD_DFAM"
+
     output:
     path("dfam_classification.csv")
 
@@ -10,5 +12,10 @@ process DOWNLOAD_DFAM {
         | awk '{OFS=","; print $1, $2 "/" $3}' \
         | sed "s|/$||g" \
         > dfam_classification.csv
+    """
+
+    stub:
+    """
+    touch dfam_classification.csv
     """
 }

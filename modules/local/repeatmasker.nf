@@ -19,4 +19,9 @@ process REPEATMASKER {
 
     gunzip *.gz
     """
+
+    stub:
+    """
+    touch ${genome}.masked ${genome}.cat
+    """
 }

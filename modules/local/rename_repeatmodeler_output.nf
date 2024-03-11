@@ -13,5 +13,10 @@ process RENAME_REPEATMODELER_OUTPUT {
     prefix=\$(echo $genome_id |sed -e "s/-families//g")
     rename_repeats.py -i $genome_path -o ${genome_id}-renamed.fa -p \$prefix
     """
+
+    stub:
+    """
+    touch ${genome_id}-renamed.fa
+    """
 }
 

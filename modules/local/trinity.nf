@@ -24,9 +24,8 @@ process TRINITY {
     Trinity --seqType fq --left \${fastq1_comma} --right \${fastq2_comma} --output trinity_${specie_name} --CPU $task.cpus --max_memory \$memory
     """
 
-    // stub:
-    // """
-    //     touch ${taxid}_transcriptomes.list
-    //     echo "${taxid},${name},0" > ${taxid}_transcriptomes_count.list
-    // """
+    stub:
+    """
+    touch trinity_${specie_name}.Trinity.fasta
+    """
 }

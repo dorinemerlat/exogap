@@ -22,9 +22,8 @@ process DOWNLOAD_TSA {
     cat *fasta > ${clade_taxid}_transcriptomes.fasta
     """
 
-    // stub:
-    // """
-    //     touch ${taxid}_transcriptomes.list
-    //     echo "${taxid},${name},0" > ${taxid}_transcriptomes_count.list
-    // """
+    stub:
+    """
+    touch ${clade_taxid}_transcriptomes.fasta
+    """
 }

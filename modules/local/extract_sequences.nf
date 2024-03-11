@@ -5,7 +5,7 @@ process EXTRACT_SEQUENCES {
     label 'agat'
 
     input:
-    tuple val(meta), path(genome)
+    tuple val(meta), path(genome), val(type)
     tuple val(meta), path(gff)
 
     output:
@@ -13,6 +13,8 @@ process EXTRACT_SEQUENCES {
 
     script:
     """
-    agat_sp_extract_sequences.pl -g $gff -f $genome -t dispersed_repeat -o ${genome}-repetitive-elements.fa
+    agat_sp_extract_sequences.pl -g $gff -f $genome -t $type -o ${genome}-repetitive-elements.fa
     """
 }
+
+// agat_sp_extract_sequences.pl -g $gff -f $genome -t dispersed_repeat -o ${genome}-repetitive-elements.fa

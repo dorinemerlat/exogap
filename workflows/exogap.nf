@@ -97,23 +97,16 @@ workflow EXOGAP {
     // preprocess genomes
     PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
 
-    // download datasets
     DOWNLOAD_DATASETS(
+        PREPARE_GENOMES.out.genomes,
         GET_INFORMATIONS_ABOUT_GENOMES.out.sra_to_download,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.large_protein_set,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.close_protein_set,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.very_close_protein_set,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.transcriptome_set
+        GET_INFORMATIONS_ABOUT_GENOMES.out.transcriptome_set,
+        GET_INFORMATIONS_ABOUT_GENOMES.out.large_proteins_set,
+        GET_INFORMATIONS_ABOUT_GENOMES.out.small_proteins_set,
+        GET_INFORMATIONS_ABOUT_GENOMES.out.training_proteins_set
         )
 
-    // GET_INFORMATIONS_ABOUT_GENOMES(genomes)
-    // PREPARE_GENOMES(genomes)
-    // // ... .set { genomes } // add genomes size from PREPARE_GENOMES in the genomes of GET_INFORMATIONS_ABOUT_GENOMES
-    // ANALYSE_GENOME_QUALITY(genomes)
 
-    // //
-    // // SUBWORKFLOW: ANNOTATE_REPEATS
-    // //
 
     // // execute repeats annotation
     // if (params.annotate_repeats) {

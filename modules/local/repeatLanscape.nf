@@ -19,4 +19,9 @@ process REPEATLANDSCAPE {
     # Repeat landscape
     createRepeatLandscape.pl -div ${align}.divsum -g ${meta.genome_size} > ${align}.html
     """
+
+    stub:
+    """
+    touch ${align}.html
+    """
 }

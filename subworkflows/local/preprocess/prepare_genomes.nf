@@ -14,19 +14,15 @@ workflow PREPARE_GENOMES {
         genomes
 
     main:
-
         // Check if fasta file is valid
         FASTA_VALIDATOR(genomes)
 
         // Reformat genomes
-        RENAME_GENOME(FASTA_VALIDATOR.out)
-
-        RENAME_GENOME.out.fasta
-            .set { genomes }
+        RENAME_GENOME(genomes)
 
         // Calculate the genome size
-        CALCULATE_GENOME_SIZE(genomes)
-
+        CALCULATE_GENOME_SIZE(RENAME_GENOME.out.fasta)
+        CALCULATE_GENOME_SIZE
         CALCULATE_GENOME_SIZE.out
             .map{id, meta, fasta, csv -> [ id, meta + ['assembly_size' : file(csv).readLines()[0].split(",")[1]], fasta ] }
             .set { genomes }

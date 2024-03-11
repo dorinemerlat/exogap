@@ -21,6 +21,11 @@ process CD_HIT_EST {
         -T $task.cpus \
         -aS $alignment_coverage_for_the_shorter_sequence
     """
+
+    stub:
+    """
+    touch ${library_path}.nr
+    """
 }
 
     // cd-hit-est -i $library_path -o ${library_path}.nr \
