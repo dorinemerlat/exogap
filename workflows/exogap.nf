@@ -106,8 +106,6 @@ workflow EXOGAP {
         GET_INFORMATIONS_ABOUT_GENOMES.out.training_proteins_set
         )
 
-
-
     // // execute repeats annotation
     // if (params.annotate_repeats) {
     //     // ANNOTATE_REPEATS(genomes)

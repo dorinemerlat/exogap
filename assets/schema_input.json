@@ -27,6 +27,28 @@
                 "pattern": "^\\S+\\.f(ast|n)?a$",
                 "errorMessage": "Fasta file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
                 "unique": true
+            },
+            "main_protein_set": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Main protein set file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'."
+            },
+            "training_protein_set": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Training protein set file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'."
+            },
+            "transcript_set": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Transcriptome set file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "unique": true
             }
         },
         "required": ["name", "taxid", "fasta"]
