@@ -47,26 +47,38 @@ workflow DOWNLOAD_DATASETS {
     take:
         genomes
         sra_to_download
-        transcriptome_set
+        transcript_set
         large_protein_set
-        small_proteins_set
+        close_proteins_set
         training_proteins_set
 
     main:
         // Transcripts set
-        DOWNLOAD_TSA(transcriptome_set)
+        if (params.max_transcriptomes != null && params.max_transcriptomes != false) {
+            DOWNLOAD_TSA(transcript_set)
+        }
 
-        DOWNLOAD_SRA(sra_to_download)
-        TRINITY(DOWNLOAD_SRA.out)
+        if (params.use_sra == true) {
+            {DOWNLOAD_SRA(sra_to_download)
+            TRINITY(DOWNLOAD_SRA.out)
+        }
 
+        if ((params.max_transcriptomes != null && params.max_transcriptomes != false) && params.use_sra == true) {
         DOWNLOAD_TSA.out.map { name, id, file -> [id, name, file ]}
             .combine (TRINITY.out, by: 0)
             .groupTuple()
-            .map { id, clade, tsa, specie_names, specie_taxids, sras -> [id, tsa.unique() + sras]}
-            .map { id, tsa -> [id, tsa, "transcripts_set.fa", 'no']}
-            .set { transcriptome_set }
+            .map { id, tsa_name, tsa_file, sra_names, sra_taxids, sra_files -> [id, ['name': tsa_name], tsa_file.unique() + sra_files]}
+            .map { id, meta, tsa -> [id, meta, tsa, "transcripts_set.fa", 'no']}
+            .set { transcript_set }
 
-        GATHER_TRANSCRIPT_FILES(transcriptome_set)
+        GATHER_TRANSCRIPT_FILES(transcript_set)
+        GATHER_TRANSCRIPT_FILES.out.set { transcript_set }
+
+        } else if ((params.max_transcriptomes != null && params.max_transcriptomes != false) && params.use_sra != true) {
+            DOWNLOAD_TSA.out.map { name, id, file -> [id, ['name': name], file ]}
+        }
+
+        GATHER_TRANSCRIPT_FILES(transcript_set)
         CD_HIT_EST(GATHER_TRANSCRIPT_FILES.out)
 
         // set path to transcripts set in genomes's meta
@@ -80,7 +92,7 @@ workflow DOWNLOAD_DATASETS {
             .set { genomes_index_by_main_proteins_set }
 
         DOWNLOAD_PROTEINS_IN_PROTEOMES(large_protein_set)
-        DOWNLOAD_PROTEINS1(small_proteins_set)
+        DOWNLOAD_PROTEINS1(close_proteins_set)
 
         DOWNLOAD_PROTEINS_IN_PROTEOMES.out.map { id, name, fasta -> [[id, fasta]] }
             .combine ( DOWNLOAD_PROTEINS1.out.map { id, name, fasta -> [[id, fasta]] } )

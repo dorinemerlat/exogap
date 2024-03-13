@@ -44,4 +44,12 @@ class Utils {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         }
     }
+
+    //
+    // Function to update a LinkedHashMap with a given key-value pair
+    //
+    public static LinkedHashMap updateLinkedHashMap(LinkedHashMap dict, Object key, Object value) {
+        dict[key] = value
+        return dict
+    }
 }
