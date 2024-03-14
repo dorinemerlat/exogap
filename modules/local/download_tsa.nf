@@ -1,14 +1,13 @@
 process DOWNLOAD_TSA {
-    tag "DOWNLOAD_TSA_${clade_name}"
-    publishDir "out/data/sra/${clade_name}/*"
+    tag "DOWNLOAD_TSA_${name}"
     cache 'lenient'
     label 'sratools'
 
     input:
-    tuple val(clade_taxid), val(clade_name), path(id_list)
+    tuple val(name), val(meta), path(id_list)
 
     output:
-    tuple val(clade_taxid), val(clade_name), path("${clade_taxid}_transcriptomes.fasta")
+    tuple val(name), val(meta), path("${meta.taxid}_transcriptomes.fasta")
 
     script:
     """
@@ -19,11 +18,11 @@ process DOWNLOAD_TSA {
         fasterq-dump --fasta \${srr}
     done
 
-    cat *fasta > ${clade_taxid}_transcriptomes.fasta
+    cat *fasta > ${meta.taxid}_transcriptomes.fasta
     """
 
     stub:
     """
-    touch ${clade_taxid}_transcriptomes.fasta
+    touch ${meta.taxid}_transcriptomes.fasta
     """
 }

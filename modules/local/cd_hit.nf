@@ -6,10 +6,10 @@ process CD_HIT {
     label 'cd_hit'
 
     input:
-    tuple val(library_id), path(library_path)
+    tuple val(library_id), val(meta), path(library_path)
 
     output:
-    tuple val(library_id), path("${library_path}.nr")
+    tuple val(library_id), val(meta), path("${library_path}.nr")
 
     script:
     """

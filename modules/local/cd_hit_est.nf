@@ -5,10 +5,10 @@ process CD_HIT_EST {
     label 'cd_hit'
 
     input:
-    tuple val(library_id), path(library_path), val(word_length), val(lenght_of_throw_away_sequence), val(alignment_coverage_for_the_shorter_sequence)
+    tuple val(library_id), val(meta), path(library_path), val(word_length), val(lenght_of_throw_away_sequence), val(alignment_coverage_for_the_shorter_sequence)
 
     output:
-    tuple val("${library_id}"), path("${library_path}.nr")
+    tuple val("${library_id}"), val(meta), path("${library_path}.nr")
 
     script:
     """
