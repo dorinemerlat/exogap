@@ -48,9 +48,8 @@ Channel.fromSamplesheet("input", skip_duplicate_check: true)
 // include { INPUT_CHECK                       } from '../subworkflows/input_check'
 include { GET_INFORMATIONS_ABOUT_GENOMES    } from '../subworkflows/local/preprocess/get_informations_about_genomes'
 include { PREPARE_GENOMES                   } from '../subworkflows/local/preprocess/prepare_genomes'
-// include { DOWNLOAD_DATASETS                   } from '../subworkflows/local/preprocess/download_datasets'
 // include { ANALYSE_GENOME_QUALITY            } from '../subworkflows/preprocess/analyse_genome_quality'
-// include { ANNOTATE_REPEATS                  } from '../subworkflows/annotate_repeats'
+include { ANNOTATE_REPETITIVE_ELEMENTS      } from '../subworkflows/local/annotate_repetitive_elements'
 // include { ANNOTATE_PROTEIN_CODING_GENES     } from '../subworkflows/annotate_protein_coding_genes'
 // include { ANNOTATE_NON_CODING_GENES         } from '../subworkflows/annotate_non_coding_genes'
 // include { POSTPROCESS                       } from '../subworkflows/post_process'
@@ -104,17 +103,10 @@ workflow EXOGAP {
     // get taxonomy, datasets...
     GET_INFORMATIONS_ABOUT_GENOMES(genomes)
 
-    // // preprocess genomes
-    // PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
+    // preprocess genomes
+    PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
 
-    // DOWNLOAD_DATASETS(
-    //     PREPARE_GENOMES.out.genomes,
-    //     GET_INFORMATIONS_ABOUT_GENOMES.out.sra_to_download,
-    //     GET_INFORMATIONS_ABOUT_GENOMES.out.transcriptome_set,
-    //     GET_INFORMATIONS_ABOUT_GENOMES.out.large_proteins_set,
-    //     GET_INFORMATIONS_ABOUT_GENOMES.out.close_proteins_set,
-    //     GET_INFORMATIONS_ABOUT_GENOMES.out.training_proteins_set
-    //     )
+    ANNOTATE_REPETITIVE_ELEMENTS(PREPARE_GENOMES.out.genomes)
 
     // // execute repeats annotation
     // if (params.annotate_repeats) {

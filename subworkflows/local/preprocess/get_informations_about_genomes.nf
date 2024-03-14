@@ -43,9 +43,13 @@ def setSelection(genomes, datasets, max_sequence_number) {
     return genomes
 }
 
+def formatName(name) {
+    // remove '[', ']', ',')'
+    return name.join('_').replaceAll('[\\[\\],]', '').replaceAll(' ', '_')
+}
 def getSetFiles(genomes, output_name, header) {
     return genomes.groupTuple()
-        .map { set, genome_id -> [set[1].join('_'),  ['taxid': set[0].join('_'), 'genomes': genome_id], set[2].flatten(), output_name, header] }
+        .map { set, genome_id -> [formatName(set[1]),  ['taxid': formatName(set[0]), 'genomes': genome_id], set[2].flatten(), output_name, header] }
 }
 
 def concatenateGenomeAndSet(genomes, dataset){

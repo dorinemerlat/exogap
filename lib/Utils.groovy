@@ -64,7 +64,7 @@ class Utils {
         }
     }
 
-    public static DataflowBroadcast gatherGenomes(DataflowBroadcast genomes) {
+    public static DataflowVariable gatherGenomes(DataflowBroadcast genomes) {
         return genomes
             .map { it -> [it[0], it[1], it[2]] } // remove extra fields
             .map { id, meta, file -> [id, ["${meta.taxid}": meta.name], file] } // keep only the IDs and essential meta data

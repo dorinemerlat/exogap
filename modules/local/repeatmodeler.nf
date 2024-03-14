@@ -1,24 +1,24 @@
 process REPEATMODELER {
-    tag "REPEATMODELER_${meta.id}"
+    tag "REPEATMODELER_${id}"
     cpus 30
     time '20d'
     label 'repeatmodeler'
 
     input:
-    tuple val(meta), path(genome)
+    tuple  val(id), val(meta), path(genome)
 
     output:
-    tuple val(meta), path("${meta.id}-families.fa")
+    tuple val(id), val(meta), path("${id}-families.fa")
 
     script:
     """
-    BuildDatabase -name $meta.id -engine ncbi $genome
+    BuildDatabase -name $id -engine ncbi $genome
 
-    RepeatModeler -pa $task.cpus -engine ncbi -database $meta.id -LTRStruct
+    RepeatModeler -pa $task.cpus -engine ncbi -database $id -LTRStruct
     """
 
     stub:
     """
-    touch ${meta.id}-families.fa
+    touch ${id}-families.fa
     """
 }

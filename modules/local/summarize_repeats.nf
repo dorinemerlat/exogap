@@ -1,6 +1,6 @@
 
-process SUMMARISE_REPEATS {
-    tag "SUMMARISE_REPEATS"
+process SUMMARIZE_REPEATS {
+    tag "SUMMARIZE_REPEATS"
     input:
     tuple val(meta), path(out)
 
