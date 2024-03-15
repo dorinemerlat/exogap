@@ -8,7 +8,7 @@ process REPEATMODELER {
     tuple  val(id), val(meta), path(genome)
 
     output:
-    tuple val(id), val(meta), path("${id}-families.fa")
+    tuple val(id), val(meta), path("${id}_families.fa")
 
     script:
     """
@@ -19,6 +19,6 @@ process REPEATMODELER {
 
     stub:
     """
-    touch ${id}-families.fa
+    touch ${id}_families.fa
     """
 }

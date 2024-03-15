@@ -20,46 +20,57 @@ workflow ANNOTATE_REPETITIVE_ELEMENTS {
 
     main:
         // Run RepeatModeler and process results
+        genomes.map { id, meta, fasta -> [ id, meta + ['genome': fasta], fasta ] }
+            .set { genomes }
+
         REPEATMODELER(genomes)
-        // RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
-        //     .set { rm_library }
+        RENAME_REPEATMODELER_OUTPUT(REPEATMODELER.out)
+            .set { rm_library }
 
-        // // use one library for all genomes
-        // if ( params.one_library_for_all ) {
-        //     GATHER_FILES(rm_library.map{ it -> tuple('families.fa', it.last()) }.groupTuple())
-        //         .set { rm_library }
-        //     }
+        // use one library for all genomes
+        if ( params.one_library_for_all ) {
+            GATHER_FILES(rm_library.map{ id, meta, file -> [ 'library_repeats', id, file ] }
+                                    .groupTuple()
+                                    .map {id, meta, file -> [ id, ['species': meta, 'name': 'repeatmodeler'], file, 'library_repeats.fa', 'no' ]})
+                .set { rm_library }
+            }
 
-        // SEPARATE_LIBRARIES(rm_library)
+        SEPARATE_LIBRARIES(rm_library)
 
-        // CD_HIT_FOR_REPEATS_1(SEPARATE_LIBRARIES.out.classified)
-        // CD_HIT_FOR_REPEATS_2(SEPARATE_LIBRARIES.out.unclassified)
+        CD_HIT_EST_1(SEPARATE_LIBRARIES.out.classified.map { id, meta, file -> [ id, meta, file, '10', '80', '98' ] })
+        CD_HIT_EST_2(SEPARATE_LIBRARIES.out.unclassified.map { id, meta, file -> [ id, meta, file, '10', '80', '98' ] })
 
-        // // use a extern repeats library
-        // Channel.fromPath( params.external_library, checkIfExists: true )
-        //     .combine(genomes.map {meta, file -> meta })
-        //     .map { library, meta -> [ meta, library ] }
-        //     .set { external_library }
+        // use a extern repeats library
+        if ( params.external_library ) {
+            REPEATMASKER_WITH_EXISTING_LIB(genomes, Channel.fromPath( params.external_library, checkIfExists: true ) )
+            REPEATMASKER_WITH_EXISTING_LIB.out.masked
+                .set { masked_genomes }
+        } else {
+            masked_genomes = genomes
+        }
 
-        // REPEATMASKER_WITH_EXISTING_LIB(genomes, external_library)
+        // make 2 iterations with own library (all or specie-specific)
+        REPEATMASKER_WITH_OWN_LIB_1(masked_genomes, CD_HIT_EST_1.out.map { id, meta, file -> file } )
+        REPEATMASKER_WITH_OWN_LIB_2(REPEATMASKER_WITH_OWN_LIB_1.out.masked, CD_HIT_EST_2.out.map { id, meta, file -> file } )
 
-        // // make 2 iterations with own library (all or specie-specific)
-        // REPEATMASKER_WITH_OWN_LIB_1(REPEATMASKER_WITH_EXISTING_LIB.out.masked, CD_HIT_FOR_REPEATS_1.out)
-        // REPEATMASKER_WITH_OWN_LIB_2(REPEATMASKER_WITH_OWN_LIB_1.out.masked, CD_HIT_FOR_REPEATS_2.out)
+        // Group all .cat files
+        REPEATMASKER_WITH_OWN_LIB_1.out.cat
+            .combine(REPEATMASKER_WITH_OWN_LIB_2.out.cat, by: 0)
+            .map { id, meta1, cat1, meta2, cat2 -> [ id, meta1, [cat1, cat2] ]}
+            .set { all_cat }
 
-        // // Group all .cat files
-        // REPEATMASKER_WITH_EXISTING_LIB.out.cat
-        //     .concat(REPEATMASKER_WITH_OWN_LIB_1.out.cat, REPEATMASKER_WITH_OWN_LIB_2.out.cat)
-        //     .groupTuple()
-        //     .set { cat }
+        if ( params.external_library ) {
+            all_cat.combine(REPEATMASKER_WITH_EXISTING_LIB.out.cat, by: 0)
+                .map { id, meta1, cat1, meta2, cat2 -> [ id, meta1, cat1 + [cat2] ]}
+                .set { all_cat }
+        }
 
-        // // Process repeats and landscape analysis
-        // PROCESSREPEATS(REPEATMASKER_WITH_OWN_LIB_2.masked, cat, external_library)
+        // Process repeats and landscape analysis
+        PROCESS_REPEATS(REPEATMASKER_WITH_OWN_LIB_2.out.masked, all_cat, Channel.fromPath( params.external_library, checkIfExists: true ))
 
+        REPEATLANDSCAPE(PROCESS_REPEATS.out.align)
 
-        // REPEATLANDSCAPE(PROCESSREPEATS.out.align)
-
-        // GET_DFAM_CLASSIFICATION()
+        DOWNLOAD_DFAM()
         // CHANGE_CLASSIFICATION_TO_DFAM(
         //     GET_DFAM_CLASSIFICATION,
         //     PROCESSREPEATS.out.masked,

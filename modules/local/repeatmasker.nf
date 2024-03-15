@@ -1,16 +1,16 @@
 process REPEATMASKER {
-    tag "REPEATMASKER_${meta.id}"
+    tag "REPEATMASKER_${id}"
     cpus 30
     time '20d'
     label 'repeatmasker'
 
     input:
-    tuple val(meta), path(genome)
-    tuple val(meta), path(library)
+    tuple  val(id), val(meta), path(genome)
+    each path(library)
 
     output:
-    tuple val(meta), path("${genome}.masked"),    emit: masked
-    tuple val(meta), path("${genome}.cat"),       emit: cat
+    tuple  val(id), val(meta), path("${genome}.masked"),    emit: masked
+    tuple  val(id), val(meta), path("${genome}.cat"),       emit: cat
 
     script:
     """

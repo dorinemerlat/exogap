@@ -1,12 +1,12 @@
 process REPEATLANDSCAPE {
-    tag "REPEATLANDSCAPE_${meta.id}"
+    tag "REPEATLANDSCAPE_${id}"
     label 'repeatmasker'
 
     input:
-    tuple val(meta), path(align)
+    tuple  val(id), val(meta), path(align)
 
     output:
-    tuple val(meta), path("${align}.html")
+    tuple  val(id), val(meta), path("${align}.html")
 
     script:
     """

@@ -49,7 +49,7 @@ def formatName(name) {
 }
 def getSetFiles(genomes, output_name, header) {
     return genomes.groupTuple()
-        .map { set, genome_id -> [formatName(set[1]),  ['taxid': formatName(set[0]), 'genomes': genome_id], set[2].flatten(), output_name, header] }
+        .map { set, genome_id -> [formatName(set[1]),  ['name': formatName(set[1]), 'taxid': formatName(set[0]), 'genomes': genome_id], set[2].flatten(), output_name, header] }
 }
 
 def concatenateGenomeAndSet(genomes, dataset){

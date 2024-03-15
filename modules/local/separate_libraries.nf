@@ -1,23 +1,23 @@
 process SEPARATE_LIBRARIES {
-    tag "SEPARATE_LIBRARIES_$library_id"
+    tag "SEPARATE_LIBRARIES_$id"
     label 'bioawk'
 
     input:
-    tuple val(library_id), path(library_path)
+    tuple val(id), val(meta), path(library)
 
 
     output:
-    tuple val("${library_id}-classified"), path("${library_id}-classified.fa"),            emit: classified
-    tuple val("${library_id}-unclassified"), path("${library_id}-unclassified.fa"),        emit: unclassified
+    tuple val("${id}_classified"), val(meta), path("${id}_classified.fa"),     emit: classified
+    tuple val("${id}_unclassified"), val(meta), path("${id}_unclassified.fa"), emit: unclassified
 
     script:
     """
-    bioawk -c fastx '\$name !~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library_path |fold -w 60  > ${library_id}-classified.fa
-    bioawk -c fastx '\$name ~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library_path |fold -w 60 > ${library_id}-unclassified.fa
+    bioawk -c fastx '\$name !~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library |fold -w 60  > ${id}_classified.fa
+    bioawk -c fastx '\$name ~ /#Unknown\$/ {print ">"\$name; print \$seq}' $library |fold -w 60 > ${id}_unclassified.fa
     """
 
     stub:
     """
-    touch ${library_id}-classified.fa ${library_id}-unclassified.fa
+    touch ${id}_classified.fa ${id}_unclassified.fa
     """
 }

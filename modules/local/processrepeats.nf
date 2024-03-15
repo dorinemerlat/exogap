@@ -1,32 +1,31 @@
 process PROCESS_REPEATS {
-    tag "PROCESS_REPEATS_${meta.id}"
-    publishDir path: "${params.outdir}/results/${meta.id}/repetitive-elements", pattern: "*{masked,gff,tbl}"
+    tag "PROCESS_REPEATS_${id}"
     time '5d'
     label 'repeatmasker'
 
     input:
-    tuple val(meta), path(masked)
-    tuple val(meta), path(cat)
-    tuple val(meta), path(library)
+    tuple  val(id), val(meta), path(masked)
+    tuple  val(id), val(meta), path(cat)
+    each path(library)
 
     output:
-    tuple val(meta), path("${meta.id}.masked"),      emit: masked
-    tuple val(meta), path("${meta.id}.gff"),         emit: gff
-    tuple val(meta), path("${meta.id}.align"),       emit: align
-    tuple val(meta), path("${meta.id}.cat"),         emit: cat
-    tuple val(meta), path("${meta.id}.out"),         emit: out
-    tuple val(meta), path("${meta.id}.tbl"),         emit: tbl
+    tuple  val(id), val(meta), path("${id}.masked"),      emit: masked
+    tuple  val(id), val(meta), path("${id}.gff"),         emit: gff
+    tuple  val(id), val(meta), path("${id}.align"),       emit: align
+    tuple  val(id), val(meta), path("${id}.cat"),         emit: cat
+    tuple  val(id), val(meta), path("${id}.out"),         emit: out
+    tuple  val(id), val(meta), path("${id}.tbl"),         emit: tbl
 
     script:
     """
-    cat $cat > ${meta.id}.cat
-    cp $masked ${meta.id}.masked
+    cat $cat > ${id}.cat
+    cp $masked ${id}.masked
 
-    ProcessRepeats -a -gff -lib $library -xsmall ${meta.id}.cat
+    ProcessRepeats -a -gff -lib $library -xsmall ${id}.cat
     """
 
     stub:
     """
-    touch ${meta.id}.masked ${meta.id}.gff ${meta.id}.align ${meta.id}.cat ${meta.id}.out ${meta.id}.tbl
+    touch ${id}.masked ${id}.gff ${id}.align ${id}.cat ${id}.out ${id}.tbl
     """
 }
