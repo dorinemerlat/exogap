@@ -12,7 +12,7 @@ process DOWNLOAD_NEWICK {
 
     script:
     """
-    get-newick.py -i '$metas'
+    get-newick.py -i '$meta'
     """
 
     stub:

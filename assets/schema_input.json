@@ -33,7 +33,7 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast|n)?a$",
-                "errorMessage": "Main protein set file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "errorMessage": "Main protein set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
                 "meta": ["main_protein_set"]
             },
             "training_protein_set": {
@@ -41,7 +41,7 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast|n)?a$",
-                "errorMessage": "Training protein set file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "errorMessage": "Training protein set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
                 "meta": ["training_protein_set"]
             },
             "transcript_set": {
@@ -49,9 +49,18 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast|n)?a$",
-                "errorMessage": "Transcriptome set file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "errorMessage": "Transcriptome set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
                 "unique": true,
                 "meta": ["transcript_set"]
+            },
+            "repeats_gff": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.gff(3)$",
+                "errorMessage": "Gff file for repetitive elements annotation can be provided, cannot contain spaces and must have extension '.gff' or '.gff3'.",
+                "unique": true,
+                "meta": ["repeats_gff"]
             }
         },
         "required": ["name", "taxid", "fasta"]

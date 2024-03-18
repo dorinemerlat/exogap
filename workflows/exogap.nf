@@ -34,6 +34,7 @@ Channel.fromSamplesheet("input", skip_duplicate_check: true)
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'main_protein_set', ['personal_set': meta.main_protein_set]), fasta ] }
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'training_protein_set', ['personal_set': meta.training_protein_set]), fasta ] }
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'transcript_set', ['personal_set': meta.transcript_set]), fasta ] }
+    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff', ['personal_annotations': meta.repeats_gff]), fasta ] }
     .set { genomes }
 
 /*
@@ -106,6 +107,20 @@ workflow EXOGAP {
     // preprocess genomes
     PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
 
+    // annotation of repetitive elements
+    // PREPARE_GENOMES.out.genomes.filter {it[1].repeats_gff.personal_annotations == null} // annotation already done
+    //     .set { genomes_repeats_to_do }
+
+    // PREPARE_GENOMES.out.genomes.view()
+    // if (genomes_repeats_done.count() != 0) {
+    // ANNOTATE_REPETITIVE_ELEMENTS(genomes.repeats_to_do)
+    // }
+
+    // ANNOTATE_REPETITIVE_ELEMENTS.out.masked.view()
+    // genomes.map { id, meta, fasta -> meta.repeats_gff.personal_annotations }
+    //     .unique()
+    //     .view()
+    // if ('repeats_gff', ['personal_annotations')
     ANNOTATE_REPETITIVE_ELEMENTS(PREPARE_GENOMES.out.genomes)
 
     // // execute repeats annotation
@@ -127,6 +142,9 @@ workflow EXOGAP {
     // // ANNOTATE_NON_CODING_GENES(masked_genomes)
 
     // // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)
+
+    // emit:
+    //     repetitive_elements = ANNOTATE_REPETITIVE_ELEMENTS.out.masked
 }
 
 /*

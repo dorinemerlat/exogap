@@ -30,12 +30,16 @@ process SEARCH_PROTEINS_IN_PROTEOMES {
         wait
 
         # merge all protein IDs
-        zcat proteomes/* > ${taxid}_proteomes.list
+        if [ "\$(ls -A proteomes)" ]; then
+            zcat proteomes/* > ${taxid}_proteomes.list
 
-        # count number of proteins for the given clade
-        proteins_count=\$(wc -l < ${taxid}_proteomes.list)
-        echo "${taxid},${name},\${proteins_count}" > ${taxid}_proteomes_count.list
-
+            # count number of proteins for the given clade
+            proteins_count=\$(wc -l < ${taxid}_proteomes.list)
+            echo "${taxid},${name},\${proteins_count}" > ${taxid}_proteomes_count.list
+        else
+            touch ${taxid}_proteomes.list
+            echo "${taxid},${name},0" > ${taxid}_proteomes_count.list
+        fi
     else
 
         touch ${taxid}_proteomes.list

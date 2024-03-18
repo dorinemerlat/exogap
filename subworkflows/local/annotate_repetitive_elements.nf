@@ -83,7 +83,7 @@ workflow ANNOTATE_REPETITIVE_ELEMENTS {
         // GET_COMPLEX_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.gff)
         // SUMMARIZE_AND_PLOT_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.out.collect{it[1]}, newick)
 
-    // emit:
-    // re_gff3 = repeats_ch.gff3
+    emit:
+        masked = PROCESS_REPEATS.out.masked
     // masked_genomes = repeats_ch.fasta
 }
