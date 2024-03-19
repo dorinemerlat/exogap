@@ -17,14 +17,25 @@ WorkflowExogap.initialise(params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 include { fromSamplesheet } from 'plugin/nf-validation'
 
-genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
-            .map { meta, fasta -> [ meta.name.toLowerCase().replace(' ', '-'), meta, file(fasta) ] }
+Channel.fromSamplesheet("input", skip_duplicate_check: true)
+    .map { meta, fasta -> [ meta.name.toLowerCase().replace(' ', '-'), meta, file(fasta) ] }
+    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'main_protein_set', ['personal_set': meta.main_protein_set]), fasta ] }
+    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'training_protein_set', ['personal_set': meta.training_protein_set]), fasta ] }
+    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'transcript_set', ['personal_set': meta.transcript_set]), fasta ] }
+    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff', ['personal_annotations': meta.repeats_gff]), fasta ] }
+    .set { genomes }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,12 +47,11 @@ genomes = Channel.fromSamplesheet("input", skip_duplicate_check: true)
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 // include { INPUT_CHECK                       } from '../subworkflows/input_check'
-include { GET_INFORMATIONS_ABOUT_GENOMES    } from '../subworkflows/local/preprocess/get_informations_about_genomes'
-include { PREPARE_GENOMES                   } from '../subworkflows/local/preprocess/prepare_genomes'
-include { DOWNLOAD_DATASETS                   } from '../subworkflows/local/preprocess/download_datasets'
+include { PREPARE_GENOMES               } from '../subworkflows/local/prepare_genomes'
 // include { ANALYSE_GENOME_QUALITY            } from '../subworkflows/preprocess/analyse_genome_quality'
-// include { ANNOTATE_REPEATS                  } from '../subworkflows/annotate_repeats'
-// include { ANNOTATE_PROTEIN_CODING_GENES     } from '../subworkflows/annotate_protein_coding_genes'
+include { GET_DATASETS                  } from '../subworkflows/local/get_datasets'
+include { ANNOTATE_REPETITIVE_ELEMENTS  } from '../subworkflows/local/annotate_repetitive_elements'
+include { ANNOTATE_PROTEIN_CODING_GENES } from '../subworkflows/annotate_protein_coding_genes'
 // include { ANNOTATE_NON_CODING_GENES         } from '../subworkflows/annotate_non_coding_genes'
 // include { POSTPROCESS                       } from '../subworkflows/post_process'
 
@@ -57,7 +67,6 @@ include { DOWNLOAD_DATASETS                   } from '../subworkflows/local/prep
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,29 +100,24 @@ workflow EXOGAP {
 
     ch_versions = Channel.empty()
 
-    // get taxonomy, datasets...
-    GET_INFORMATIONS_ABOUT_GENOMES(genomes)
+    // get taxonomy and preprocess genomes
+    PREPARE_GENOMES(genomes)
 
-    // preprocess genomes
-    PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
+    // annotation of repetitive elements
+    // PREPARE_GENOMES.out.genomes.filter {it[1].repeats_gff.personal_annotations == null} // annotation already done
+    //     .set { genomes_repeats_to_do }
 
-    // download datasets
-    DOWNLOAD_DATASETS(
-        GET_INFORMATIONS_ABOUT_GENOMES.out.sra_to_download,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.large_protein_set,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.close_protein_set,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.very_close_protein_set,
-        GET_INFORMATIONS_ABOUT_GENOMES.out.transcriptome_set
-        )
+    // PREPARE_GENOMES.out.genomes.view()
+    // if (genomes_repeats_done.count() != 0) {
+    // ANNOTATE_REPETITIVE_ELEMENTS(genomes.repeats_to_do)
+    // }
 
-    // GET_INFORMATIONS_ABOUT_GENOMES(genomes)
-    // PREPARE_GENOMES(genomes)
-    // // ... .set { genomes } // add genomes size from PREPARE_GENOMES in the genomes of GET_INFORMATIONS_ABOUT_GENOMES
-    // ANALYSE_GENOME_QUALITY(genomes)
-
-    // //
-    // // SUBWORKFLOW: ANNOTATE_REPEATS
-    // //
+    // ANNOTATE_REPETITIVE_ELEMENTS.out.masked.view()
+    // genomes.map { id, meta, fasta -> meta.repeats_gff.personal_annotations }
+    //     .unique()
+    //     .view()
+    // if ('repeats_gff', ['personal_annotations')
+    ANNOTATE_REPETITIVE_ELEMENTS(PREPARE_GENOMES.out.genomes)
 
     // // execute repeats annotation
     // if (params.annotate_repeats) {
@@ -130,10 +134,15 @@ workflow EXOGAP {
     //     // -> masked_genomes
     // }
 
+    // execute genome annotation
+    GET_DATASETS(PREPARE_GENOMES.out.genomes)
     // // ANNOTATE_PROTEIN_CODING_GENES(masked_genomes)
     // // ANNOTATE_NON_CODING_GENES(masked_genomes)
 
     // // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)
+
+    // emit:
+    //     repetitive_elements = ANNOTATE_REPETITIVE_ELEMENTS.out.masked
 }
 
 /*

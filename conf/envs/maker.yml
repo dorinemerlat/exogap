@@ -1,0 +1,7 @@
+name: maker
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::maker=3.01.03

@@ -1,0 +1,7 @@
+name: interproscan
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::interproscan=5.52_86.0

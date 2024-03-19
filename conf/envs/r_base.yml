@@ -1,0 +1,7 @@
+name: r_base
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::r-base=4.3.3

@@ -1,0 +1,7 @@
+name: augustus
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::augustus=3.5.0

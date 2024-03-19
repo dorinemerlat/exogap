@@ -1,0 +1,9 @@
+name: newick
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::newick=1.9.0
+  - anaconda::requests=2.31.0
+

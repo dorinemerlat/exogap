@@ -1,0 +1,7 @@
+name: py_fasta_validator
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::py_fasta_validator=0.6
