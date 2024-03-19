@@ -1,0 +1,7 @@
+name: perl
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - anaconda::perl=v5.32.1.1

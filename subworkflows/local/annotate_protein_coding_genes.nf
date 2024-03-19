@@ -9,7 +9,10 @@ include { AB_INITIO_ANNOTATION as AB_INITIO_ANNOTATION_1 }                  from
 include { AB_INITIO_ANNOTATION as AB_INITIO_ANNOTATION_2 }                  from 'ab_initio_annotation.nf'
 
 // include modules
+include { CTL_FOR_ANNOTATION_BY_SIMILARITY }                                from '../../modules/local/ctl_for_annotation_by_similarity'
 include { MAKER_BY_SIMILARITY }                                             from '../../modules/local/maker_by_similarity'
+include { GENERATE_MAKER_GFF }                                              from '../../modules/local/generate_maker_gff'
+include { AGAT_STATISTICS }                                                 from '../../modules/local/agat_statistics'
 include { ELIMINATE_REDUNDANCE as ELIMINATE_REDUNDANCE_IN_PROTEINS }        from '../../modules/local-hit/cd-hit_for_genes'
 include { REFORMAT_MAKER_GFF }                                              from '../../modules/local/reformat_maker_gff'
 include { BLAST }                                                           from '../../modules/local/blast'
@@ -25,7 +28,11 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
     main:
 
         // structural annotation
-        MAKER_BY_SIMILARITY(genomes, ELIMINATE_REDUNDANCE_IN_PROTEINS, ELIMINATE_REDUNDANCE_IN_TRANSCRIPTS)
+        CTL_FOR_ANNOTATION_BY_SIMILARITY(genomes)
+        MAKER_BY_SIMILARITY(CTL_FOR_ANNOTATION_BY_SIMILARITY.out)
+        GENERATE_MAKER_GFF(MAKER_BY_SIMILARITY.out)
+        AGAT_STATISTICS(GENERATE_MAKER_GFF.out)
+
         AB_INITIO_ANNOTATION_1(genomes, MAKER_BY_SIMILARITY)
         AB_INITIO_ANNOTATION_1(genomes, MAKER_AB_INITIO_1)
         REFORMAT_MAKER_GFF(MAKER_AB_INITIO_2.out)

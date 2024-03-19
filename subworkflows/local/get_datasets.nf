@@ -5,8 +5,6 @@ GET TAXONOMIC INFORMATIONS AND SELECT PUBLIC DATA TO USE FOR ANNOTATION
 */
 
 // include modules
-include { DOWNLOAD_LINEAGE }                                from '../../../modules/local/download_lineage.nf'
-include { DOWNLOAD_NEWICK }                                 from '../../../modules/local/download_newick'
 include { SEARCH_PROTEINS_IN_PROTEOMES }                    from '../../../modules/local/search_proteins_in_proteomes.nf'
 include { SEARCH_PROTEINS }                                 from '../../../modules/local/search_proteins'
 include { SEARCH_TSA }                                      from '../../../modules/local/search_tsa'
@@ -24,6 +22,7 @@ include { CD_HIT as CD_HIT_TRAINING_PROTEINS }              from '../../../modul
 include { DOWNLOAD_PROTEINS_IN_PROTEOMES }                  from '../../../modules/local/download_proteins_in_proteomes'
 include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS1 }         from '../../../modules/local/download_proteins'
 include { DOWNLOAD_PROTEINS as DOWNLOAD_PROTEINS2 }         from '../../../modules/local/download_proteins'
+
 
 def setSelection(genomes, datasets, max_sequence_number) {
     genomes_index_by_lineage = Utils.indexGenomesByLineage(genomes)
@@ -60,24 +59,11 @@ def concatenateGenomeAndSet(genomes, dataset){
                 .map { id, set, genome, fasta -> [id, genome, fasta, ['name':set[0], 'taxid': set[1], 'file': set[2]]] }
 }
 
-workflow GET_INFORMATIONS_ABOUT_GENOMES {
+workflow GET_DATASETS {
     take:
         genomes
 
     main:
-        // Get the lineage taxonomy of each genome (one by genome)
-        DOWNLOAD_LINEAGE(genomes)
-
-        DOWNLOAD_LINEAGE.out
-            .map { it -> [ it[0], file(it[1]).splitText() ] }
-            .map{ id, lineage -> [ id, lineage.collect { it.split(',') } ] }
-            .map{ id, lineage -> [ id, ["lineage": lineage.collect { [ "rank": "${it[0]}", "name": "${it[2]}".replace('\n', ''), "taxid": "${it[1]}" ] }]]}
-            .join(genomes)
-            .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
-            .set { genomes }
-
-        DOWNLOAD_NEWICK(Utils.gatherGenomes(genomes))
-
         // choose which busco dataset to use for each specie
         DOWNLOAD_BUSCO_DATASETS()
 

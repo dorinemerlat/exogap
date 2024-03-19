@@ -47,11 +47,11 @@ Channel.fromSamplesheet("input", skip_duplicate_check: true)
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 // include { INPUT_CHECK                       } from '../subworkflows/input_check'
-include { GET_INFORMATIONS_ABOUT_GENOMES    } from '../subworkflows/local/preprocess/get_informations_about_genomes'
-include { PREPARE_GENOMES                   } from '../subworkflows/local/preprocess/prepare_genomes'
+include { PREPARE_GENOMES               } from '../subworkflows/local/prepare_genomes'
 // include { ANALYSE_GENOME_QUALITY            } from '../subworkflows/preprocess/analyse_genome_quality'
-include { ANNOTATE_REPETITIVE_ELEMENTS      } from '../subworkflows/local/annotate_repetitive_elements'
-// include { ANNOTATE_PROTEIN_CODING_GENES     } from '../subworkflows/annotate_protein_coding_genes'
+include { GET_DATASETS                  } from '../subworkflows/local/get_datasets'
+include { ANNOTATE_REPETITIVE_ELEMENTS  } from '../subworkflows/local/annotate_repetitive_elements'
+include { ANNOTATE_PROTEIN_CODING_GENES } from '../subworkflows/annotate_protein_coding_genes'
 // include { ANNOTATE_NON_CODING_GENES         } from '../subworkflows/annotate_non_coding_genes'
 // include { POSTPROCESS                       } from '../subworkflows/post_process'
 
@@ -67,7 +67,6 @@ include { ANNOTATE_REPETITIVE_ELEMENTS      } from '../subworkflows/local/annota
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,11 +100,8 @@ workflow EXOGAP {
 
     ch_versions = Channel.empty()
 
-    // get taxonomy, datasets...
-    GET_INFORMATIONS_ABOUT_GENOMES(genomes)
-
-    // preprocess genomes
-    PREPARE_GENOMES(GET_INFORMATIONS_ABOUT_GENOMES.out.genomes)
+    // get taxonomy and preprocess genomes
+    PREPARE_GENOMES(genomes)
 
     // annotation of repetitive elements
     // PREPARE_GENOMES.out.genomes.filter {it[1].repeats_gff.personal_annotations == null} // annotation already done
@@ -138,6 +134,8 @@ workflow EXOGAP {
     //     // -> masked_genomes
     // }
 
+    // execute genome annotation
+    GET_DATASETS(PREPARE_GENOMES.out.genomes)
     // // ANNOTATE_PROTEIN_CODING_GENES(masked_genomes)
     // // ANNOTATE_NON_CODING_GENES(masked_genomes)
 

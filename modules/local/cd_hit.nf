@@ -1,6 +1,6 @@
 process CD_HIT {
     tag "CD_HIT_$library_id"
-    cpus 10
+    cpus 64
     memory '16 GB'
     time '1d'
     label 'cd_hit'
@@ -13,10 +13,10 @@ process CD_HIT {
 
     script:
     """
-    memory=\$(echo $task.memory | sed 's/Gb//')
+    memory=\$(echo "$task.memory" | sed 's/GB//')
     memory=\$((\$memory * 1024))
 
-    cd-hit -i $library_id -o ${library_path}.nr -c 0.95 -n 5 -g 1 -d 0 -M \$memory -T $task.cpus
+    cd-hit -i $library_path -o ${library_path}.nr -c 0.95 -n 5 -g 1 -d 0 -M \$memory -T $task.cpus
     """
 
     stub:

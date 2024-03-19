@@ -21,7 +21,7 @@ process DOWNLOAD_PROTEINS_IN_PROTEOMES {
     curl --output proteomes/\${upid}_protIDs.fa.zip \
     "https://rest.uniprot.org/uniprotkb/stream?compressed=true&format=fasta&query=%28%28proteome%3A\${upid}%29%29+AND+%28reviewed%3Atrue%29"
     done
-s
+
     # merge all protein IDs
     zcat proteomes/* > ${meta.taxid}_proteins.fa
     """

@@ -1,6 +1,6 @@
 process CD_HIT_EST {
     tag "CD_HIT_EST_$library_id"
-    cpus 10
+    cpus 64
     time '1d'
     label 'cd_hit'
 
@@ -12,6 +12,9 @@ process CD_HIT_EST {
 
     script:
     """
+    memory=\$(echo "$task.memory" | sed 's/GB//')
+    memory=\$((\$memory * 1024))
+
     cd-hit-est -i $library_path -o ${library_path}.nr \
         -c 0.95 \
         -g 1 \
