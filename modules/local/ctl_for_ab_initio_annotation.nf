@@ -4,10 +4,10 @@ process CTL_FOR_AB_INITIO_ANNOTATION {
 
     input:
     tuple val(id), val(meta), path(genome), path(maker), path(snap), path(augustus)
-    each val(iteration)s
+    each val(iteration)
 
     output:
-    tuple  val(id), val(meta), path(genome), path("maker_opts.ctl"),      emit: masked
+    tuple  val(id), val(meta), path(genome), path("maker_opts.ctl")
 
 
     script:

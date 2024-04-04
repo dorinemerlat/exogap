@@ -3,10 +3,10 @@ process AGAT_STATISTICS {
     label 'agat'
 
     input:
-    tuple val(id), val(meta), path(gff), val(iteration)
+    tuple val(id), val(meta), path(genome), path(gff), val(iteration) // without sequences
 
     output:
-    tuple val(id), val(meta), path("${id}.stats"), val(iteration)
+    tuple val(id), val(meta), path(genome), path("${id}.stats"), val(iteration)
 
     script:
     """

@@ -1,17 +1,18 @@
-include {REPEATMODELER }                                    from '../../modules/local/repeatmodeler'
-include {RENAME_REPEATMODELER_OUTPUT }                      from '../../modules/local/rename_repeatmodeler_output'
-include {GATHER_FILES }                                     from '../../modules/local/gather_files'
-include {SEPARATE_LIBRARIES }                               from '../../modules/local/separate_libraries'
-include {CD_HIT_EST as CD_HIT_EST_1 }                       from '../../modules/local/cd_hit_est'
-include {CD_HIT_EST as CD_HIT_EST_2 }                       from '../../modules/local/cd_hit_est'
-include {REPEATMASKER as REPEATMASKER_WITH_EXISTING_LIB }   from '../../modules/local/repeatmasker'
-include {REPEATMASKER as REPEATMASKER_WITH_OWN_LIB_1 }      from '../../modules/local/repeatmasker'
-include {REPEATMASKER as REPEATMASKER_WITH_OWN_LIB_2 }      from '../../modules/local/repeatmasker'
-include {PROCESS_REPEATS }                                  from '../../modules/local/processrepeats'
-include {REPEATLANDSCAPE }                                  from '../../modules/local/repeatLanscape'
-include {SUMMARIZE_REPEATS }                                from '../../modules/local/summarize_repeats'
+include { REPEATMODELER                                     } from '../../modules/local/repeatmodeler'
+include { RENAME_REPEATMODELER_OUTPUT                       } from '../../modules/local/rename_repeatmodeler_output'
+include { GATHER_FILES                                      } from '../../modules/local/gather_files'
+include { SEPARATE_LIBRARIES                                } from '../../modules/local/separate_libraries'
+include { CD_HIT_EST as CD_HIT_EST_1                        } from '../../modules/local/cd_hit_est'
+include { CD_HIT_EST as CD_HIT_EST_2                        } from '../../modules/local/cd_hit_est'
+include { REPEATMASKER as REPEATMASKER_WITH_EXISTING_LIB    } from '../../modules/local/repeatmasker'
+include { REPEATMASKER as REPEATMASKER_WITH_OWN_LIB_1       }from '../../modules/local/repeatmasker'
+include { REPEATMASKER as REPEATMASKER_WITH_OWN_LIB_2       } from '../../modules/local/repeatmasker'
+include { PROCESS_REPEATS                                   } from '../../modules/local/processrepeats'
+include { REPEATLANDSCAPE                                   } from '../../modules/local/repeatLanscape'
+include { SUMMARIZE_REPEATS                                 } from '../../modules/local/summarize_repeats'
 // include {PLOT_REPEATS }                                     from '../../modules/local/plot_repeats.nf'
-include {DOWNLOAD_DFAM }                                    from '../../modules/local/download_dfam.nf'
+include { DOWNLOAD_DFAM                                     } from '../../modules/local/download_dfam.nf'
+include { REFORMAT_CLASSIFICATION_TO_DFAM                   } from '../../modules/local/reformat_classification_to_dfam.nf'
 
 workflow ANNOTATE_REPETITIVE_ELEMENTS {
     take:
@@ -71,19 +72,24 @@ workflow ANNOTATE_REPETITIVE_ELEMENTS {
         REPEATLANDSCAPE(PROCESS_REPEATS.out.align)
 
         DOWNLOAD_DFAM()
-        // CHANGE_CLASSIFICATION_TO_DFAM(
-        //     GET_DFAM_CLASSIFICATION,
-        //     PROCESSREPEATS.out.masked,
-        //     PROCESSREPEATS.out.gff,
-        //     PROCESSREPEATS.out.cat,
-        //     PROCESSREPEATS.out.out,
-        //     PROCESSREPEATS.out.tbl,
-        //     REPEATLANDSCAPE.out.align)
 
+        REFORMAT_CLASSIFICATION_TO_DFAM(
+            PROCESS_REPEATS.out.gff,
+            PROCESS_REPEATS.out.cat,
+            PROCESS_REPEATS.out.out,
+            PROCESS_REPEATS.out.tbl,
+            REPEATLANDSCAPE.out,
+            DOWNLOAD_DFAM.out)
+
+        REFORMAT_CLASSIFICATION_TO_DFAM.out.gff
+            .join (genomes )
+            .map { id, meta1, gff, meta2, fasta -> [ id, Utils.updateLinkedHashMap(meta1, 'repeats_gff', gff), fasta]}
+            .set { genomes }
         // GET_COMPLEX_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.gff)
         // SUMMARIZE_AND_PLOT_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.out.collect{it[1]}, newick)
 
+
     emit:
-        masked = PROCESS_REPEATS.out.masked
+        genomes = genomes
     // masked_genomes = repeats_ch.fasta
 }
