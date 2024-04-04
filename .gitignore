@@ -14,3 +14,4 @@ nextflow.config.*
 busco_downloads/
 *myriapod*
 for_christelle/*
+nextflow.sh

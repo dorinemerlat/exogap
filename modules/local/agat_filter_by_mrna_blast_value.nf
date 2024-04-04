@@ -6,7 +6,7 @@ process AGAT_FILTER_BY_MRNA_BLAST_VALUE {
     tuple val(id), val(meta), path(genome), path(gff), path(blastp_out), val(iteration)
 
     output:
-    tuple val(id), val(meta), path(genome), path("non_redundant.gff")
+    tuple val(id), val(meta), path(genome), path("non_redundant.gff"), val(iteration)
 
     script:
     """

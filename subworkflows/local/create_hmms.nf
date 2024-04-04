@@ -16,6 +16,10 @@ include { MAKEBLASTDB                               } from '../../modules/local/
 include { BLASTP                                    } from '../../modules/local/blastp'
 include { AGAT_FILTER_BY_MRNA_BLAST_VALUE           } from '../../modules/local/agat_filter_by_mrna_blast_value'
 include { GFF_TO_AUGUSTUS_GFF                       } from '../../modules/local/gff_to_augustus_gff'
+include { CREATE_AUGUSTUS_SET                       } from '../../modules/local/create_augustus_set'
+include { CREATE_AUGUSTUS_NEW_SPECIES               } from '../../modules/local/create_augustus_new_species'
+// include { TRAINING_AUGUSTUS                         } from '../../modules/local/training_augustus'
+// include { OPTIMIZE_AUGUSTUS                         } from '../../modules/local/optimize_augustus'
 
 workflow CREATE_HMMS {
     take:
@@ -59,9 +63,18 @@ workflow CREATE_HMMS {
 
         // Reformat the gff file for augustus
         GFF_TO_AUGUSTUS_GFF(AGAT_FILTER_BY_MRNA_BLAST_VALUE.out)
-    //     CREATE_AUGUSTUS_SET(GFF_TO_AUGUSTUS_GFF.out)
+        CREATE_AUGUSTUS_SET(GFF_TO_AUGUSTUS_GFF.out)
 
-    //     // agat_sp_filter_by_mrnaBlastValue
-    // emit:
-    //     snap = SNAP.out
+        CREATE_AUGUSTUS_NEW_SPECIES(gff_for_augustus)
+        // CREATE_AUGUSTUS_SET.join(CREATE_AUGUSTUS_NEW_SPECIES.out)
+        //     .map { -> [] }
+        //     .set { training_set }
+
+        // TRAINING_AUGUSTUS(training_set)
+        // OPTIMIZE_AUGUSTUS(TRAINING_AUGUSTUS.out)
+        // TRAINING_AUGUSTUS(OPTIMIZE_AUGUSTUS.out)
+
+    emit:
+        snap = SNAP.out
+        // augustus = TRAINING_AUGUSTUS.out
 }
