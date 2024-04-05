@@ -18,12 +18,13 @@ include { MAKER_BY_SIMILARITY as MAKER_BY_SIMILARITY_MAIN       } from '../../mo
 include { MAKER_BY_SIMILARITY as MAKER_BY_SIMILARITY_TRAINING   } from '../../modules/local/maker_by_similarity'
 include { MAKER_AB_INITIO as MAKER_AB_INITIO_1                  } from '../../modules/local/maker_ab_initio'
 include { MAKER_AB_INITIO as MAKER_AB_INITIO_2                  } from '../../modules/local/maker_ab_initio'
-include { FILTER_MAKER_AB_INITIO_PREDICTIONS                   } from '../../modules/local/filter_maker_ab_initio_predictions'
+include { FILTER_MAKER_AB_INITIO_PREDICTIONS                    } from '../../modules/local/filter_maker_ab_initio_predictions'
 include { AGAT_MERGE_ANNOTATIONS                                } from '../../modules/local/agat_merge_annotations'
 include { MAKER_MAP_IDS                                         } from '../../modules/local/maker_map_ids'
 include { GENERATE_MAKER_FASTA                                  } from '../../modules/local/generate_maker_fasta'
 include { BLASTP                                                } from '../../modules/local/blastp'
-include { INTERPROSCAN                                              } from '../../modules/local/interproscan'
+include { BLAST_FORMATTER                                       } from '../../modules/local/blast_formatter'
+include { INTERPROSCAN                                          } from '../../modules/local/interproscan'
 // include { FUNCTIONAL_ANNOTATION_BLAST2GO                            } from '../../modules/local/blast2go'
 // include { FUNCTIONAL_ANNOTATION_WITH_MAKER                          } from '../../modules/local/functional_annotation_with_maker'
 
@@ -110,7 +111,9 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
             .set { sequences_for_blastp }
 
         BLASTP(sequences_for_blastp)
+        BLAST_FORMATTER(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '2', comment ]})
         INTERPROSCAN(GENERATE_MAKER_FASTA.out.proteins)
+
 
     //     if (params.blast2go) {
                 // DOWNLOAD_OBO

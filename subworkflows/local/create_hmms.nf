@@ -13,6 +13,7 @@ include { AGAT_FILTER_BY_LOCUS_DISTANCE             } from '../../modules/local/
 include { AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS } from '../../modules/local/agat_filter_incomplete_gene_coding_models'
 include { AGAT_EXTRACT_SEQUENCE                     } from '../../modules/local/agat_extract_sequence'
 include { MAKEBLASTDB                               } from '../../modules/local/makeblastdb'
+include { BLAST_FORMATTER                           } from '../../modules/local/blast_formatter'
 include { BLASTP                                    } from '../../modules/local/blastp'
 include { AGAT_FILTER_BY_MRNA_BLAST_VALUE           } from '../../modules/local/agat_filter_by_mrna_blast_value'
 include { GFF_TO_AUGUSTUS_GFF                       } from '../../modules/local/gff_to_augustus_gff'
@@ -54,9 +55,10 @@ workflow CREATE_HMMS {
         MAKEBLASTDB(AGAT_EXTRACT_SEQUENCE.out.map {id, meta, genome, proteins, iteration -> [ id, meta, proteins, 'prot', iteration] })
 
         AGAT_EXTRACT_SEQUENCE.out.join(MAKEBLASTDB.out)
-            .map { id, meta1, genome, proteins, iteration, meta2, db, comment -> [ id, meta1, proteins, db.find { db =~ ".phr" }.toString().replaceFirst(/.phr/, ""), db, '10', '3', '100', '6', comment ] }
+            .map { id, meta1, genome, proteins, iteration, meta2, db, comment -> [ id, meta1, proteins, db.find { db =~ ".phr" }.toString().replaceFirst(/.phr/, ""), db, '10', '3', '100', comment ] }
             .set { sequences_for_blastp }
         BLASTP(sequences_for_blastp)
+        BLAST_FORMATTER(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '6', comment ]})
 
         AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS.out.join(BLASTP.out)
             .map { id, meta1, genome, gff, iteration, meta2,  blastp_out, comment -> [ id, meta1, genome, gff, blastp_out, iteration ] }
