@@ -17,9 +17,12 @@ include { BLASTP                                    } from '../../modules/local/
 include { AGAT_FILTER_BY_MRNA_BLAST_VALUE           } from '../../modules/local/agat_filter_by_mrna_blast_value'
 include { GFF_TO_AUGUSTUS_GFF                       } from '../../modules/local/gff_to_augustus_gff'
 include { CREATE_AUGUSTUS_SET                       } from '../../modules/local/create_augustus_set'
-include { CREATE_AUGUSTUS_NEW_SPECIES               } from '../../modules/local/create_augustus_new_species'
-// include { TRAINING_AUGUSTUS                         } from '../../modules/local/training_augustus'
-// include { OPTIMIZE_AUGUSTUS                         } from '../../modules/local/optimize_augustus'
+include { CREATE_AUGUSTUS_NEW_SPECIE                } from '../../modules/local/create_augustus_new_specie'
+include { TRAINING_AUGUSTUS as TRAINING_AUGUSTUS_1  } from '../../modules/local/training_augustus'
+include { TRAINING_AUGUSTUS as TRAINING_AUGUSTUS_2  } from '../../modules/local/training_augustus'
+include { AUGUSTUS as AUGUSTUS_1                    } from '../../modules/local/augustus'
+include { AUGUSTUS as AUGUSTUS_2                    } from '../../modules/local/augustus'
+include { OPTIMIZE_AUGUSTUS                         } from '../../modules/local/optimize_augustus'
 
 workflow CREATE_HMMS {
     take:
@@ -51,7 +54,7 @@ workflow CREATE_HMMS {
         MAKEBLASTDB(AGAT_EXTRACT_SEQUENCE.out.map {id, meta, genome, proteins, iteration -> [ id, meta, proteins, 'prot', iteration] })
 
         AGAT_EXTRACT_SEQUENCE.out.join(MAKEBLASTDB.out)
-            .map { id, meta1, genome, proteins, iteration, meta2, db, comment -> [ id, meta1, proteins, db, '6', comment ] }
+            .map { id, meta1, genome, proteins, iteration, meta2, db, comment -> [ id, meta1, proteins, db.find { db =~ ".phr" }.toString().replaceFirst(/.phr/, ""), db, '10', '3', '100', '6', comment ] }
             .set { sequences_for_blastp }
         BLASTP(sequences_for_blastp)
 
@@ -65,16 +68,21 @@ workflow CREATE_HMMS {
         GFF_TO_AUGUSTUS_GFF(AGAT_FILTER_BY_MRNA_BLAST_VALUE.out)
         CREATE_AUGUSTUS_SET(GFF_TO_AUGUSTUS_GFF.out)
 
-        CREATE_AUGUSTUS_NEW_SPECIES(gff_for_augustus)
-        // CREATE_AUGUSTUS_SET.join(CREATE_AUGUSTUS_NEW_SPECIES.out)
-        //     .map { -> [] }
-        //     .set { training_set }
+        CREATE_AUGUSTUS_NEW_SPECIE(gff_for_augustus)
+        CREATE_AUGUSTUS_SET.out.join(CREATE_AUGUSTUS_NEW_SPECIE.out)
+            .map { id, meta1, genome1, train, test, iteration1, meta2, genome2, specie, iteration2 -> [id, meta1, genome1, train, test, specie, iteration1] }
+            .set { training_set }
 
-        // TRAINING_AUGUSTUS(training_set)
-        // OPTIMIZE_AUGUSTUS(TRAINING_AUGUSTUS.out)
-        // TRAINING_AUGUSTUS(OPTIMIZE_AUGUSTUS.out)
+        TRAINING_AUGUSTUS_1(training_set)
+        AUGUSTUS_1(TRAINING_AUGUSTUS_1.out)
+
+        OPTIMIZE_AUGUSTUS(TRAINING_AUGUSTUS_1.out)
+
+        TRAINING_AUGUSTUS_2(OPTIMIZE_AUGUSTUS.out)
+        AUGUSTUS_2(TRAINING_AUGUSTUS_2.out)
 
     emit:
         snap = SNAP.out
-        // augustus = TRAINING_AUGUSTUS.out
+        augustus = TRAINING_AUGUSTUS_2.out
+        augustus_gff = AGAT_FILTER_BY_MRNA_BLAST_VALUE.out
 }

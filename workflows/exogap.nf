@@ -37,6 +37,12 @@ Channel.fromSamplesheet("input", skip_duplicate_check: true)
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',  meta.repeats_gff), fasta ] }
     .set { genomes }
 
+// bank blast
+Channel.fromPath(params.blast_db_local + "/*")
+    .collect()
+    .map { it -> [it.find { it =~ ".phr" }.toString().replaceFirst(/.phr/, ""), it] }
+    .set { blast_db }
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
@@ -123,7 +129,7 @@ workflow EXOGAP {
         .map { id, meta1, fasta1, meta2, fasta2 -> [id, Utils.updateLinkedHashMap(meta1, 'repeats_gff', meta2.repeats_gff), fasta1]}
         .set { genomes }
 
-    ANNOTATE_PROTEIN_CODING_GENES( genomes )
+    ANNOTATE_PROTEIN_CODING_GENES( genomes, blast_db )
     // // ANNOTATE_NON_CODING_GENES(masked_genomes)
 
     // // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)

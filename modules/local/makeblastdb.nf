@@ -15,7 +15,7 @@ process MAKEBLASTDB {
 
     stub:
     """
-    for i in ["ndb", "nhr", "nin", "not", "nsq", "ntf", "nto"]; do
+    for i in "ndb", "nhr", "nin", "not", "nsq", "ntf", "nto"; do
         touch ${id}_db.\${i}
     done
     """

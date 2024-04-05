@@ -6,9 +6,9 @@ process GENERATE_MAKER_GFF {
     tuple val(id), val(meta), path(genome), path(maker_log), val(iteration)
 
     output:
-    tuple  val(id), val(meta), path(genome), path("${id}_complete.gff"), val(iteration),                emit: gff_complete
-    tuple  val(id), val(meta), path(genome), path("${id}.gff"), val(iteration),                         emit: gff
-    tuple  val(id), val(meta), path(genome), path("${id}_complete_with_sequences.gff"), val(iteration), emit: gff_complete_with_sequences
+    tuple val(id), val(meta), path(genome), path("${id}_complete.gff"), val(iteration),                emit: gff_complete
+    tuple val(id), val(meta), path(genome), path("${id}.gff"), val(iteration),                         emit: gff
+    tuple val(id), val(meta), path(genome), path("${id}_complete_with_sequences.gff"), val(iteration), emit: gff_complete_with_sequences
 
     script:
     """

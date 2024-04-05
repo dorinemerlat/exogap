@@ -5,30 +5,39 @@ ANNOTATE PROTEIN CODING GENES
 */
 
 // include subworkflows
-include { RUN_MAKER as RUN_MAKER_BY_ANNOTATION_MAIN     } from './run_maker.nf'
-include { RUN_MAKER as RUN_MAKER_BY_ANNOTATION_TRAINING } from './run_maker.nf'
-include { RUN_MAKER as RUN_AB_INITIO_MAKER_1            } from './run_maker.nf'
-include { RUN_MAKER as RUN_AB_INITIO_MAKER_2            } from './run_maker.nf'
-include { CREATE_HMMS as CREATE_HMMS_1                  } from './create_hmms.nf'
-include { CREATE_HMMS as CREATE_HMMS_2                  } from './create_hmms.nf'
+include { PROCESS_MAKER as PROCESS_MAKER_BY_SIMILARITY_MAIN     } from './process_maker.nf'
+include { PROCESS_MAKER as PROCESS_MAKER_BY_SIMILARITY_TRAINING } from './process_maker.nf'
+include { PROCESS_MAKER as PROCESS_MAKER_AB_INITIO_1            } from './process_maker.nf'
+include { PROCESS_MAKER as PROCESS_MAKER_AB_INITIO_2            } from './process_maker.nf'
+include { CREATE_HMMS as CREATE_HMMS_1                          } from './create_hmms.nf'
+include { CREATE_HMMS as CREATE_HMMS_2                          } from './create_hmms.nf'
 
 
 // include modules
-include { CTL_FOR_ANNOTATION_BY_SIMILARITY as CTL_FOR_ANNOTATION_BY_SIMILARITY_MAIN     } from '../../modules/local/ctl_for_annotation_by_similarity'
-include { CTL_FOR_ANNOTATION_BY_SIMILARITY as CTL_FOR_ANNOTATION_BY_SIMILARITY_TRAINING } from '../../modules/local/ctl_for_annotation_by_similarity'
-include { CTL_FOR_AB_INITIO_ANNOTATION as CTL_FOR_AB_INITIO_ANNOTATION_1                } from '../../modules/local/ctl_for_ab_initio_annotation'
-include { CTL_FOR_AB_INITIO_ANNOTATION as CTL_FOR_AB_INITIO_ANNOTATION_2                } from '../../modules/local/ctl_for_ab_initio_annotation'
-
-include { REFORMAT_MAKER_GFF                                        } from '../../modules/local/reformat_maker_gff'
-include { BLASTP                                                    } from '../../modules/local/blastp'
-// include { INTERPROSCAN                                              } from '../../modules/local/interproscan'
+include { MAKER_BY_SIMILARITY as MAKER_BY_SIMILARITY_MAIN       } from '../../modules/local/maker_by_similarity'
+include { MAKER_BY_SIMILARITY as MAKER_BY_SIMILARITY_TRAINING   } from '../../modules/local/maker_by_similarity'
+include { MAKER_AB_INITIO as MAKER_AB_INITIO_1                  } from '../../modules/local/maker_ab_initio'
+include { MAKER_AB_INITIO as MAKER_AB_INITIO_2                  } from '../../modules/local/maker_ab_initio'
+include { FILTER_MAKER_AB_INITIO_PREDICTIONS                   } from '../../modules/local/filter_maker_ab_initio_predictions'
+include { AGAT_MERGE_ANNOTATIONS                                } from '../../modules/local/agat_merge_annotations'
+include { MAKER_MAP_IDS                                         } from '../../modules/local/maker_map_ids'
+include { GENERATE_MAKER_FASTA                                  } from '../../modules/local/generate_maker_fasta'
+include { BLASTP                                                } from '../../modules/local/blastp'
+include { INTERPROSCAN                                              } from '../../modules/local/interproscan'
 // include { FUNCTIONAL_ANNOTATION_BLAST2GO                            } from '../../modules/local/blast2go'
 // include { FUNCTIONAL_ANNOTATION_WITH_MAKER                          } from '../../modules/local/functional_annotation_with_maker'
 
 
+def gff_for_hmm( channel, iteration ) {
+    return channel.map { id, meta, genome, gff, previous_iteration -> [ id, meta, genome, gff, iteration] }
+}
+
+
+def create
 workflow ANNOTATE_PROTEIN_CODING_GENES {
     take:
         genomes
+        blast_db
 
     main:
 
@@ -36,50 +45,79 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
         genomes.map { id, meta, fasta -> [ id, meta, fasta, meta.main_protein_set.dataset.file, meta.transcript_set.dataset.file, meta.repeats_gff, 'main']}
             .set { genomes_for_main_similiarity_annotation }
 
-        CTL_FOR_ANNOTATION_BY_SIMILARITY_MAIN(genomes_for_main_similiarity_annotation)
-        RUN_MAKER_BY_ANNOTATION_MAIN(CTL_FOR_ANNOTATION_BY_SIMILARITY_MAIN.out)
+        MAKER_BY_SIMILARITY_MAIN(genomes_for_main_similiarity_annotation)
+        PROCESS_MAKER_BY_SIMILARITY_MAIN(MAKER_BY_SIMILARITY_MAIN.out)
 
 
         if (params.max_proteins_from_close_species ) {
             genomes.map { id, meta, fasta -> [ id, meta, fasta, meta.training_protein_set.dataset.file, meta.transcript_set.dataset.file, meta.repeats_gff, 'training']}
                 .set { genomes_for_training_similiarity_annotation }
 
-            CTL_FOR_ANNOTATION_BY_SIMILARITY_TRAINING(genomes_for_training_similiarity_annotation)
-            RUN_MAKER_BY_ANNOTATION_TRAINING(CTL_FOR_ANNOTATION_BY_SIMILARITY_TRAINING.out)
-            RUN_MAKER_BY_ANNOTATION_TRAINING.out.gff_for_augustus.set { gff_for_augustus }
+            MAKER_BY_SIMILARITY_TRAINING(genomes_for_training_similiarity_annotation)
+            PROCESS_MAKER_BY_SIMILARITY_TRAINING(MAKER_BY_SIMILARITY_TRAINING.out)
+            PROCESS_MAKER_BY_SIMILARITY_TRAINING.out.gff_for_augustus.set { gff_for_augustus_1 }
 
         }  else {
-            RUN_MAKER_BY_ANNOTATION_MAIN.out.gff_for_augustus.set { gff_for_augustus }
+            PROCESS_MAKER_BY_SIMILARITY_MAIN.out.gff_for_augustus.set { gff_for_augustus_1 }
         }
 
-        RUN_MAKER_BY_ANNOTATION_MAIN.out.gff_for_snap
-            .map { id, meta, genome, gff, previous_iteration -> [ id, meta, genome, gff, '1'] }
-            .set { gff_for_snap }
+        gff_for_snap_1 = gff_for_hmm(PROCESS_MAKER_BY_SIMILARITY_MAIN.out.gff_for_maker_and_snap, '1')
+        gff_for_augustus_1 = gff_for_hmm(gff_for_augustus_1, '1')
 
-        gff_for_augustus
-            .map { id, meta, genome, gff, previous_iteration -> [ id, meta, genome, gff, '1'] }
-            .set { gff_for_augustus }
+        CREATE_HMMS_1(gff_for_snap_1, gff_for_augustus_1)
 
-        CREATE_HMMS_1(gff_for_snap, gff_for_augustus)
-    //     CTL_FOR_AB_INITIO_1(RUN_MAKER_BY_ANNOTATION_MAIN.out, CREATE_HMMS_1.out.snap, CREATE_HMMS_1.out.augustus)
-    //     RUN_AB_INITIO_MAKER_1(CTL_FOR_AB_INITIO_1.out, '1')
+        PROCESS_MAKER_BY_SIMILARITY_MAIN.out.gff_for_maker_and_snap.join(CREATE_HMMS_1.out.snap)
+            .map { id, meta1, genome1, gff, previous_iteration, meta2, genome2, snap, iteration -> [ id, meta1, genome1, gff, snap, iteration ] }
+            .join(CREATE_HMMS_1.out.augustus)
+            .map { id, meta1, genome1, gff, snap, iteration1, meta2, genome2, train, test, augustus, iteration2 -> [ id, meta1, genome1, gff, snap, augustus, iteration1 ] }
+            .set { genomes_for_ab_initio_annotation_1 }
 
-    //     // TO DO: create set for augustus2
-    //     CREATE_HMMS_2(RUN_AB_INITIO_MAKER_1.out, agustus_set2, '2')
-    //     CTL_FOR_AB_INITIO_2(RUN_AB_INITIO_MAKER_1.out, CREATE_HMMS_2.out.snap, CREATE_HMMS_2.out.augustus, '2')
-    //     RUN_AB_INITIO_MAKER_2(CTL_FOR_AB_INITIO_2.out, '2')
+        MAKER_AB_INITIO_1(genomes_for_ab_initio_annotation_1)
+        PROCESS_MAKER_AB_INITIO_1(MAKER_AB_INITIO_1.out)
 
-    //     // functional annotation
-    //     REFORMAT_PROTEINS(RUN_AB_INITIO_MAKER_2.out) // TO DO: add this to the module to remove star
-    //     BLASTP(REFORMAT_MAKER_GFF)
-    //     INTERPROSCAN(REFORMAT_MAKER_GFF)
+        gff_for_snap_2 = gff_for_hmm(PROCESS_MAKER_AB_INITIO_1.out.gff_for_maker_and_snap, '2')
+        gff_for_augustus_2 = gff_for_hmm(PROCESS_MAKER_AB_INITIO_1.out.gff_for_augustus, '2')
+
+        FILTER_MAKER_AB_INITIO_PREDICTIONS(gff_for_augustus_2)
+        FILTER_MAKER_AB_INITIO_PREDICTIONS.out.join(CREATE_HMMS_1.out.augustus_gff)
+            .map { id, meta1, genome1, gff1, iteration1, meta2, genome2, gff2, iteration2 -> [ id, meta1, genome1, gff1, gff2, iteration1 ] }
+            .set { gff_for_augustus_2 }
+        AGAT_MERGE_ANNOTATIONS(gff_for_augustus_2)
+
+        CREATE_HMMS_2(gff_for_snap_2, AGAT_MERGE_ANNOTATIONS.out)
+
+        PROCESS_MAKER_AB_INITIO_1.out.gff_for_maker_and_snap.join(CREATE_HMMS_2.out.snap)
+            .map { id, meta1, genome1, gff, previous_iteration, meta2, genome2, snap, iteration -> [ id, meta1, genome1, gff, snap, iteration ] }
+            .join(CREATE_HMMS_2.out.augustus)
+            .map { id, meta1, genome1, gff, snap, iteration1, meta2, genome2, train, test, augustus, iteration2 -> [ id, meta1, genome1, gff, snap, augustus, iteration1 ] }
+            .set { genomes_for_ab_initio_annotation_2 }
+
+        MAKER_AB_INITIO_2(genomes_for_ab_initio_annotation_2)
+        PROCESS_MAKER_AB_INITIO_2(MAKER_AB_INITIO_2.out)
+        GENERATE_MAKER_FASTA(MAKER_AB_INITIO_2.out)
+
+        PROCESS_MAKER_AB_INITIO_2.out.gff_for_maker_and_snap
+            .join(GENERATE_MAKER_FASTA.out.proteins)
+            .join(GENERATE_MAKER_FASTA.out.transcripts)
+            .map { id, meta1, genome1, gff, iteration, meta2, genome2, proteins, meta3, genome3, transcripts -> [ id, meta1, genome1, gff, proteins, transcripts ]}
+            .set { maker_outputs }
+
+        MAKER_MAP_IDS(maker_outputs)
+
+        // functional annotation
+        MAKER_MAP_IDS.out.proteins
+            .map { id, meta, genome, proteins -> [id, meta, proteins, blast_db[0], blast_db[1], '1.0E-6', '3', '20', '5', 'functionnal']}
+            .set { sequences_for_blastp }
+
+        BLASTP(sequences_for_blastp)
+        INTERPROSCAN(GENERATE_MAKER_FASTA.out.proteins)
 
     //     if (params.blast2go) {
                 // DOWNLOAD_OBO
                 // DOWNLOAD_UNIPROT_BLAST()
     //         FUNCTIONAL_ANNOTATION_BLAST2GO(REFORMAT_MAKER_GFF, BLAST, INTERPROSCAN)
     //     } else {
-    //         FUNCTIONAL_ANNOTATION_WITH_MAKER(REFORMAT_MAKER_GFF, BLAST, INTERPROSCAN)
+    //         MAKER_FUNCTIONAL()
     //     }
 
     // emit:
