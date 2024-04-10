@@ -4,11 +4,11 @@ CHECK IF FASTA FILES ARE VALIDS, REFORMATE THEM AND CALCULATE THEIR SIZE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { DOWNLOAD_LINEAGE }                    from '../../../modules/local/download_lineage.nf'
-include { DOWNLOAD_NEWICK }                     from '../../../modules/local/download_newick'
-include { FASTA_VALIDATOR }                     from '../../../modules/local/fasta_validator'
-include { RENAME_GENOME }                       from '../../../modules/local/rename_genome'
-include { CALCULATE_GENOME_SIZE }               from '../../../modules/local/calculate_genome_size'
+include { DOWNLOAD_LINEAGE }                    from '../../modules/local/download_lineage.nf'
+include { DOWNLOAD_NEWICK }                     from '../../modules/local/download_newick'
+include { FASTA_VALIDATOR }                     from '../../modules/local/fasta_validator'
+include { RENAME_GENOME }                       from '../../modules/local/rename_genome'
+include { CALCULATE_GENOME_SIZE }               from '../../modules/local/calculate_genome_size'
 
 workflow PREPARE_GENOMES {
     take:

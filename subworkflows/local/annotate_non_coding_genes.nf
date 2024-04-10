@@ -1,17 +1,28 @@
-workflow ANNOTATE_PROTEIN_CODING_GENES {
+include { INFERNAL                  } from '../../modules/local/infernal'
+include { BARRNAP as BARRNAP_NUCL   } from '../../modules/local/barrnap'
+include { BARRNAP as BARRNAP_MITO   } from '../../modules/local/barrnap'
+include { RNAMMER                   } from '../../modules/local/rnammer'
+// include { AGAT_MERGE_ANNOTATIONS    } from '../../modules/local/agat_merge_annotations'
+// include { SPLIT_BY_NCRNA_TYPE       } from '../../modules/local/split_by_ncrna_type'
+include { DOWNLOAS_RFAM             } from '../../modules/local/download_rfam'
+
+workflow ANNOTATE_NON_CODING_GENES {
     take:
         genomes
-        maker
 
     main:
+    DOWNLOAS_RFAM()
 
-    // select set about data to download
-    RUN_INFERNAL(genomes)
-    RUN_RNAMMER(genomes)
-    RUN_BARNAP(genomes)
+    INFERNAL(genomes.combine(DOWNLOAS_RFAM.out.models))
+    BARRNAP_NUCL(genomes.map { id, meta, genome -> [id, meta, genome, 'nucl']})
+    BARRNAP_MITO(genomes.map { id, meta, genome -> [id, meta, genome, 'mito']})
+    RNAMMER(genomes)
 
-    // POST-PROCESSING: filter and concatenate results
 
     emit:
-        annotated_genomes
+        infernal = INFERNAL.out
+        barrnap_nucl = BARRNAP_NUCL.out
+        barrnap_mito = BARRNAP_MITO.out
+        rnammer = RNAMMER.out
+
 }
