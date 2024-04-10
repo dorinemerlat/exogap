@@ -14,6 +14,7 @@ process BLASTP {
 
     """
 
+
     stub:
     """
     touch ${id}.blastp_format_11.out

@@ -58,7 +58,7 @@ include { PREPARE_GENOMES               } from '../subworkflows/local/prepare_ge
 include { GET_DATASETS                  } from '../subworkflows/local/get_datasets'
 include { ANNOTATE_REPETITIVE_ELEMENTS  } from '../subworkflows/local/annotate_repetitive_elements'
 include { ANNOTATE_PROTEIN_CODING_GENES } from '../subworkflows/local/annotate_protein_coding_genes'
-// include { ANNOTATE_NON_CODING_GENES         } from '../subworkflows/annotate_non_coding_genes'
+include { ANNOTATE_NON_CODING_GENES     } from '../subworkflows/local/annotate_non_coding_genes'
 // include { POSTPROCESS                       } from '../subworkflows/post_process'
 
 /*
@@ -130,9 +130,10 @@ workflow EXOGAP {
         .set { genomes }
 
     ANNOTATE_PROTEIN_CODING_GENES( genomes, blast_db )
-    // // ANNOTATE_NON_CODING_GENES(masked_genomes)
 
-    // // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)
+    ANNOTATE_NON_CODING_GENES(genomes)
+
+    // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)
 
     // emit:
     //     repetitive_elements = ANNOTATE_REPETITIVE_ELEMENTS.out.masked

@@ -4,12 +4,12 @@ process INTERPROSCAN {
     cpus 20
 
     input:
-    tuple val(id), val(meta), path(genome), path(proteins)
+    tuple val(id), val(meta), path(proteins)
 
     output:
-    tuple val(id), val(meta), path(genome), path("${id}.ips.xml"),    emit: xml
-    tuple val(id), val(meta), path(genome), path("${id}.ips.tsv"),    emit: tsv
-    tuple val(id), val(meta), path(genome), path("${id}.ips.gff3"),   emit: gff
+    tuple val(id), val(meta), path("${id}.ips.xml"),    emit: xml
+    tuple val(id), val(meta), path("${id}.ips.tsv"),    emit: tsv
+    tuple val(id), val(meta), path("${id}.ips.gff3"),   emit: gff
 
     script:
     """

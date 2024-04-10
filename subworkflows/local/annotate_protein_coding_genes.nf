@@ -23,7 +23,8 @@ include { AGAT_MERGE_ANNOTATIONS                                } from '../../mo
 include { MAKER_MAP_IDS                                         } from '../../modules/local/maker_map_ids'
 include { GENERATE_MAKER_FASTA                                  } from '../../modules/local/generate_maker_fasta'
 include { BLASTP                                                } from '../../modules/local/blastp'
-include { BLAST_FORMATTER                                       } from '../../modules/local/blast_formatter'
+include { BLAST_FORMATTER as BLAST_FORMATTER_FMT2               } from '../../modules/local/blast_formatter'
+include { BLAST_FORMATTER as BLAST_FORMATTER_FMT5               } from '../../modules/local/blast_formatter'
 include { INTERPROSCAN                                          } from '../../modules/local/interproscan'
 // include { FUNCTIONAL_ANNOTATION_BLAST2GO                            } from '../../modules/local/blast2go'
 // include { FUNCTIONAL_ANNOTATION_WITH_MAKER                          } from '../../modules/local/functional_annotation_with_maker'
@@ -81,7 +82,7 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
 
         FILTER_MAKER_AB_INITIO_PREDICTIONS(gff_for_augustus_2)
         FILTER_MAKER_AB_INITIO_PREDICTIONS.out.join(CREATE_HMMS_1.out.augustus_gff)
-            .map { id, meta1, genome1, gff1, iteration1, meta2, genome2, gff2, iteration2 -> [ id, meta1, genome1, gff1, gff2, iteration1 ] }
+            .map { id, meta1, genome1, gff1, iteration1, meta2, genome2, gff2, iteration2 -> [ id, meta1, genome1, [gff1, gff2], iteration1 ] }
             .set { gff_for_augustus_2 }
         AGAT_MERGE_ANNOTATIONS(gff_for_augustus_2)
 
@@ -105,15 +106,15 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
 
         MAKER_MAP_IDS(maker_outputs)
 
-        // functional annotation
-        MAKER_MAP_IDS.out.proteins
-            .map { id, meta, genome, proteins -> [id, meta, proteins, blast_db[0], blast_db[1], '1.0E-6', '3', '20', '5', 'functionnal']}
+        // // functional annotation
+        MAKER_MAP_IDS.out.proteins.combine(blast_db)
+            .map { id, meta,  proteins, blastdb_name, blastdb_files -> [id, meta, proteins, blastdb_name, blastdb_files, '1.0E-6', '3', '20', 'functionnal']}
             .set { sequences_for_blastp }
 
         BLASTP(sequences_for_blastp)
-        BLAST_FORMATTER(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '2', comment ]})
-        INTERPROSCAN(GENERATE_MAKER_FASTA.out.proteins)
-
+        BLAST_FORMATTER_FMT2(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '2', comment ]})
+        BLAST_FORMATTER_FMT5(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '5', comment ]})
+        INTERPROSCAN(MAKER_MAP_IDS.out.proteins)
 
     //     if (params.blast2go) {
                 // DOWNLOAD_OBO
@@ -123,6 +124,6 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
     //         MAKER_FUNCTIONAL()
     //     }
 
-    // emit:
-    //     annotated_genomes
+    emit:
+        gff = MAKER_MAP_IDS.out.gff
 }

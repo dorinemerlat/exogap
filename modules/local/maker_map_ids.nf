@@ -1,15 +1,15 @@
 process MAKER_MAP_IDS {
-    tag "MAKER_MAP_IDS_${id}_${iteration}"
+    tag "MAKER_MAP_IDS_${id}"
     label 'maker'
 
     input:
     tuple val(id), val(meta), path(genome), path(gff), path(proteins), path(transcripts)
 
     output:
-    tuple val(id), val(meta), path(genome), path("${gff}.id.map"),                  emit: map
-    tuple val(id), val(meta), path(genome), path("${id}_renamed.gff"),              emit: gff
-    tuple val(id), val(meta), path(genome), path("${id}_renamed.proteins.fa"),      emit: proteins
-    tuple val(id), val(meta), path(genome), path("${id}_renamed.transcripts.fa"),   emit: transcripts
+    tuple val(id), val(meta), path("${gff}.id.map"),                  emit: map
+    tuple val(id), val(meta), path("${id}_renamed.gff"),              emit: gff
+    tuple val(id), val(meta), path("${id}_renamed.proteins.fa"),      emit: proteins
+    tuple val(id), val(meta), path("${id}_renamed.transcripts.fa"),   emit: transcripts
 
     script:
     """
