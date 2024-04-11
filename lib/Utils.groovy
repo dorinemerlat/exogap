@@ -85,7 +85,7 @@ class Utils {
 
 
     public static List createEmptySet() {
-        return [[null, ['taxid': null, 'count': null, 'other': null], null]]
+        return [null, ['taxid': null, 'name': null, 'count': null, 'other': null], null]
     }
 }
 

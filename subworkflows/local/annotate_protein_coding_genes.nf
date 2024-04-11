@@ -42,7 +42,6 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
         blast_db
 
     main:
-
         // structural annotation
         genomes.map { id, meta, fasta -> [ id, meta, fasta, meta.main_protein_set.dataset.file, meta.transcript_set.dataset.file, meta.repeats_gff, 'main']}
             .set { genomes_for_main_similiarity_annotation }

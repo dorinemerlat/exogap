@@ -84,7 +84,7 @@ workflow GET_DATASETS {
             .set { parents }
 
         // select main proteins set
-        if (params.max_proteins_for_large_main != null && params.max_proteins_for_large_main != false) {
+        if (params.max_proteins_for_large_main != null && params.max_proteins_for_large_main != false) { // if user want use the automatic download of proteins from proteomes
             SEARCH_PROTEINS_IN_PROTEOMES(parents)
             DOWNLOAD_PROTEINS_IN_PROTEOMES(setSelection(genomes, SEARCH_PROTEINS_IN_PROTEOMES.out, params.max_proteins_for_large_main))
 
@@ -95,12 +95,12 @@ workflow GET_DATASETS {
                 .set { genomes }
 
 
-        } else {
+        } else { // if user doesn't want to use the automatic download of proteins from proteomes
             genomes.map { genome, meta, fasta, set -> [ genome, Utils.updateLinkedHashMap(meta, 'main_protein_set', Utils.updateLinkedHashMap(meta.main_protein_set, 'from_uniprot_proteomes', Utils.createEmptySet())), fasta]}
                 .set { genomes }
         }
 
-        if (params.max_proteins_for_close_main != null && params.max_proteins_for_close_main != false) {
+        if (params.max_proteins_for_close_main != null && params.max_proteins_for_close_main != false) { // if user want use the automatic download of proteins from close species
             SEARCH_PROTEINS(parents)
             DOWNLOAD_PROTEINS1(setSelection(genomes, SEARCH_PROTEINS.out, params.max_proteins_for_close_main))
 
@@ -110,7 +110,7 @@ workflow GET_DATASETS {
                                                                                                     genome_meta.main_protein_set, 'from_uniprot_proteins',[set_taxid, set_meta, set_file] )), genome_fasta]}
                 .set { genomes }
 
-        } else {
+        } else { // if user doesn't want to use the automatic download of proteins from close species
             genomes.map { genome, meta, fasta, set -> [ genome, Utils.updateLinkedHashMap(meta, 'main_protein_set', Utils.updateLinkedHashMap(meta.main_protein_set, 'from_uniprot_proteins', Utils.createEmptySet())), fasta]}
                 .set { genomes }
         }
@@ -123,14 +123,14 @@ workflow GET_DATASETS {
                                                                 [from_uniprot_proteomes[2], from_uniprot_proteins[2], personal_set].findAll { it != null }], // file
                                                                 id] }, "main_proteins_set.fa", 'no')
 
-    GATHER_MAIN_PROTEIN_FILES(main_proteins)
+        GATHER_MAIN_PROTEIN_FILES(main_proteins)
         CD_HIT_MAIN_PROTEINS(GATHER_MAIN_PROTEIN_FILES.out)
         genomes = concatenateGenomeAndSet(genomes, CD_HIT_MAIN_PROTEINS.out)
         genomes.map { genome, meta, fasta, set -> [ genome, Utils.updateLinkedHashMap(meta, 'main_protein_set', Utils.updateLinkedHashMap(meta.main_protein_set, 'dataset', set)), fasta]}
                 .set { genomes }
 
         // training proteins set
-        if (params.max_proteins_for_training != null && params.max_proteins_for_training != false) {
+        if (params.max_proteins_for_training != null && params.max_proteins_for_training != false) { // if user want use the automatic download of proteins to training
             DOWNLOAD_PROTEINS2(setSelection(genomes, SEARCH_PROTEINS.out, params.max_proteins_for_training))
 
             Utils.indexGenomesByLineage(genomes).combine(DOWNLOAD_PROTEINS2.out, by : 0)
@@ -139,7 +139,7 @@ workflow GET_DATASETS {
                                                                                                     genome_meta.training_protein_set, 'from_uniprot',[set_taxid, set_meta, set_file] )), genome_fasta]}
                 .set { genomes }
 
-        } else {
+        } else { // if user doesn't want to use the automatic download of proteins to training
             genomes.map { genome, meta, fasta, set -> [ genome, Utils.updateLinkedHashMap(meta, 'training_protein_set', Utils.updateLinkedHashMap(meta.training_protein_set, 'from_uniprot', Utils.createEmptySet())), fasta]}
                 .set { genomes }
         }
@@ -159,7 +159,7 @@ workflow GET_DATASETS {
                 .set { genomes }
 
         // transcripts set
-        if (params.max_transcriptomes != null && params.max_transcriptomes != false) {
+        if (params.max_transcriptomes != null && params.max_transcriptomes != false) { // if user want use the automatic download of transcripts from TSA
             parents.combine( parents.count() ).set { parents_with_count }
             SEARCH_TSA(parents_with_count)
             DOWNLOAD_TSA(setSelection(genomes, SEARCH_TSA.out, params.max_transcriptomes))
@@ -170,14 +170,14 @@ workflow GET_DATASETS {
                                                                                                     genome_meta.transcript_set, 'from_tsa',[set_taxid, set_meta, set_file] )), genome_fasta]}
                 .set { genomes }
 
-        } else {
+        } else { // if user doesn't want to use the automatic download of transcripts from TSA
             genomes.map { genome, meta, fasta, set -> [ genome, Utils.updateLinkedHashMap(meta, 'transcript_set', Utils.updateLinkedHashMap(meta.transcript_set, 'from_tsa', Utils.createEmptySet())), fasta]}
                 .set { genomes }
         }
 
 
         // select complementary transcriptomes (SRA)
-        if (params.use_sra == true) {
+        if (params.use_sra == true) { // if user want use the automatic download of transcripts from SRA
             genomes.map { id, meta, fasta -> [[meta.transcript_set.from_tsa[1].taxid, meta.transcript_set.from_tsa[1].other.readLines()], [id, meta.taxid]] }
                 .filter { !(it[0][1].contains(it[1][1])) }
                 .map { tsa_set, genome -> [tsa_set[0], genome[0], genome[1]] }
@@ -191,6 +191,7 @@ workflow GET_DATASETS {
                 .map{ clade, specie_name, specie_taxid, out -> [clade, specie_name, specie_taxid, out, out.readLines().size()] }
                 .set { sra_to_download }
 
+            if ( sra_to_download.count().toString() != 'DataflowVariable(value=null)') { // if there are SRA to download (find with SEARCH_SRA)
                 DOWNLOAD_SRA(sra_to_download)
                 TRINITY(DOWNLOAD_SRA.out)
 
@@ -200,7 +201,13 @@ workflow GET_DATASETS {
                                                                                                     genome_meta.transcript_set, 'from_sra',[set_taxid, set_meta, set_file] )), genome_fasta]}
                 .set { genomes }
 
-        } else {
+            } else { // if there are no SRA to download
+                genomes.map { genome, meta, fasta -> [ genome, Utils.updateLinkedHashMap(meta, 'transcript_set', Utils.updateLinkedHashMap(meta.transcript_set, 'from_sra', Utils.createEmptySet())), fasta]}
+                .set { genomes }
+            }
+
+
+        } else { // if user doesn't want to use the automatic download of transcripts from SRA
             genomes.map { genome, meta, fasta, set -> [ genome, Utils.updateLinkedHashMap(meta, 'transcript_set', Utils.updateLinkedHashMap(meta.transcript_set, 'from_sra', Utils.createEmptySet())), fasta]}
                 .set { genomes }
         }

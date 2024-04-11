@@ -124,7 +124,6 @@ workflow EXOGAP {
 
     // execute genome annotation
     GET_DATASETS(PREPARE_GENOMES.out.genomes)
-
     GET_DATASETS.out.genomes.join(genomes)
         .map { id, meta1, fasta1, meta2, fasta2 -> [id, Utils.updateLinkedHashMap(meta1, 'repeats_gff', meta2.repeats_gff), fasta1]}
         .set { genomes }

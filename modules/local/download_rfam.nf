@@ -1,5 +1,5 @@
-process DOWNLOAS_RFAM {
-    tag "DOWNLOAS_RFAM_${id}"
+process DOWNLOAD_RFAM {
+    tag "DOWNLOAD_RFAM_${id}"
 
     output:
     tuple path("family.txt"),                                               emit: families
