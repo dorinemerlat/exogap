@@ -57,7 +57,7 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.gff(3)$",
+                "pattern": "^\\S+\\.gff(3)?$",
                 "errorMessage": "Gff file for repetitive elements annotation can be provided, cannot contain spaces and must have extension '.gff' or '.gff3'.",
                 "unique": true,
                 "meta": ["repeats_gff"]

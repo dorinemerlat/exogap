@@ -18,11 +18,9 @@ workflow ANNOTATE_NON_CODING_GENES {
     BARRNAP_MITO(genomes.map { id, meta, genome -> [id, meta, genome, 'mito']})
     RNAMMER(genomes)
 
-
     emit:
         infernal = INFERNAL.out
         barrnap_nucl = BARRNAP_NUCL.out
         barrnap_mito = BARRNAP_MITO.out
         rnammer = RNAMMER.out
-
 }

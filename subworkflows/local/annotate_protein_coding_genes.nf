@@ -43,7 +43,7 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
 
     main:
         // structural annotation
-        genomes.map { id, meta, fasta -> [ id, meta, fasta, meta.main_protein_set.dataset.file, meta.transcript_set.dataset.file, meta.repeats_gff, 'main']}
+        genomes.map { id, meta, fasta -> [ id, meta, fasta, meta.main_protein_set.dataset.file, meta.transcript_set.dataset.file, meta.repeats_gff.dataset, 'main']}
             .set { genomes_for_main_similiarity_annotation }
 
         MAKER_BY_SIMILARITY_MAIN(genomes_for_main_similiarity_annotation)
@@ -51,7 +51,7 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
 
 
         if (params.max_proteins_from_close_species ) {
-            genomes.map { id, meta, fasta -> [ id, meta, fasta, meta.training_protein_set.dataset.file, meta.transcript_set.dataset.file, meta.repeats_gff, 'training']}
+            genomes.map { id, meta, fasta -> [ id, meta, fasta, file(meta.training_protein_set.dataset.file), file(meta.transcript_set.dataset.file), file(meta.repeats_gff.dataset), 'training']}
                 .set { genomes_for_training_similiarity_annotation }
 
             MAKER_BY_SIMILARITY_TRAINING(genomes_for_training_similiarity_annotation)
@@ -114,14 +114,7 @@ workflow ANNOTATE_PROTEIN_CODING_GENES {
         BLAST_FORMATTER_FMT2(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '2', comment ]})
         BLAST_FORMATTER_FMT5(BLASTP.out.map { id, meta, archive, comment -> [ id, meta, archive, '5', comment ]})
         INTERPROSCAN(MAKER_MAP_IDS.out.proteins)
-
-    //     if (params.blast2go) {
-                // DOWNLOAD_OBO
-                // DOWNLOAD_UNIPROT_BLAST()
-    //         FUNCTIONAL_ANNOTATION_BLAST2GO(REFORMAT_MAKER_GFF, BLAST, INTERPROSCAN)
-    //     } else {
-    //         MAKER_FUNCTIONAL()
-    //     }
+        // MAKER_FUNCTIONAL()
 
     emit:
         gff = MAKER_MAP_IDS.out.gff

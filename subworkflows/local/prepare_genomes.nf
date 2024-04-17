@@ -24,23 +24,23 @@ workflow PREPARE_GENOMES {
             .map{ id, lineage -> [ id, ["lineage": lineage.collect { [ "rank": "${it[0]}", "name": "${it[2]}".replace('\n', ''), "taxid": "${it[1]}" ] }]]}
             .join(genomes)
             .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
-            .set { genomes }
+            .set { genomes_with_lineage }
 
-        DOWNLOAD_NEWICK(Utils.gatherGenomes(genomes))
+        DOWNLOAD_NEWICK(Utils.gatherGenomes(genomes_with_lineage))
 
         // Check if fasta file is valid
         FASTA_VALIDATOR(genomes)
 
         // Reformat genomes
-        RENAME_GENOME(genomes)
+        RENAME_GENOME(genomes_with_lineage)
 
         // Calculate the genome size
         CALCULATE_GENOME_SIZE(RENAME_GENOME.out.fasta)
         CALCULATE_GENOME_SIZE.out
             .map{id, meta, fasta, csv -> [ id, meta + ['assembly_size' : file(csv).readLines()[0].split(",")[1]], fasta ] }
-            .set { genomes }
-
+            .map{id, meta, fasta -> [ id, meta + ['genome' : fasta], fasta ] }
+            .set { genomes_with_info }
 
     emit:
-        genomes     = genomes
+        genomes     = genomes_with_info
 }

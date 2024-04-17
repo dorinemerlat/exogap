@@ -34,14 +34,32 @@ Channel.fromSamplesheet("input", skip_duplicate_check: true)
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'main_protein_set', ['personal_set': meta.main_protein_set]), fasta ] }
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'training_protein_set', ['personal_set': meta.training_protein_set]), fasta ] }
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'transcript_set', ['personal_set': meta.transcript_set]), fasta ] }
-    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',  meta.repeats_gff), fasta ] }
+    .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',   ['personal_set':meta.repeats_gff]), fasta ] }
     .set { genomes }
 
 // bank blast
-Channel.fromPath(params.blast_db_local + "/*")
-    .collect()
-    .map { it -> [it.find { it =~ ".phr" }.toString().replaceFirst(/.phr/, ""), it] }
-    .set { blast_db }
+if (params.blastdb_local) {
+    Channel.fromPath(params.blastdb_local + "/*")
+        .collect()
+        .map { it -> [it.find { it =~ ".phr" }.toString().replaceFirst(/.phr/, ""), it] }
+        .set { blastdb }
+
+} else if (params.blastdb_to_download ) {
+    if (params.blastdb_to_download in ["nr", "swissprot", "refseq_prot"]) {
+        Channel.from(params.blastdb).set { blastdb }
+    } else {
+        println "Invalid blastdb_to_download value. Please specify 'nr', 'swissprot', or 'refseq_prot'."
+        exit 1
+    }
+
+} else if (params.blastdb_local && params.blastdb_to_download) {
+    println "Please specify either 'blastdb_local' or 'blastdb_to_download', not both."
+    exit 1
+
+} else {
+    println "Please specify either 'blastdb_local' or 'blastdb_to_download'."
+    exit 1
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,10 +74,11 @@ Channel.fromPath(params.blast_db_local + "/*")
 include { PREPARE_GENOMES               } from '../subworkflows/local/prepare_genomes'
 // include { ANALYSE_GENOME_QUALITY            } from '../subworkflows/preprocess/analyse_genome_quality'
 include { GET_DATASETS                  } from '../subworkflows/local/get_datasets'
+include { GET_BLASTDB                   } from '../subworkflows/local/get_blastdb'
 include { ANNOTATE_REPETITIVE_ELEMENTS  } from '../subworkflows/local/annotate_repetitive_elements'
 include { ANNOTATE_PROTEIN_CODING_GENES } from '../subworkflows/local/annotate_protein_coding_genes'
 include { ANNOTATE_NON_CODING_GENES     } from '../subworkflows/local/annotate_non_coding_genes'
-// include { POSTPROCESS                       } from '../subworkflows/post_process'
+include { POSTPROCESS                   } from '../subworkflows/local/postprocess'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,30 +128,46 @@ workflow EXOGAP {
     // get taxonomy and preprocess genomes
     PREPARE_GENOMES(genomes)
 
-    genomes.branch {
-        no_repeats: it[1].repeats_gff == null
-        with_repeats: other }
-        .set { genomes }
+    // download datasets
+    GET_DATASETS(PREPARE_GENOMES.out.genomes)
 
-    if (genomes.no_repeats.count() != 0) {
-        ANNOTATE_REPETITIVE_ELEMENTS(genomes.no_repeats)
-
-        ANNOTATE_REPETITIVE_ELEMENTS.out.genomes
-            .concat ( genomes.with_repeats )
-            .set { genomes }
+    if (params.blastdb_to_download) {
+        GET_BLASTDB(blastdb)
+        GET_BLASTDB.out.blastdb.set { blastdb }
     }
 
-    // execute genome annotation
-    GET_DATASETS(PREPARE_GENOMES.out.genomes)
-    GET_DATASETS.out.genomes.join(genomes)
-        .map { id, meta1, fasta1, meta2, fasta2 -> [id, Utils.updateLinkedHashMap(meta1, 'repeats_gff', meta2.repeats_gff), fasta1]}
-        .set { genomes }
+    // repetitive elements annotation
+    PREPARE_GENOMES.out.genomes
+        .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff', meta.repeats_gff + ['repeatmasker': null]), fasta ] }
+        .branch {
+            no_repeats: it[1].repeats_gff.personal_set == null
+            with_repeats: it[1].repeats_gff.personal_set != null }
+        .set { genomes_for_repeats }
 
-    ANNOTATE_PROTEIN_CODING_GENES( genomes, blast_db )
+    ANNOTATE_REPETITIVE_ELEMENTS(genomes_for_repeats.no_repeats)
 
-    ANNOTATE_NON_CODING_GENES(genomes)
+    // define the gff to use (anotate_repetitive_elements output or personal gff)
+    ANNOTATE_REPETITIVE_ELEMENTS.out.genomes
+        .concat(genomes_for_repeats.with_repeats)
+        .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',  meta.repeats_gff + ['dataset': [meta.repeats_gff.personal_set, meta.repeats_gff.repeatmasker].findAll{ it != null }[0]]), fasta ] }
+        .set { masked_genomes }
 
-    // POSTPROCESS(ANNOTATE_PROTEIN_CODING_GENES.out, ANNOTATE_NON_CODING_GENES.out)
+    GET_DATASETS.out.genomes
+        .join(masked_genomes)
+        .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1 + ['repeats_gff': meta2.repeats_gff], fasta2]}
+        .set { genomes_for_annotation }
+
+    ANNOTATE_PROTEIN_CODING_GENES( genomes_for_annotation, blastdb )
+
+    ANNOTATE_NON_CODING_GENES(genomes_for_annotation)
+
+    POSTPROCESS(genomes_for_annotation,
+                ANNOTATE_PROTEIN_CODING_GENES.out.gff,
+                ANNOTATE_NON_CODING_GENES.out.infernal,
+                ANNOTATE_NON_CODING_GENES.out.barrnap_nucl,
+                ANNOTATE_NON_CODING_GENES.out.barrnap_mito,
+                ANNOTATE_NON_CODING_GENES.out.rnammer,
+                genomes_for_annotation.map { id, meta, fasta -> [id, meta, meta.repeats_gff.dataset]})
 
     // emit:
     //     repetitive_elements = ANNOTATE_REPETITIVE_ELEMENTS.out.masked

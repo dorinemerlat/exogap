@@ -83,11 +83,10 @@ workflow ANNOTATE_REPETITIVE_ELEMENTS {
 
         REFORMAT_CLASSIFICATION_TO_DFAM.out.gff
             .join (genomes )
-            .map { id, meta1, gff, meta2, fasta -> [ id, Utils.updateLinkedHashMap(meta1, 'repeats_gff', gff), fasta]}
+            .map { id, meta1, gff, meta2, fasta -> [ id, Utils.updateLinkedHashMap(meta2, 'repeats_gff',  meta2.repeats_gff + ['repeatmasker': gff]), fasta ] }
             .set { genomes }
         // GET_COMPLEX_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.gff)
         // SUMMARIZE_AND_PLOT_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.out.collect{it[1]}, newick)
-
 
     emit:
         genomes = genomes
