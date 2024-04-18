@@ -73,18 +73,20 @@ workflow ANNOTATE_REPETITIVE_ELEMENTS {
 
         DOWNLOAD_DFAM()
 
-        REFORMAT_CLASSIFICATION_TO_DFAM(
-            PROCESS_REPEATS.out.gff,
-            PROCESS_REPEATS.out.cat,
-            PROCESS_REPEATS.out.out,
-            PROCESS_REPEATS.out.tbl,
-            REPEATLANDSCAPE.out,
-            DOWNLOAD_DFAM.out)
+        // REFORMAT_CLASSIFICATION_TO_DFAM(
+        //     PROCESS_REPEATS.out.gff,
+        //     PROCESS_REPEATS.out.cat,
+        //     PROCESS_REPEATS.out.out,
+        //     PROCESS_REPEATS.out.tbl,
+        //     REPEATLANDSCAPE.out,
+        //     DOWNLOAD_DFAM.out)
 
-        REFORMAT_CLASSIFICATION_TO_DFAM.out.gff
-            .join (genomes )
-            .map { id, meta1, gff, meta2, fasta -> [ id, Utils.updateLinkedHashMap(meta2, 'repeats_gff',  meta2.repeats_gff + ['repeatmasker': gff]), fasta ] }
-            .set { genomes }
+        // REFORMAT_CLASSIFICATION_TO_DFAM.out.gff
+        //     .join (genomes )
+        //     .map { id, meta1, gff, meta2, fasta -> [ id, Utils.updateLinkedHashMap(meta2, 'repeats_gff',  meta2.repeats_gff + ['repeatmasker': gff]), fasta ] }
+        //     .join { REPEATMASKER_WITH_OWN_LIB_2.out.masked }
+        //     .map { id, meta1, fasta, meta2, masked_fasta -> [ id, meta1, masked_fasta ] }
+        //     .set { genomes }
         // GET_COMPLEX_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.gff)
         // SUMMARIZE_AND_PLOT_REPEATS(CHANGE_CLASSIFICATION_TO_DFAM.out.out.collect{it[1]}, newick)
 

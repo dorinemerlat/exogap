@@ -152,22 +152,22 @@ workflow EXOGAP {
         .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',  meta.repeats_gff + ['dataset': [meta.repeats_gff.personal_set, meta.repeats_gff.repeatmasker].findAll{ it != null }[0]]), fasta ] }
         .set { masked_genomes }
 
-    GET_DATASETS.out.genomes
-        .join(masked_genomes)
-        .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1 + ['repeats_gff': meta2.repeats_gff], fasta2]}
-        .set { genomes_for_annotation }
+    // GET_DATASETS.out.genomes
+    //     .join(masked_genomes)
+    //     .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1 + ['repeats_gff': meta2.repeats_gff], fasta2]}
+    //     .set { genomes_for_annotation }
 
-    ANNOTATE_PROTEIN_CODING_GENES( genomes_for_annotation, blastdb )
+    // ANNOTATE_PROTEIN_CODING_GENES( genomes_for_annotation, blastdb )
 
-    ANNOTATE_NON_CODING_GENES(genomes_for_annotation)
+    // ANNOTATE_NON_CODING_GENES(genomes_for_annotation)
 
-    POSTPROCESS(genomes_for_annotation,
-                ANNOTATE_PROTEIN_CODING_GENES.out.gff,
-                ANNOTATE_NON_CODING_GENES.out.infernal,
-                ANNOTATE_NON_CODING_GENES.out.barrnap_nucl,
-                ANNOTATE_NON_CODING_GENES.out.barrnap_mito,
-                ANNOTATE_NON_CODING_GENES.out.rnammer,
-                genomes_for_annotation.map { id, meta, fasta -> [id, meta, meta.repeats_gff.dataset]})
+    // POSTPROCESS(genomes_for_annotation,
+    //             ANNOTATE_PROTEIN_CODING_GENES.out.gff,
+    //             ANNOTATE_NON_CODING_GENES.out.infernal,
+    //             ANNOTATE_NON_CODING_GENES.out.barrnap_nucl,
+    //             ANNOTATE_NON_CODING_GENES.out.barrnap_mito,
+    //             ANNOTATE_NON_CODING_GENES.out.rnammer,
+    //             genomes_for_annotation.map { id, meta, fasta -> [id, meta, meta.repeats_gff.dataset]})
 
     // emit:
     //     repetitive_elements = ANNOTATE_REPETITIVE_ELEMENTS.out.masked
