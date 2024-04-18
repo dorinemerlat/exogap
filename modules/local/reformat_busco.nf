@@ -1,6 +1,7 @@
 process REFORMAT_BUSCO {
     scratch true
     tag "REFORMAT_BUSCO_${id}_${dataset}_${mode}"
+    label 'jq'
 
     input:
     tuple val (id), val(meta), path(genome), path(json), val(dataset), val(mode)
