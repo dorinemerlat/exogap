@@ -1,4 +1,5 @@
 process MAKER_AB_INITIO {
+    scratch true
     tag "MAKER_AB_INITIO_${id}_${iteration}"
     label 'maker'
 

@@ -1,4 +1,5 @@
 process AGAT_FILTER_BY_LOCUS_DISTANCE {
+    scratch true
     tag "AGAT_FILTER_BY_LOCUS_DISTANCE_${id}_${iteration}"
     label 'agat'
 

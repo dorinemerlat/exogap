@@ -1,4 +1,5 @@
 process SEARCH_PROTEINS {
+    scratch true
     tag "SEARCH_PROTEINS_${name}"
     publishDir "out/data/proteins/${taxid}/*", mode: 'copy'
     cache 'lenient'

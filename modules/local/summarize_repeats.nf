@@ -1,4 +1,5 @@
 
+    scratch true
 process SUMMARIZE_REPEATS {
     tag "SUMMARIZE_REPEATS"
     input:

@@ -1,4 +1,5 @@
 process SAMPLESHEET_CHECK {
+    scratch true
     tag "$samplesheet"
     label 'python_phylo'
 

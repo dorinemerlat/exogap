@@ -1,4 +1,5 @@
 process PROCESS_REPEATS {
+    scratch true
     tag "PROCESS_REPEATS_${id}"
     time '5d'
     label 'repeatmasker'

@@ -1,4 +1,5 @@
 process MAKEBLASTDB {
+    scratch true
     tag "MAKEBLASTDB_${id}_${comment}"
     label 'blast'
 

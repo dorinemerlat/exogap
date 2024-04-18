@@ -1,4 +1,5 @@
 process CHANGE_TE_NAME {
+    scratch true
     tag "CHANGE_TE_NAME_${meta.id}"
 
     input:

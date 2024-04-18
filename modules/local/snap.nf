@@ -1,4 +1,5 @@
 process SNAP {
+    scratch true
     tag "SNAP_${id}_${iteration}"
     label 'maker'
 

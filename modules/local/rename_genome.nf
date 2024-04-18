@@ -1,4 +1,5 @@
 process RENAME_GENOME {
+    scratch true
     tag "RENAME_GENOME_$id"
     // publishDir "${params.outdir}/out/$id"
     cache 'lenient'

@@ -1,4 +1,5 @@
 process REPEATMASKER {
+    scratch true
     tag "REPEATMASKER_${id}"
     cpus 30
     time '20d'

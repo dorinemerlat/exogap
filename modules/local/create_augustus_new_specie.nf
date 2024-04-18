@@ -1,4 +1,5 @@
 process CREATE_AUGUSTUS_NEW_SPECIE {
+    scratch true
     tag "CREATE_AUGUSTUS_NEW_SPECIE_${id}_${iteration}"
     label 'maker'
 

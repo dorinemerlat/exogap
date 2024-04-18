@@ -1,4 +1,5 @@
 process TRINITY {
+    scratch true
     tag "TRINITY_${specie_name}"
     cpus 40
     memory "20 GB"

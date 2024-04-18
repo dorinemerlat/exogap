@@ -1,4 +1,5 @@
 process GENERATE_AED {
+    scratch true
     tag "GENERATE_AED_${id}_${iteration}"
     label 'perl'
 

@@ -1,4 +1,5 @@
 process FASTA_VALIDATOR {
+    scratch true
     tag "FASTA_VALIDATOR_${id}"
     cache 'lenient'
     label 'fasta_validator'

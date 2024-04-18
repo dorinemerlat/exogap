@@ -1,4 +1,5 @@
 process REFORMAT_BUSCO {
+    scratch true
     tag "REFORMAT_BUSCO_${id}_${dataset}_${mode}"
 
     input:

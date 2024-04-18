@@ -1,4 +1,5 @@
 process SPLIT_BY_NCRNA_TYPE {
+    scratch true
     tag "SPLIT_BY_NCRNA_TYPE_${id}"
 
     input:

@@ -1,4 +1,5 @@
 process GFF_TO_AUGUSTUS_GFF {
+    scratch true
     tag "GFF_TO_AUGUSTUS_GFF_${id}_${iteration}"
     label 'maker'
 

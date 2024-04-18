@@ -1,4 +1,5 @@
 process RENAME_REPEATMODELER_OUTPUT {
+    scratch true
     tag "RENAME_REPEATMODELER_OUTPUT_${id}"
     label 'biopython'
 

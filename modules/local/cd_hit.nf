@@ -1,4 +1,5 @@
 process CD_HIT {
+    scratch true
     tag "CD_HIT_$library_id"
     cpus 64
     memory '16 GB'

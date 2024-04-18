@@ -1,4 +1,5 @@
 process AGAT_STATISTICS {
+    scratch true
     tag "AGAT_STATISTICS_${id}_${iteration}"
     label 'agat'
 

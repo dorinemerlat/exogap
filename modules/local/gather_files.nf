@@ -1,4 +1,5 @@
 process GATHER_FILES {
+    scratch true
     // in tag, replace characters: [, ] by nothing
     tag "GATHER_FILES_${meta.name}"
 

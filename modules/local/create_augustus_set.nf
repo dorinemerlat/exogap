@@ -1,4 +1,5 @@
 process CREATE_AUGUSTUS_SET {
+    scratch true
     tag "CREATE_AUGUSTUS_SET_${id}_${iteration}"
     label 'maker'
 

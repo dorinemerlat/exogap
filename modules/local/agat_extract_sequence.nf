@@ -1,4 +1,5 @@
 process AGAT_EXTRACT_SEQUENCE {
+    scratch true
     tag "AGAT_EXTRACT_SEQUENCE_${id}_${iteration}"
     label 'agat'
 

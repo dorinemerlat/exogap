@@ -1,4 +1,5 @@
 process BUSCO {
+    scratch true
     tag "BUSCO_${id}_${dataset}_${mode}"
     cpus 15
     time '1d'

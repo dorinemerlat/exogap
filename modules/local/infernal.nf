@@ -1,4 +1,5 @@
 process INFERNAL {
+    scratch true
     tag "INFERNAL_${id}"
     label 'infernal'
     cpus 40

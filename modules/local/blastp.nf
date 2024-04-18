@@ -1,4 +1,5 @@
 process BLASTP {
+    scratch true
     tag "BLASTP_${id}_${comment}"
     label 'blast'
 

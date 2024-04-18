@@ -1,4 +1,5 @@
 process AGAT_FILTER_BY_MRNA_BLAST_VALUE {
+    scratch true
     tag "AGAT_FILTER_BY_MRNA_BLAST_VALUE_${id}_${iteration}"
     label 'agat'
 

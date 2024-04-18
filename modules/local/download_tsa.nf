@@ -1,4 +1,5 @@
 process DOWNLOAD_TSA {
+    scratch true
     tag "DOWNLOAD_TSA_${name}"
     cache 'lenient'
     label 'sratools'

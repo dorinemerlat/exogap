@@ -1,4 +1,5 @@
 process UPDATE_LOCALDB {
+    scratch true
     tag "UPDATE_LOCALDB_${id}"
     cpus 10
 

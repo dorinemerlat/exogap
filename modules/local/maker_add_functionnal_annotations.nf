@@ -1,4 +1,5 @@
 process MAKER_ADD_FUNCTIONNAL_ANNOTATIONS {
+    scratch true
     tag "MAKER_ADD_FUNCTIONNAL_ANNOTATIONS_${id}_${iteration}"
     label 'maker'
 

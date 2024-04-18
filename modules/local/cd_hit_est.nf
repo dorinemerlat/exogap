@@ -1,4 +1,5 @@
 process CD_HIT_EST {
+    scratch true
     tag "CD_HIT_EST_$library_id"
     cpus 64
     time '1d'
