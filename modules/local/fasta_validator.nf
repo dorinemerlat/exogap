@@ -18,6 +18,6 @@ process FASTA_VALIDATOR {
 
     stub:
     """
-    touch run_fasta_validator.stub
+    touch run_fasta_validator.out
     """
 }
