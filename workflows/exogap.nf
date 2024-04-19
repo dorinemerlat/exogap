@@ -37,6 +37,8 @@ Channel.fromSamplesheet("input", skip_duplicate_check: true)
     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',   ['personal_set':meta.repeats_gff]), fasta ] }
     .set { genomes }
 
+genomes.view()
+
 // bank blast
 if (params.blastdb_local) {
     Channel.fromPath(params.blastdb_local + "/*")
