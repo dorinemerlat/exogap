@@ -1,5 +1,4 @@
 process DOWNLOAD_LINEAGE {
-    scratch true
     tag "DOWNLOAD_LINEAGE_${id}"
     cache 'lenient'
     label 'jq'

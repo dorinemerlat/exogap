@@ -16,3 +16,8 @@ busco_downloads/
 for_christelle/*
 nextflow.sh 
 fil*.gff
+nextflow_*
+nextflow.sbatch
+conf/ifb_core.config
+ifb_core.config
+out/

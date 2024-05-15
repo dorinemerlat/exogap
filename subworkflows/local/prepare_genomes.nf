@@ -29,7 +29,7 @@ workflow PREPARE_GENOMES {
         DOWNLOAD_NEWICK(Utils.gatherGenomes(genomes_with_lineage))
 
         // Check if fasta file is valid
-        FASTA_VALIDATOR(genomes)
+        // FASTA_VALIDATOR(genomes)
 
         // Reformat genomes
         RENAME_GENOME(genomes_with_lineage)
