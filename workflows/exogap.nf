@@ -72,7 +72,7 @@ if (params.blastdb_local) {
 //
 // include { INPUT_CHECK                       } from '../subworkflows/input_check'
 include { PREPARE_GENOMES               } from '../subworkflows/local/prepare_genomes'
-// include { ANALYSE_GENOME_QUALITY            } from '../subworkflows/preprocess/analyse_genome_quality'
+include { ANALYSE_GENOME_QUALITY        } from '../subworkflows/local/analyse_genome_quality'
 include { GET_DATASETS                  } from '../subworkflows/local/get_datasets'
 include { GET_BLASTDB                   } from '../subworkflows/local/get_blastdb'
 include { ANNOTATE_REPETITIVE_ELEMENTS  } from '../subworkflows/local/annotate_repetitive_elements'
@@ -128,29 +128,32 @@ workflow EXOGAP {
     // get taxonomy and preprocess genomes
     PREPARE_GENOMES(genomes)
 
-    // download datasets
-    GET_DATASETS(PREPARE_GENOMES.out.genomes)
+    // analyse genome quality 
+    ANALYSE_GENOME_QUALITY(PREPARE_GENOMES.out.genomes)
 
-    if (params.blastdb_to_download) {
-        GET_BLASTDB(blastdb)
-        GET_BLASTDB.out.blastdb.set { blastdb }
-    }
+    // // download datasets
+    // GET_DATASETS(PREPARE_GENOMES.out.genomes)
 
-    // repetitive elements annotation
-    PREPARE_GENOMES.out.genomes
-        .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff', meta.repeats_gff + ['repeatmasker': null]), fasta ] }
-        .branch {
-            no_repeats: it[1].repeats_gff.personal_set == null
-            with_repeats: it[1].repeats_gff.personal_set != null }
-        .set { genomes_for_repeats }
+    // if (params.blastdb_to_download) {
+    //     GET_BLASTDB(blastdb)
+    //     GET_BLASTDB.out.blastdb.set { blastdb }
+    // }
 
-    ANNOTATE_REPETITIVE_ELEMENTS(genomes_for_repeats.no_repeats)
+    // // repetitive elements annotation
+    // PREPARE_GENOMES.out.genomes
+    //     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff', meta.repeats_gff + ['repeatmasker': null]), fasta ] }
+    //     .branch {
+    //         no_repeats: it[1].repeats_gff.personal_set == null
+    //         with_repeats: it[1].repeats_gff.personal_set != null }
+    //     .set { genomes_for_repeats }
 
-    // define the gff to use (anotate_repetitive_elements output or personal gff)
-    ANNOTATE_REPETITIVE_ELEMENTS.out.genomes
-        .concat(genomes_for_repeats.with_repeats)
-        .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',  meta.repeats_gff + ['dataset': [meta.repeats_gff.personal_set, meta.repeats_gff.repeatmasker].findAll{ it != null }[0]]), fasta ] }
-        .set { masked_genomes }
+    // ANNOTATE_REPETITIVE_ELEMENTS(genomes_for_repeats.no_repeats)
+
+    // // define the gff to use (anotate_repetitive_elements output or personal gff)
+    // ANNOTATE_REPETITIVE_ELEMENTS.out.genomes
+    //     .concat(genomes_for_repeats.with_repeats)
+    //     .map { id, meta, fasta -> [ id, Utils.updateLinkedHashMap(meta, 'repeats_gff',  meta.repeats_gff + ['dataset': [meta.repeats_gff.personal_set, meta.repeats_gff.repeatmasker].findAll{ it != null }[0]]), fasta ] }
+    //     .set { masked_genomes }
 
     // GET_DATASETS.out.genomes
     //     .join(masked_genomes)

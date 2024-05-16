@@ -9,7 +9,6 @@ include { SEARCH_PROTEINS_IN_PROTEOMES }                    from '../../modules/
 include { SEARCH_PROTEINS }                                 from '../../modules/local/search_proteins'
 include { SEARCH_TSA }                                      from '../../modules/local/search_tsa'
 include { SEARCH_SRA }                                      from '../../modules/local/search_sra'
-include { DOWNLOAD_BUSCO_DATASETS }                         from '../../modules/local/download_busco_datasets'
 include { DOWNLOAD_SRA }                                    from '../../modules/local/download_sra'
 include { DOWNLOAD_TSA }                                    from '../../modules/local/download_tsa'
 include { TRINITY }                                         from '../../modules/local/trinity'
@@ -64,17 +63,6 @@ workflow GET_DATASETS {
         genomes
 
     main:
-        // choose which busco dataset to use for each specie
-        DOWNLOAD_BUSCO_DATASETS()
-
-        genomes.map { id, meta, fasta -> meta.lineage.collect{[it.name.toLowerCase(), id, meta, fasta]} } // create an it for each parent of each genome
-            .flatMap{ it }
-            .combine(DOWNLOAD_BUSCO_DATASETS.out.splitCsv(), by: 0) // -> [taxon, id, meta, fasta, busco_dataset]
-            .map { taxon, id, meta, fasta, busco_dataset -> [id, meta, fasta, busco_dataset] }
-            .groupTuple()
-            .map { id, meta, file, busco_datasets -> [id, meta[0] + [ "busco_dataset": busco_datasets ], file[0]] }
-            .set { genomes }
-
         // select set about data to download (proteins and transcripts)
         genomes.map { id, meta, fasta -> meta.lineage.collect{["taxid": it.taxid, "name": it.name, "rank": it.rank]} } // create an it for each parent of each genome
             .map { it.findAll { it.rank != "superkingdom"} .findAll {it.rank != "species"} } // keep only those with rank different of superkingdom or species

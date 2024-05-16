@@ -1,27 +1,31 @@
 process BUSCO {
-    scratch true
     tag "BUSCO_${id}_${dataset}_${mode}"
-    cpus 15
+    cpus 30
     time '1d'
-    publishDir "${params.outdir}/results/programs-outputs/busco/", mode: 'symlink'
-    label: 'busco'
+    label 'busco'
 
     input:
     tuple val(id), val(meta), path(genome), val(dataset), val(mode)
 
     output:
-    tuple val(id), val(meta), path(genome), path("short_summary.*.json"), val(dataset), val(mode),  emit: json
-    tuple val(id), val(meta), path(genome), path("short_summary.*.txt"),  val(dataset), val(mode),  emit: txt
-
+    tuple val(id), path("busco_${id}_${dataset}_${mode}.json"),  emit: json
+    tuple val(id), path("busco_${id}_${dataset}_${mode}.txt"),   emit: txt
+    path "busco_${id}_${dataset}_${mode}.csv",                   emit: csv
     script:
     """
     busco -i $genome -l $dataset -o $id -m $mode -c $task.cpus
-    mv ${id}/short_summary.* .
+    mv ${id}/short_summary.*.json busco_${id}_${dataset}_${mode}.json
+    mv ${id}/short_summary.*.txt busco_${id}_${dataset}_${mode}.txt
+
+    jq -r '.results | [.Complete, ."Single copy", ."Multi copy", .Fragmented, .Missing, .n_markers] | @csv' busco_${id}_${dataset}_${mode}.json \
+        | awk -v id=$id -v mode=$mode -v dataset=$dataset 'BEGIN {print "id,mode,dataset,complete,single_copy,multi_copyfragmented,missing,n_markers"} {print id "," mode "," dataset "," \$0}' \
+        > busco_${id}_${dataset}_${mode}.csv
     """
 
     stub:
     """
-    touch short_summary.*.json
-    touch short_summary.*.txt
+    touch busco_${id}_${dataset}_${mode}.json
+    touch busco_${id}_${dataset}_${mode}.txt
+    touch busco_${id}_${dataset}_${mode}.csv
     """
 }

@@ -4,24 +4,24 @@ process GATHER_FILES {
     tag "GATHER_FILES_${meta.name}"
 
     input:
-    tuple val(id), val(meta), path(inputs), val(name_output), val(header)
+    tuple val(id), val(meta), path(inputs), val(output_name), val(header)
 
     output:
-    tuple  val(id), val(meta), path(name_output)
+    tuple val(id), val(meta), path(output_name)
 
     script:
     """
     if [ $header == no ]; then
-        cat $inputs > ${name_output}
+        cat $inputs > ${output_name}
 
     elif [ $header == yes ]; then
-        head -n 1 ${inputs[0]} > ${name_output}
-        tail -n +2 $inputs >> ${name_output}
+        head -n 1 ${inputs[0]} > ${output_name}
+        tail -n +2 $inputs >> ${output_name}
     fi
     """
 
     stub:
     """
-    touch ${name_output}
+    touch ${output_name}
     """
 }
