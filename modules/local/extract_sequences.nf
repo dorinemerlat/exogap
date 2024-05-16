@@ -1,5 +1,4 @@
 process EXTRACT_SEQUENCES {
-    scratch true
     tag "EXTRACT_SEQUENCES_${meta.id}"
     publishDir "${params.outdir}/results/${meta.id}/repetitive-elements"
 

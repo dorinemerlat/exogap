@@ -1,5 +1,4 @@
 process AGAT_FILTER_FEATURES_BY_ATTRIBUTE_VALUE {
-    scratch true
     tag "AGAT_FILTER_FEATURES_BY_ATTRIBUTE_VALUE_${id}_${iteration}"
     label 'agat'
 

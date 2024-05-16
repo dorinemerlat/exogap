@@ -1,5 +1,4 @@
 process REPEATMODELER {
-    scratch true
     tag "REPEATMODELER_${id}"
     cpus 30
     time '20d'

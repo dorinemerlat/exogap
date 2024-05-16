@@ -1,5 +1,4 @@
 process REFORMAT_CLASSIFICATION_TO_DFAM {
-    scratch true
     tag "REFORMAT_CLASSIFICATION_TO_DFAM_${id}"
 
     input:

@@ -1,5 +1,4 @@
 process AGAT_KEEP_LONGEST_ISOFORM {
-    scratch true
     tag "AGAT_KEEP_LONGEST_ISOFORM_${id}_${iteration}"
     label 'agat'
 

@@ -1,5 +1,4 @@
 process AGAT_MERGE_ANNOTATIONS {
-    scratch true
 
     tag "AGAT_MERGE_ANNOTATIONS_${id}_${iteration}"
     label 'agat'

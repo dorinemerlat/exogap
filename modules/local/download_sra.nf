@@ -1,5 +1,4 @@
 process DOWNLOAD_SRA {
-    scratch true
     tag "DOWNLOAD_SRA_${specie_name}"
     cache 'lenient'
     label 'sratools'

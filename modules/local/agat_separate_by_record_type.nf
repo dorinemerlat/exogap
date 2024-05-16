@@ -1,5 +1,4 @@
 process AGAT_SEPARATE_BY_RECORD_TYPE {
-    scratch true
     tag "AGAT_SEPARATE_BY_RECORD_TYPE_${id}_${iteration}"
     label 'agat'
 

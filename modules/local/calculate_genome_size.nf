@@ -1,5 +1,4 @@
 process CALCULATE_GENOME_SIZE {
-    scratch true
     tag "CALCULATE_GENOME_SIZE_$id"
     cache 'lenient'
     label 'bioawk'

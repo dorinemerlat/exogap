@@ -1,5 +1,4 @@
 process DOWNLOAD_NEWICK {
-    scratch true
     // publishDir "${params.outdir}"
     label 'python_phylo'
     tag "DOWNLOAD_NEWICK"

@@ -1,5 +1,4 @@
 process SEARCH_PROTEINS_IN_PROTEOMES {
-    scratch true
     tag "SEARCH_PROTEINS_IN_PROTEOMES_${name}"
 
     publishDir "out/data/proteins_in_proteomes/${taxid}/*", mode: 'copy'

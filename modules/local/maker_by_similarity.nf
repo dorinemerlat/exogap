@@ -1,5 +1,4 @@
 process MAKER_BY_SIMILARITY {
-    scratch true
     tag "MAKER_BY_SIMILARITY_${id}_${iteration}"
     label 'maker'
 

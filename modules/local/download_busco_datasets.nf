@@ -1,5 +1,4 @@
 process DOWNLOAD_BUSCO_DATASETS {
-    scratch true
     tag "DOWNLOAD_BUSCO_DATASETS"
     cache 'lenient'
     label 'busco'

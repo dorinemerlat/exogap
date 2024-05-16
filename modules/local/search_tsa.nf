@@ -1,5 +1,4 @@
 process SEARCH_TSA {
-    scratch true
     tag "SEARCH_TSA_${name}"
     publishDir "out/data/transcriptomes/${taxid}/*", mode: 'copy'
     cache 'lenient'

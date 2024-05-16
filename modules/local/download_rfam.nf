@@ -1,5 +1,4 @@
 process DOWNLOAD_RFAM {
-    scratch true
     tag "DOWNLOAD_RFAM_${id}"
 
     output:

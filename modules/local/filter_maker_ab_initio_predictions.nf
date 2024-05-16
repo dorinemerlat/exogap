@@ -1,5 +1,4 @@
 process FILTER_MAKER_AB_INITIO_PREDICTIONS {
-    scratch true
     tag "FILTER_MAKER_AB_INITIO_PREDICTIONS_${id}_${iteration}"
 
     input:

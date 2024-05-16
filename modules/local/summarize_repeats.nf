@@ -1,5 +1,4 @@
 process SUMMARIZE_REPEATS {
-    scratch true
     tag "SUMMARIZE_REPEATS"
     input:
     tuple val(meta), path(out)

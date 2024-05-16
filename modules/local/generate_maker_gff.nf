@@ -1,5 +1,4 @@
 process GENERATE_MAKER_GFF {
-    scratch true
     tag "GENERATE_MAKER_GFF_${id}_${iteration}"
     label 'maker'
 

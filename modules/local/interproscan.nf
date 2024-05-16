@@ -1,5 +1,4 @@
 process INTERPROSCAN {
-    scratch true
     tag "INTERPROSCAN_${id}"
     label 'interproscan'
     cpus 20

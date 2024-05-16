@@ -1,5 +1,4 @@
 process AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS {
-    scratch true
     tag "AGAT_FILTER_INCOMPLETE_GENE_CODING_MODELS_${id}_${iteration}"
     label 'agat'
 

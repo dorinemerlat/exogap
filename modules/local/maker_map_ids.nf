@@ -1,5 +1,4 @@
 process MAKER_MAP_IDS {
-    scratch true
     tag "MAKER_MAP_IDS_${id}"
     label 'maker'
 

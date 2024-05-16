@@ -1,5 +1,4 @@
 process OPTIMIZE_AUGUSTUS {
-    scratch true
     tag "OPTIMIZE_AUGUSTUS_${id}_${iteration}"
     label 'maker'
     cpus 40

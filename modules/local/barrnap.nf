@@ -1,5 +1,4 @@
 process BARRNAP {
-    scratch true
     tag "BARRNAP_${id}_${type}"
     label 'barrnap'
     cpus 40

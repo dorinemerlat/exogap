@@ -1,5 +1,4 @@
 process SEARCH_SRA {
-    scratch true
     tag "SEARCH_SRA_${specie_name}"
     cache 'lenient'
     label 'entrez_direct'

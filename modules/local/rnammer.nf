@@ -1,5 +1,4 @@
 process RNAMMER {
-    scratch true
     tag "RNAMMER_${id}"
     label 'maker'
 

@@ -1,5 +1,4 @@
 process BLAST_FORMATTER {
-    scratch true
     tag "BLAST_FORMATTER_${id}_${comment}"
     label 'blast'
 

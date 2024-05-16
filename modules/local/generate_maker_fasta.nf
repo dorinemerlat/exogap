@@ -1,5 +1,4 @@
 process GENERATE_MAKER_FASTA {
-    scratch true
     tag "GENERATE_MAKER_FASTA_${id}_${iteration}"
     label 'maker'
 

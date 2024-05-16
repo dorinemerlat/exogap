@@ -1,5 +1,4 @@
 process SEPARATE_LIBRARIES {
-    scratch true
     tag "SEPARATE_LIBRARIES_$id"
     label 'bioawk'
 

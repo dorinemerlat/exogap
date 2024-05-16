@@ -1,5 +1,4 @@
 process AUGUSTUS {
-    scratch true
     tag "AUGUSTUS_${id}_${iteration}"
     label 'maker'
 

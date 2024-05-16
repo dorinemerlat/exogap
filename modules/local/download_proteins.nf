@@ -1,5 +1,4 @@
 process DOWNLOAD_PROTEINS {
-    scratch true
     tag "DOWNLOAD_PROTEINS_${name}"
     cache 'lenient'
 

@@ -1,5 +1,4 @@
 process REPEATLANDSCAPE {
-    scratch true
     tag "REPEATLANDSCAPE_${id}"
     label 'repeatmasker'
 

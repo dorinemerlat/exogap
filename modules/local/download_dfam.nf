@@ -1,5 +1,4 @@
 process DOWNLOAD_DFAM {
-    scratch true
     tag "DOWNLOAD_DFAM"
     label 'jq'
 

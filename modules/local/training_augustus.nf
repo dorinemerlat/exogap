@@ -1,5 +1,4 @@
 process TRAINING_AUGUSTUS {
-    scratch true
     tag "TRAINING_AUGUSTUS_${id}_${iteration}"
     label 'maker'
 
