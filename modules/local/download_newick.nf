@@ -4,20 +4,18 @@ process DOWNLOAD_NEWICK {
     tag "DOWNLOAD_NEWICK"
 
     input:
-    tuple val(ids), val(meta), val(files)
+    path info
 
     output:
-    tuple val(ids), val(meta), path('*.tree'),             emit: newick
-    tuple val(ids), val(meta), path('*.tree.ascii_art'),   emit: ascii
+    path "*.tree"
 
     script:
     """
-    get-newick.py -i '$meta'
+    get_newick.py $info
     """
 
     stub:
     """
-    touch ${meta}.tree
-    touch ${meta}.tree.ascii_art
+    touch stub.tree
     """
 }

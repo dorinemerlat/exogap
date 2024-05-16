@@ -129,7 +129,7 @@ workflow EXOGAP {
     PREPARE_GENOMES(genomes)
 
     // analyse genome quality 
-    ANALYSE_GENOME_QUALITY(PREPARE_GENOMES.out.genomes)
+    ANALYSE_GENOME_QUALITY(PREPARE_GENOMES.out.genomes, PREPARE_GENOMES.out.newick, PREPARE_GENOMES.out.info)
 
     // // download datasets
     // GET_DATASETS(PREPARE_GENOMES.out.genomes)

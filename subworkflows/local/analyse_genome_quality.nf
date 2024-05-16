@@ -14,7 +14,9 @@ include { GATHER_FILES                      } from '../../modules/local/gather_f
 workflow ANALYSE_GENOME_QUALITY {
     take:
         genomes 
-
+        newick
+        info
+        
     main:
         // choose which busco dataset to use for each specie
         DOWNLOAD_BUSCO_DATASETS()
@@ -30,8 +32,8 @@ workflow ANALYSE_GENOME_QUALITY {
             .set { genomes }
 
         BUSCO(genomes_for_busco.map {id, meta, fasta, busco_dataset -> [id, meta, fasta, busco_dataset, 'genome' ]} )
-        GATHER_FILES(BUSCO.out.csv.collect())
-        
+        GATHER_FILES(BUSCO.out.csv.collect().map { csv -> ["id", "meta", csv, "busco.csv", "yes"] })
+        PLOT_BUSCO(GATHER_FILES.out, newick, info)
     //     REFORMAT_BUSCO(BUSCO.out.json)
 
     // gather_genomes(REFORMAT_BUSCO.out)

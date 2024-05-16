@@ -29,8 +29,6 @@ workflow PREPARE_GENOMES {
             .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
             .set { genomes_with_lineage }
 
-        DOWNLOAD_NEWICK(Utils.gatherGenomes(genomes_with_lineage)) 
-
         // Check if fasta file is valid
         // FASTA_VALIDATOR(genomes)
 
@@ -51,7 +49,10 @@ workflow PREPARE_GENOMES {
         GATHER_SIZES(CALCULATE_GENOME_SIZE.out.size_for_info.collect().map { csv -> ["id", "meta", csv, "size.csv", "yes"] })
         JOIN_FILES(GATHER_LINEAGES.out.map {id, meta, file -> file }, GATHER_SIZES.out.files.map {id, meta, file -> file })
 
+        DOWNLOAD_NEWICK(JOIN_FILES.out) 
+
     emit:
         genomes = genomes_with_info
         info    = JOIN_FILES.out
+        newick  = DOWNLOAD_NEWICK.out
 }
