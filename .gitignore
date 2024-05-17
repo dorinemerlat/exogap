@@ -21,3 +21,7 @@ nextflow.sbatch
 conf/ifb_core.config
 ifb_core.config
 out/
+singularity*
+cache*
+out*
+work*

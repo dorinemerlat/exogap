@@ -1,5 +1,5 @@
 process DOWNLOAD_BUSCO_DATASETS {
-    tag "DOWNLOAD_BUSCO_DATASETS"
+    tag "datasets"
     cache 'lenient'
     label 'busco'
 

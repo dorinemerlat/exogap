@@ -1,6 +1,6 @@
 process GATHER_FILES {
     // in tag, replace characters: [, ] by nothing
-    tag "GATHER_FILES_${meta.name}"
+    tag "${id}"
 
     input:
     tuple val(id), val(meta), path(inputs), val(output_name), val(header)
@@ -15,7 +15,7 @@ process GATHER_FILES {
 
     elif [ $header == yes ]; then
         head -n 1 ${inputs[0]} > ${output_name}
-        tail -n +2 $inputs >> ${output_name}
+        tail -q -n +2 $inputs >> ${output_name}
     fi
     """
 

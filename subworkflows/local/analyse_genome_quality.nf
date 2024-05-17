@@ -8,7 +8,7 @@ CALCULATE STATISTICS ABOUT GENOME QUALITY
 // include subworkflows
 include { BUSCO                             } from '../../modules/local/busco'
 include { DOWNLOAD_BUSCO_DATASETS           } from '../../modules/local/download_busco_datasets'
-include { GATHER_FILES                      } from '../../modules/local/gather_files'
+include { GATHER_FILES as GATHER_BUSCO      } from '../../modules/local/gather_files'
 // include modules
 
 workflow ANALYSE_GENOME_QUALITY {
@@ -32,8 +32,14 @@ workflow ANALYSE_GENOME_QUALITY {
             .set { genomes }
 
         BUSCO(genomes_for_busco.map {id, meta, fasta, busco_dataset -> [id, meta, fasta, busco_dataset, 'genome' ]} )
-        GATHER_FILES(BUSCO.out.csv.collect().map { csv -> ["id", "meta", csv, "busco.csv", "yes"] })
-        PLOT_BUSCO(GATHER_FILES.out, newick, info)
+        BUSCO.out.csv
+            .groupTuple()
+            .map { id, files -> [id, "meta", files, "busco.csv", "yes"] }
+            .set { busco_to_gather }
+
+        GATHER_FILES(busco_to_gather)
+        JOIN_FILES(info.combine( GATHER_BUSCO.out.map {dataset, meta, busco -> [dataset, busco] }).map { info, dataset, busco -> ['info_and_busco_' + dataset, info, busco, "info.csv"] })
+        // PLOT_BUSCO(GATHER_FILES.out, newick, info)
     //     REFORMAT_BUSCO(BUSCO.out.json)
 
     // gather_genomes(REFORMAT_BUSCO.out)

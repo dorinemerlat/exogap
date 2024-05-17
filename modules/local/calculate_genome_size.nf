@@ -1,5 +1,5 @@
 process CALCULATE_GENOME_SIZE {
-    tag "CALCULATE_GENOME_SIZE_$id"
+    tag "$id"
     cache 'lenient'
     label 'bioawk'
 
@@ -13,10 +13,12 @@ process CALCULATE_GENOME_SIZE {
     script:
     """
     bioawk -c fastx '{print length(\$seq)}' $genome |awk -v id=$id 'BEGIN{OFS=",";} {sum+=\$1} END {print id, sum;}' > "${id}.size"
+    awk 'BEGIN {print "id,genome_size"} {print}' ${id}.size > ${id}_size.csv
     """
 
     stub:
     """
-    echo "${id}, 0" > ${id}.csv
+    echo "${id}, 0" > ${id}.size
+    awk 'BEGIN {print "id,genome_size"} {print}' ${id}.size > ${id}_size.csv
     """
 }

@@ -1,16 +1,19 @@
 process BUSCO {
-    tag "BUSCO_${id}_${dataset}_${mode}"
+    tag "${id}_${dataset}_${mode}"
     cpus 30
     time '1d'
     label 'busco'
+    stageInMode 'copy'
+    stageOutMode 'copy'
 
     input:
     tuple val(id), val(meta), path(genome), val(dataset), val(mode)
 
     output:
-    tuple val(id), path("busco_${id}_${dataset}_${mode}.json"),  emit: json
-    tuple val(id), path("busco_${id}_${dataset}_${mode}.txt"),   emit: txt
-    path "busco_${id}_${dataset}_${mode}.csv",                   emit: csv
+    tuple val(id), path("busco_${id}_${dataset}_${mode}.json"),     emit: json
+    tuple val(id), path("busco_${id}_${dataset}_${mode}.txt"),      emit: txt
+    tuple val(dataset), path("busco_${id}_${dataset}_${mode}.csv"), emit: csv
+
     script:
     """
     busco -i $genome -l $dataset -o $id -m $mode -c $task.cpus

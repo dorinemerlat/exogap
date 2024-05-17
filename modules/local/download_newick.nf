@@ -1,13 +1,13 @@
 process DOWNLOAD_NEWICK {
     // publishDir "${params.outdir}"
     label 'python_phylo'
-    tag "DOWNLOAD_NEWICK"
+    tag "newick"
 
     input:
-    path info
+    path(info)
 
     output:
-    path "*.tree"
+    path "*.nwk"
 
     script:
     """
@@ -16,6 +16,6 @@ process DOWNLOAD_NEWICK {
 
     stub:
     """
-    touch stub.tree
+    touch stub.nwk
     """
 }

@@ -58,7 +58,6 @@ def main():
         newick = newick.replace(row['taxid'], ','.join(map(str, row['id']))) # it will join only if they are several ids for the same taxid
 
     remaining_taxids = re.findall(r'\)(\d+)', newick)
-    print(remaining_taxids)
     for taxid in remaining_taxids:
         url = "https://lbgi.fr/api/taxonomy/description/{}".format(str(taxid))
         r = requests.get(url, headers={ "Accept" : "application/json"})

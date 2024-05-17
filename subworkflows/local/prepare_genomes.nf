@@ -19,7 +19,7 @@ workflow PREPARE_GENOMES {
 
     main:
         // Download the lineage and create newick file
-        DOWNLOAD_LINEAGE(genomes)
+        DOWNLOAD_LINEAGE(genomes.map { id, meta, fasta -> [id, meta] })
 
         DOWNLOAD_LINEAGE.out.lineage
             .map { it -> [ it[0], file(it[1]).splitText() ] }
@@ -29,8 +29,8 @@ workflow PREPARE_GENOMES {
             .map { id, taxonomy, meta, fasta -> [id, meta + taxonomy, fasta ] }
             .set { genomes_with_lineage }
 
-        // Check if fasta file is valid
-        // FASTA_VALIDATOR(genomes)
+    //     // Check if fasta file is valid
+    //     // FASTA_VALIDATOR(genomes)
 
         // Reformat genomes
         RENAME_GENOME(genomes_with_lineage)
@@ -41,18 +41,18 @@ workflow PREPARE_GENOMES {
         CALCULATE_GENOME_SIZE.out.size
             .map { id, meta, size -> [ id, meta + ['assembly_size' : file(size).readLines()[0].split(",")[1]] ] }
             .join ( RENAME_GENOME.out.fasta )
-            .map { id, meta_with_size, meta_without_size, fasta -> id, meta_with_size, fasta}
+            .map { id, meta_with_size, meta_without_size, fasta -> [id, meta_with_size, fasta] }
             .set { genomes_with_info }
-
+        
         // Create the info files
-        GATHER_LINEAGES(DOWNLOAD_LINEAGE.out.lineage_for_info.collect().map { csv -> ["id", "meta", csv, "lineages.csv", "yes"] })
-        GATHER_SIZES(CALCULATE_GENOME_SIZE.out.size_for_info.collect().map { csv -> ["id", "meta", csv, "size.csv", "yes"] })
-        JOIN_FILES(GATHER_LINEAGES.out.map {id, meta, file -> file }, GATHER_SIZES.out.files.map {id, meta, file -> file })
+        GATHER_LINEAGES(DOWNLOAD_LINEAGE.out.lineage_for_info.collect().map { csv -> ["lineage", "meta", csv, "lineages.csv", "yes"] })
+        GATHER_SIZES(CALCULATE_GENOME_SIZE.out.size_for_info.collect().map { csv -> ["size", "meta", csv, "size.csv", "yes"] })
+        JOIN_FILES(GATHER_LINEAGES.out.map {id, meta, file -> file }.combine( GATHER_SIZES.out.map {id, meta, file -> file }).map { lineage, size -> ['lineage_and_size', lineage, size, "info.csv"] })
 
         DOWNLOAD_NEWICK(JOIN_FILES.out) 
 
     emit:
         genomes = genomes_with_info
-        info    = JOIN_FILES.out
+        info    = JOIN_FILES.out.map {id, file -> file}
         newick  = DOWNLOAD_NEWICK.out
 }
