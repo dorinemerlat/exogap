@@ -2,12 +2,17 @@ process DOWNLOAD_BUSCO_DATASETS {
     tag "datasets"
     cache 'lenient'
     label 'busco'
+    scratch false 
+
+    input:
+    tuple val(id), val(list_datasets)
 
     output:
-    path "BUSCO_datasets.txt"
+    path "busco_downloads"
 
     script:
     """
-    busco --list-datasets | grep "_odb" |  awk '{print \$NF}' |awk -F '_' '{OFS=","; print \$1, \$1 "_" \$2}' > BUSCO_datasets.txt
+    busco --download $list_datasets
+    busco --download \$(awk '\$NF == "placement_files" {print \$1}' busco_downloads/file_versions.tsv | tr '\n' ' ')
     """
 }

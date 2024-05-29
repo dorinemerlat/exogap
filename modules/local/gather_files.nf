@@ -14,7 +14,8 @@ process GATHER_FILES {
         cat $inputs > ${output_name}
 
     elif [ $header == yes ]; then
-        head -n 1 ${inputs[0]} > ${output_name}
+        first_input=\$(echo "$inputs" | cut -f 1 -d ' ')
+        head -n 1 \$first_input > ${output_name}
         tail -q -n +2 $inputs >> ${output_name}
     fi
     """

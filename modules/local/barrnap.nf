@@ -11,12 +11,12 @@ process BARRNAP {
 
     script:
     """
-    barrnap --quiet --kingdom ${type} --threads $task.cpus --outseq ${id}_barrnap_${type}.fa $genome > ${id}_barrnap_${type}.gff.tmp
+    barrnap --quiet --kingdom ${type} --threads ${task.cpus} --outseq ${id}_barrnap_${type}.fa ${genome} > ${id}_barrnap_${type}.gff.tmp
 
     grep -v '^#' ${id}_barrnap_${type}.gff.tmp \
-        | sed -E 's/barrnap:[0-9]+(\.[0-9]+)?/barrnap/g' \
-        | awk '{ nb++; print \$1"\t"\$2"\tgene\t"\$4"\t"\$5"\t"\$6"\t"\$7"\t"\$8"\tID=barrnap_"nb";"\$9";family=Gene,rRNA\n" \
-            \$1"\t"\$2"\t"\$3"\t"\$4"\t"\$5"\t"\$6"\t"\$7"\t"\$8"\tID=rnammer_"nb"-rRNA;Parent=barrnap_"nb";"\$9";family=Gene,rRNA"}' \
+        | sed -E 's/barrnap:[0-9]+(\\.[0-9]+)?/barrnap/g' \
+        | awk '{ nb++; print \$1"\\t"\$2"\\tgene\\t"\$4"\\t"\$5"\\t"\$6"\\t"\$7"\\t"\$8"\\tID=barrnap_"nb";"\$9";family=Gene,rRNA\n" \
+            \$1"\\t"\$2"\\t"\$3"\\t"\$4"\\t"\$5"\\t"\$6"\\t"\$7"\\t"\$8"\\tID=rnammer_"nb"-rRNA;Parent=barrnap_"nb";"\$9";family=Gene,rRNA"}' \
         > ${id}_barrnap_${type}.gff
     """
 

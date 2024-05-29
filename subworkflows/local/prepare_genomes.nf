@@ -47,9 +47,9 @@ workflow PREPARE_GENOMES {
         // Create the info files
         GATHER_LINEAGES(DOWNLOAD_LINEAGE.out.lineage_for_info.collect().map { csv -> ["lineage", "meta", csv, "lineages.csv", "yes"] })
         GATHER_SIZES(CALCULATE_GENOME_SIZE.out.size_for_info.collect().map { csv -> ["size", "meta", csv, "size.csv", "yes"] })
-        JOIN_FILES(GATHER_LINEAGES.out.map {id, meta, file -> file }.combine( GATHER_SIZES.out.map {id, meta, file -> file }).map { lineage, size -> ['lineage_and_size', lineage, size, "info.csv"] })
+        JOIN_FILES(GATHER_LINEAGES.out.map {id, meta, file -> file }.combine( GATHER_SIZES.out.map {id, meta, file -> file }).map { lineage, size -> ['lineage_and_size', [lineage, size], "info.csv"] })
 
-        DOWNLOAD_NEWICK(JOIN_FILES.out) 
+        DOWNLOAD_NEWICK(JOIN_FILES.out.map { id, file -> file}) 
 
     emit:
         genomes = genomes_with_info

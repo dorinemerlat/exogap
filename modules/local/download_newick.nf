@@ -2,6 +2,7 @@ process DOWNLOAD_NEWICK {
     // publishDir "${params.outdir}"
     label 'python_phylo'
     tag "newick"
+    scratch false
 
     input:
     path(info)

@@ -64,8 +64,14 @@ def main():
         name = r.json()['data']['name']
         newick = newick.replace(taxid, name)
     
-    root = re.findall(r'\)(\w+);', newick)[0]
+    # Get the root
+    # put the line below in a try, if doesn't work then the root is the value (composed of letter, number and '-' character) before the ';' character
+    try:
+        root = re.findall(r'\)(\w+);', newick)[0]
+    except:
+        root = re.findall(r'([\w-]+);$', newick)[0]
 
+    print(root)
     with open(root + ".nwk", "w") as file:
         file.write(newick)
 

@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - anaconda::busco=5.6.1
+  - anaconda::busco=5.7.1

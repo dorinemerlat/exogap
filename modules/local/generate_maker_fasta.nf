@@ -12,8 +12,8 @@ process GENERATE_MAKER_FASTA {
 
     script:
     """
-    fasta_merge -d $maker_log -o $id
-    sed -i 's/\*//g' ${id}*.fasta
+    fasta_merge -d ${maker_log} -o ${id}
+    sed -i 's/\\*//g' ${id}*.fasta
     """
 
     stub:
