@@ -1,106 +1,131 @@
-# ![nf-core/exogaptwo](docs/images/nf-core-exogaptwo_logo_light.png#gh-light-mode-only) ![nf-core/exogaptwo](docs/images/nf-core-exogaptwo_logo_dark.png#gh-dark-mode-only)
-
-[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/exogaptwo/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+![nf-core/exogap](./docs/images/exogap_logo_light.png#gh-light-mode-only)
+![nf-core/exogap](./docs/images/exogap_logo_dark.png#gh-dark-mode-only)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Nextflow Tower](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Nextflow%20Tower-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/nf-core/exogaptwo)
-
-[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23exogaptwo-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/exogaptwo)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
 ## Introduction
 
-**nf-core/exogaptwo** is a bioinformatics pipeline that ...
+EXOGAP (EXotic Organism Genome Annotation Pipeline) is a Nextflow DSL2 workflow for comprehensive annotation of genomes from non-model species. It integrates tools for repetitive element identification, protein-coding gene prediction and non-coding gene prediction. The pipeline can annotate multiple related genomes in a single run and formats outputs for deposition in public databases.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+Main modules:
+- Repetitive element annotation: RepeatModeler, RepeatMasker (uses FamDB).
+- Protein-coding gene annotation: MAKER2, AUGUSTUS, SNAP, BLAST, InterProScan.
+- Non-coding gene annotation: tRNAscan-SE, RNAmmer, Barrnap, Infernal, SnoScan.
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+## Installation
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+Prerequisites:
+- Nextflow (recommended >= 24.04)
+- Singularity / Apptainer (or Docker/Podman if using container profiles)
+
+Clone the repository:
+```bash
+git clone https://github.com/dorinemerlat/exogap.git
+cd exogap
+```
 
 ## Usage
 
-> **Note**
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-> to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-> with `-profile test` before running the workflow on actual data.
+### Samplesheet CSV file
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+Prepare a samplesheet CSV describing genomes to annotate.
 
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
-
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+Example samplesheet (samplesheet.csv):
+```
+name,taxid,fasta
+Polydesmus complanatus,510027,/path/to/polydesmus-complanatus.fa
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+Column description:
 
--->
+- name (required): display name used in reports (alphanumeric, spaces, '-' and '_' allowed).
+- taxid (required): NCBI taxon id (use nearest parent taxid if exact id not available).
+- fasta (required): path to fasta assembly file (absolute or relative).
 
-Now, you can run the pipeline using:
+### Config file
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+Fill the `nextflow.config` file. Here a describe the main options
 
-```bash
-nextflow run nf-core/exogaptwo \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+*Note*: Use absolute paths when targeting cloud storage (S3/GS).
+
+**Input & output**
+
+| Parameter | Type | Default | Description |
+|---|---:|---|---|
+| input | string | null | Path to samplesheet CSV describing genomes to annotate (required). |
+| outdir | string | 'out' | Output directory for pipeline results. |
+
+**Module activation**
+
+| Parameter | Type | Default | Description |
+|---|---:|---|---|
+| module_repeats | boolean | true | Enable repetitive elements annotation. |
+| module_genes | boolean | true | Enable protein-coding gene annotation. |
+| module_ncgenes | boolean | true | Enable non-coding gene annotation. |
+
+**Options for repetitive element annotation**
+
+| Parameter | Type | Default | Description |
+|---|---:|---|---|
+| download_famdb | boolean | false | true = download a FamDB partition from dfam.org; false = use local `famdb_path`. |
+| famdb_to_download | string | null | FamDB partition id ('1'..'16') to download when `download_famdb` is true. See [FamDB](https://github.com/dorinemerlat/exogap/README.md#####FamDB) |
+| famdb_path | string | null | Local path to FamDB `.h5` file (required when `download_famdb` is false). |
+| group_consensus_sequences | boolean | true | Use a single consensus library across all genomes in the run. |
+
+**Resources & limits**
+
+| Parameter | Type | Default | Description |
+|---|---:|---|---|
+| max_memory | string | '128.GB' | Upper memory limit for jobs (Nextflow format, e.g. "8.GB"). |
+| max_cpus | integer | 16 | Upper CPU limit for jobs. |
+| max_time | string | '240.h' | Upper walltime limit for jobs (e.g. "2.h", "30.m"). |
+
+#### FamDB
+
+Choose the FamDB partition id (1..16) matching your taxonomic scope when using `download_famdb`.
+
+| Partition | Name | Content |
+|---:|---|---|
+| 0 | root | root |
+| 1 | Brachycera | Brachycera |
+| 2 | Archelosauria | Archelosauria |
+| 3 | Hymenoptera | Hymenoptera |
+| 4 | Otomorpha | Otomorpha |
+| 5 | rosids | rosids |
+| 6 | Viridiplantae | Saxifragales, asterids, Proteales, Nymphaeales, Amborellales, Caryophyllales, Ranunculales, Mesostigmatophyceae, Chlorokybophyceae, Charophyceae, Lycopodiopsida, Chlorophyta, Liliopsida, Polypodiopsida, Marchantiophyta, Acrogymnospermae, Bryophyta |
+| 7 | Mammalia | Mammalia |
+| 8 | Noctuoidea | Noctuoidea |
+| 9 | Obtectomera | Bombycoidea, Papilionoidea, Pyraloidea, Hesperioidea, Geometroidea, Drepanoidea, Pterophoroidea |
+| 10 | Eupercaria | Eupercaria |
+| 11 | Ctenosquamata | Ovalentaria, Myctophata, Lampridacea, Carangaria, Holocentrimorphaceae, Batrachoidaria, Anabantaria, Paracanthopterygii, Ophidiaria, Gobiaria, Syngnathiaria, Pelagiaria |
+| 12 | Vertebrata | Chondrichthyes, Lepidosauria, Protacanthopterygii, Coelacanthimorpha, Amphibia, Cladistia, Holostei, Cyclostomata, Osteoglossocephala, Stomiati, Dipnomorpha, Elopocephalai, Chondrostei |
+| 13 | Coleoptera | Coleoptera |
+| 14 | Endopterygota | Gelechioidea, Yponomeutoidea, Incurvarioidea, Tineoidea, Apoditrysia, Nematocera, Strepsiptera, Neuropterida, Siphonaptera, Trichoptera |
+| 15 | Protostomia | Nematoda, Chelicerata, Collembola, Polyneoptera, Monocondylia, Palaeoptera, Crustacea, Paraneoptera, Myriapoda, Scalidophora, Spiralia |
+| 16 | Riboviria | Diverse groups including many unicellular eukaryotes, viruses and bacteria (see original dfam partition descriptions) |
+
+### Launch pipeline
+
+Run the pipeline (example):
 ```
-
-> **Warning:**
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-> provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/exogaptwo/usage) and the [parameter documentation](https://nf-co.re/exogaptwo/parameters).
+nextflow run main.nf -profile <singularity|docker|...> --config nextflow.config
+```
 
 ## Pipeline output
-
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/exogaptwo/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/exogaptwo/output).
+Generated outputs include per-genome annotation files (GFF), fasta sequences and summary reports and MultiQC reports. See docs/ for detailed output layout (TODO: add full output list).
 
 ## Credits
 
-nf-core/exogaptwo was originally written by Dorine Merlat.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+Originally written by Dorine Merlat (dorine.merlat@etu.unistra.fr).
+Thanks to Arnaud Kress and Odile Lecompte for assistance.
 
 ## Contributions and Support
 
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
-
-For further information or help, don't hesitate to get in touch on the [Slack `#exogaptwo` channel](https://nfcore.slack.com/channels/exogaptwo) (you can join with [this invite](https://nf-co.re/join/slack)).
+See .github/CONTRIBUTING.md for contribution guidelines. For issues or support, please open an issue on the pipeline GitHub repository.
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  nf-core/exogaptwo for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
-
-You can cite the `nf-core` publication as follows:
-
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+See CITATIONS.md for tool references and citation details. If using this pipeline in a publication, please cite the pipeline DOI when available.
