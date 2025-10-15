@@ -1,36 +1,60 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/exogaptwo/master/assets/schema_input.json",
-    "title": "nf-core/exogaptwo pipeline - params.input schema",
-    "description": "Schema for the file provided with params.input",
+    "title": "nf-core/exogaptwo pipeline - input.csv schema",
+    "description": "Schema for the file provided with input.csv",
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "name": {
                 "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+                "pattern": "^(\\w|\\s)+$",
+                "errorMessage": "Sample genome must be provided (can contain spaces).",
+                "unique": true,
+                "meta": ["name"]
             },
-            "fastq_1": {
+            "taxid": {
+                "type": ["string", "integer"],
+                "pattern": "^[0-9]+$",
+                "errorMessage": "TaxID must be provided and contain only numbers.",
+                "meta": ["taxid"]
+            },
+            "fasta": {
                 "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Fasta file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "unique": true
             },
-            "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ]
+            "proteins_set": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Main protein set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "meta": ["protein_set"]
+            },
+            "transcripts_set": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Transcriptome set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "unique": true,
+                "meta": ["transcript_set"]
+            },
+            "repeats_set": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast|n)?a$",
+                "errorMessage": "Fasta library for repetitive elements annotation can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
+                "unique": true,
+                "meta": ["repeat_set"]
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["name", "taxid", "fasta"]
     }
 }

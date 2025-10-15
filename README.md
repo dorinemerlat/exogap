@@ -2,8 +2,6 @@
 ![nf-core/exogap](./docs/images/exogap_logo_dark.png#gh-dark-mode-only)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
-[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
 ## Introduction
@@ -19,7 +17,7 @@ Main modules:
 
 Prerequisites:
 - Nextflow (recommended >= 24.04)
-- Singularity / Apptainer (or Docker/Podman if using container profiles)
+- Singularity / Apptainer 
 
 Clone the repository:
 ```bash
@@ -124,8 +122,24 @@ Thanks to Arnaud Kress and Odile Lecompte for assistance.
 
 ## Contributions and Support
 
-See .github/CONTRIBUTING.md for contribution guidelines. For issues or support, please open an issue on the pipeline GitHub repository.
+If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
+
+For issues or support, please open an issue on the pipeline GitHub repository.
 
 ## Citations
 
-See CITATIONS.md for tool references and citation details. If using this pipeline in a publication, please cite the pipeline DOI when available.
+<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
+<!-- If you use  nf-core/test for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+
+<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+
+
+An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
+
+You can cite the `nf-core` publication as follows:
+
+> **The nf-core framework for community-curated bioinformatics pipelines.**
+>
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+>
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
