@@ -1,24 +1,36 @@
-process REPEATMODELER {
+process MCHELPER {
     tag "${id}"
     cpus 50
     time '20d'
-    label 'repeatmodeler'
+    label 'mchelper'
+    errorStrategy 'ignore'
 
     input:
-    tuple val(id), val(meta), path(genome)
+    tuple val(id), val(meta), path(families), path(genome)
 
     output:
-    tuple val(id), val(meta), path("${id}-families.fa")
+    tuple val(id), val(meta), path("classifiedModule/kept_seqs_classified_module.fa"), emit: classified
+    tuple val(id), val(meta), path("unclassifiedModule/kept_seqs_unclassified_module.fa"), emit: unclassified
 
     script:
     """
-    BuildDatabase -name $id -engine ncbi $genome
+    merged_input="${id}_merged_input.fa"
+    cat $families > \$merged_input
+    input=\$merged_input
 
-    RepeatModeler -threads $task.cpus -engine ncbi -database $id -LTRStruct
+    python3 MCHelper/MCHelper.py \
+        -g ${genome} \
+        -l \${input} \
+        -o out_${id} \
+        --input_type fasta \
+        -r A \
+        -t ${task.cpus} \
+        -b arthropoda_odb10.hmm \
+        -a F
     """
 
     stub:
     """
-    touch ${id}_families.fa
+    touch classifiedModule/kept_seqs_classified_module.fa unclassifiedModule/kept_seqs_unclassified_module.fa
     """
 }

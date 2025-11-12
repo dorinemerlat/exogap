@@ -112,6 +112,17 @@ if (params.module_repeats == true) {
         log.error "Parameter error: --group_consensus_sequences must be true or false."
         System.exit(1)
     }
+
+    // Vérification du paramètre optionnel reference_library
+    if (params.reference_library) {
+        def ref_lib_file = file(params.reference_library)
+        if (!ref_lib_file.exists()) {
+            log.warn "The file provided for --reference_library does not exist: ${params.reference_library}"
+        } else {
+            params.reference_library = ref_lib_file
+            log.info "Reference library file provided for repeat annotation: ${params.reference_library}"
+        }
+    }
 }
 
 /*

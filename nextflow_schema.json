@@ -1,3 +1,10 @@
+        {
+            "name": "reference_library",
+            "type": "file",
+            "description": "Optional reference library file (e.g. Repbase)",
+            "label": "Reference library (optional)",
+            "required": false
+        },
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/exogaptwo/master/nextflow_schema.json",
