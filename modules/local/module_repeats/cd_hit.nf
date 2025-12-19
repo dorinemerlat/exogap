@@ -2,7 +2,8 @@ process CD_HIT {
     tag "${id}"
     cpus 50
     time '1d'
-    // label 'exogap_tools'
+    label 'exogap_tools'
+    scratch false
 
     input:
     tuple val(id), val(meta), path(input), val(type), val(sequence_identity_threshold), val(length_of_throw_away_sequence), val(alignment_coverage_for_the_shorter_sequence)

@@ -1,18 +1,18 @@
 process CLEAN_REPEAT_FAMILIES {
     tag "${id}"
-    label 'hite'
+    // label 'hite'
     scratch 'false'
 
     input:
-    tuple val(id), val(meta), path(families), path(classification), val(source)
+    tuple val(id), val(meta), path(families), path(classification)
 
     output:
-    tuple val(id), val(meta), path("${families.baseName}.cleaned.fa"), emit: main
     tuple val(id), val(meta), path("${families.baseName}.cleaned_for_mchelper.fa"), emit: for_mchelper
+    tuple val(id), val(meta), path("${families.baseName}.tsv"), emit: table
 
     script:
     """
-    clean_repeat_families.py -f ${families} -c ${classification} -s ${source} -m ${meta.mnemonic.exogap}
+    clean_repeat_families.py -f ${families} -c ${classification} -m ${meta.mnemonic.exogap}
     """
 
     stub:

@@ -41,7 +41,9 @@ workflow EXOGAPTWO {
 
         // if (params.module_ncgenes == true) {
         //     print "Running module ncRNA annotation"
-        //     NCGENES_ANNOTATION()
+        //     genomes.map { id, meta, genome -> [id, meta, file("/enadisk/tempor/merlat/exogaptwo/cache/repeats_annotation/repeatmasker/${id}/genome_${id}.fa.masked")] }
+        //         .set { masked_genomes }
+        //     NCGENES_ANNOTATION(masked_genomes)
         // }
 
         // print "Running module postprocessing"
