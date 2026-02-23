@@ -1,6 +1,7 @@
 process DOWNLOAD_NEWICK {
     tag "newick"
     label 'exogap_tools'
+    scratch false
 
     input:
     tuple val(taxids)

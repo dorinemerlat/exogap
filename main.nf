@@ -138,30 +138,15 @@ Channel.fromList(samplesheet)
     .map { id, meta, fasta -> [ id, Utils.updateTopLevelKey(meta, 'taxid', meta.taxid.toString()), fasta ] }
     // look if user has provided dataset to use
     .map { id, meta, fasta ->
-        def updatedMeta = meta.collectEntries { key, value ->
-            // search the meta parameter relative to the user dataset
-            if (key.contains("_set")) {
-                // look if user has provided a set for each specie...
-                if (!value.isEmpty()) {
-                    // ... if so, use it
-                    [key, ["user_set": value]]
-                } else {
-                    // ... if not, look if a set is provided in the params for all species...
-                    if (params.containsKey(key)) {
-                        // ... if so, use it
-                        [key, ["user_set": params."$key"]]
-                    } else {
-                        // ... if not, set it to null
-                        [key, ["user_set": null]]
-                    }
-                // if user provides a set for each specie, use it
-                }
-            // for all other parameters, keep them as they are
+        def updatedNUllMeta = meta.collectEntries { key, value ->
+            // if the value is empty list, replace it with null
+            if (value instanceof List && value.isEmpty()) {
+                return [(key): null]
             } else {
-                [key, value]
+                return [(key): value]
             }
         }
-        [id, updatedMeta, file(fasta)]
+        [id, updatedNUllMeta, file(fasta)]
     }
     .set { genomes }
 

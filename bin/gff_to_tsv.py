@@ -1,65 +1,71 @@
 #!/usr/bin/env python3
 
 import argparse
+import gffpandas.gffpandas as gffpd
 import pandas as pd
+import os
 
-def parse_attributes(attribute_string):
-    """Parses the attributes column in a GFF file into a dictionary."""
+def parse_attributes(s):
+    if pd.isna(s) or s == "":
+        return {}
     attributes = {}
-    for attr in attribute_string.split(";"):
-        key_value = attr.split("=")
-        if len(key_value) == 2:
-            key, value = key_value
-            attributes[key] = value
+    for item in str(s).split(";"):
+        item = item.strip()
+        if not item:
+            continue
+        if "=" in item:
+            k, v = item.split("=", 1)
+            attributes[k] = v
     return attributes
 
-def parse_gff_line(line):
-    """Parse a GFF line into a dictionary."""
-    fields = line.strip().split("\t")
+def parse_gff(path):
+    """Parse a GFF file into a DataFrame and expand attributes into columns."""
+    gff_obj = gffpd.read_gff3(path)
+    name = os.path.basename(path).split(".")[0]
 
-    first_fields = {
-        "seqid": fields[0],
-        "source": fields[1],
-        "type": fields[2],
-        "start": fields[3],
-        "end": fields[4],
-        "score": fields[5],
-        "strand": fields[6],
-        "phase": fields[7],
-    }
+    gff = gff_obj.df.copy()
+    gff.insert(0, "genome_id", name)
 
-    attribute_fields = parse_attributes(fields[8])
+    # filter to keep only lines with type "Transposable_elements"
+    gff = gff[gff["type"] == "Transposable_elements"].copy()
 
-    return {**first_fields, **attribute_fields}
+    # Parse attributes into dict
+    attr_dicts = gff["attributes"].apply(parse_attributes)
 
-def parse_gff(gff_file):
-    """Parses the GFF file and returns a DataFrame."""
-    entries = []
+    # Expand dicts into columns
+    attr_df = pd.json_normalize(attr_dicts)
 
-    with open(gff_file, 'r') as file:
-        for line in file:
-            if not line.startswith("#"):  # Ignore header lines
-                entry = parse_gff_line(line)
-                entries.append(entry)
+    # Merge expanded attributes with the main dataframe
+    gff = gff.reset_index(drop=True)
 
-    # Get all column names from the first entry to ensure all attributes are included
-    all_columns = set()
-    for entry in entries:
-        all_columns.update(entry.keys())
+    attr_dicts = gff["attributes"].apply(parse_attributes)
+    attr_df = pd.json_normalize(attr_dicts).reset_index(drop=True)
 
-    # Classic GFF columns (always present)
-    classic_columns = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase']
-    
-    # Get the attribute columns (everything except the classic columns)
-    attribute_columns = sorted(all_columns - set(classic_columns))
-    
-    # Final column order: first the classic columns, then the sorted attribute columns
-    final_columns = classic_columns + attribute_columns
+    gff = pd.concat([gff.drop(columns=["attributes"]), attr_df], axis=1)
 
-    # Convert the list of dictionaries into a DataFrame with the correct column order
-    df = pd.DataFrame(entries, columns=final_columns)
+    return gff
 
-    return df
+def summarize_gff(df):
+    """Summarize the GFF DataFrame by counting entries per genome_id and type."""
+    summary = df.groupby(["genome_id", "total_length", "repeat_type", "repeat_class", "repeat_order", "repeat_superfamily", "repeat_family"]).size().reset_index(name="count")
+
+    # if total_length is a string
+    df["total_length"] = pd.to_numeric(df["total_length"], errors="coerce")
+
+    summary = (
+        df.groupby(
+            ["genome_id", "repeat_type", "repeat_class", "repeat_order",
+             "repeat_superfamily", "repeat_family"],
+            dropna=False
+        )
+        .agg(
+            count=("genome_id", "size"),
+            total_length_sum=("total_length", "sum")
+        )
+        .reset_index()
+    )
+
+    return summary
 
 def main():
     # Set up the argument parser
@@ -72,9 +78,10 @@ def main():
 
     # Parse the GFF file
     df = parse_gff(args.input)
-    
+    summary = summarize_gff(df)
+
     # Save the result to a TSV file
-    df.to_csv(args.output, sep='\t', index=False)
+    summary.to_csv(args.output, sep='\t', index=False)
 
 if __name__ == "__main__":
     main()

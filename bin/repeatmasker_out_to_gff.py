@@ -2,8 +2,10 @@
 
 import argparse
 from pathlib import Path
+import string
 import sys
-
+import pandas as pd
+import re
 
 def parse_args():
     p = argparse.ArgumentParser(
@@ -12,6 +14,7 @@ def parse_args():
     p.add_argument('-r', '--repeatmasker', required=True, help='RepeatMasker .out file')
     p.add_argument('-m', '--mchelper', required=False, help='mchelper output (optional mapping file)')
     p.add_argument('-o', '--output', required=True, help='Output GFF file')
+    p.add_argument('-c', '--classification', required=True, help='Classification file')
     return p.parse_args()
 
 
@@ -55,20 +58,6 @@ def load_mchelper_map(path: str):
         # best-effort: ignore parsing errors
         pass
     return mp
-
-
-def classify_type(classfamily: str) -> str:
-    """Map RepeatMasker class/family to GFF type field."""
-    if classfamily is None:
-        return 'Transposable_elements'
-    cf = classfamily.strip()
-    if cf.lower() == 'unknown':
-        return 'Transposable_elements'
-    if cf.startswith('Simple_repeat') or cf == 'Simple_repeat':
-        return 'Simple_repeat'
-    if cf.startswith('Low_complexity') or cf == 'Low_complexity':
-        return 'Low_complexity'
-    return 'Transposable_elements'
 
 
 def parse_rm_line(tokens):
@@ -122,6 +111,173 @@ def parse_rm_line(tokens):
     except Exception:
         return None
 
+def create_mcp(
+    id : str = '',
+    type_: str = '',
+    comment: str = '',
+    class_: str = '',
+    order: str = '',
+    superfamily: str = '',
+    family: str = '',
+    subfamily: str = '',
+    subfamily2: str = ''
+):
+    mcp = {
+        'id': id,
+        'comment': comment,
+        'rm2_id': '',
+        'rm2_length': '',
+        'rm_code': '',
+        'rm2_type': type_,
+        'rm2_class': class_,
+        'rm2_order': order,
+        'rm2_superfamily': superfamily,
+        'rm2_family': family,
+        'rm2_subfamily': subfamily,
+        'rm2_subfamily2': subfamily2,
+        'gene_target': '',
+        'gene_evalue': '',
+        'gene_score': '',
+        'rrna_target': '',
+        'rrna_evalue': '',
+        'rrna_score': '',
+        'mchelper_id': '',
+        'MCHelper': '',
+        'extended_length': '',
+        'replace_sequence': '',
+        'MCHelper_length': '',
+        'MCHelper_strand': '',
+        'MCHelper_confused': '',
+        'MCHelper_class': '',
+        'MCHelper_order': '',
+        'MCHelper_Wcode': '',
+        'MCHelper_sFamily': '',
+        'MCHelper_CI': '',
+        'MCHelper_coding': '',
+        'MCHelper_struct': '',
+        'MCHelper_other': '',
+        'MCHelper_Reason': '',
+        'statut': ''
+    }
+
+    return mcp
+
+def normalize(s: str) -> str:
+    if not s:
+        return ''
+    return s.lower().replace('-', '').replace('_', '').strip()
+
+
+def extract_classification_dict(classif_row):
+    """
+    Build a standardized classification dictionary from a classif_df row
+    """
+    return {
+        'type' : classif_row.get('Type', ''),
+        'class': classif_row.get('Class', ''),
+        'class': classif_row.get('Class', ''),
+        'order': classif_row.get('Order', ''),
+        'superfamily': classif_row.get('SuperFamily', ''),
+        'family': classif_row.get('Family', ''),
+        'subfamily': classif_row.get('SubFamily', ''),
+        'subfamily2': classif_row.get('Subfamily2', '')
+    }
+
+# to delete later
+def load_unknown_identified(path):
+    identified = {}
+
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+
+    with path.open() as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or "#" not in line:
+                continue
+
+            parts = line.split("#", 1)
+
+            key = parts[0].lstrip(">").strip()
+            value = parts[1].strip()
+
+            identified[key] = value
+
+    return identified
+
+
+def check_problematic_repeat_name(repeat_name, mcp, classif_df):
+    if repeat_name in mcp:
+        if mcp[repeat_name]['rm2_class'] == 'ClassI' or mcp[repeat_name]['rm2_class'] == 'ClassII':
+            mcp[repeat_name]['rm2_type'] = 'Transposable Element'
+        elif mcp[repeat_name]['rm2_class'] == 'Satellite' or mcp[repeat_name]['rm2_class'] == 'Simple':
+            mcp[repeat_name]['rm2_type'] = 'Tandem repeat'
+        elif mcp[repeat_name]['rm2_class'] == 'RNA':
+            mcp[repeat_name]['rm2_type'] = 'Pseudogene'
+        elif mcp[repeat_name]['rm_code'].lower() == 'unknown':
+            mcp[repeat_name]['rm2_type'] = 'Transposable Element'
+        else:
+            mcp[repeat_name]['rm2_type'] = 'Transposable Element'
+        return mcp[repeat_name]
+
+    elif re.search(r"\(([ACGT]+)\)", repeat_name, flags=re.IGNORECASE):
+        mcp_line = create_mcp( id=repeat_name, comment="from RepBase", type_='Tandem repeat' )
+        return mcp_line
+
+    elif "-rich" in repeat_name.lower() or "_rich" in repeat_name.lower():
+        mcp_line = create_mcp( id=repeat_name, comment="from RepBase", type_='Low complexity' )
+        return mcp_line
+
+    elif ("-" in repeat_name or "_" in repeat_name) and not '_TE' in repeat_name:
+        first_part = re.split(r"[-_]", repeat_name, maxsplit=1)[0]
+        first_part_norm = normalize(first_part)
+
+        if first_part_norm:
+            cols = ['Order', 'SuperFamily', 'Family', 'SubFamily', 'Subfamily2']
+            cols = [c for c in cols if c in classif_df.columns]
+
+            if cols:
+                norm_df = classif_df[cols].apply(
+                    lambda col: (
+                        col.astype(str)
+                           .str.lower()
+                           .str.replace('-', '', regex=False)
+                           .str.replace('_', '', regex=False)
+                           .str.strip()
+                    )
+                )
+
+                matches = norm_df.eq(first_part_norm)
+                if matches.any(axis=None):
+                    row_idx, col_name = matches.stack().loc[lambda x: x].index[0]
+                    classif_row = classif_df.loc[row_idx]
+
+                    classif_dict = extract_classification_dict(classif_row)
+                    mcp_line = create_mcp(
+                        id=repeat_name,
+                        comment="from RepBase",
+                        type_=classif_dict['type'],
+                        class_=classif_dict['class'],
+                        order=classif_dict['order'],
+                        superfamily=classif_dict['superfamily'],
+                        family=classif_dict['family'],
+                        subfamily=classif_dict['subfamily'],
+                        subfamily2=classif_dict['subfamily2']
+                    )
+                    return mcp_line
+                else:
+                    mcp_line = create_mcp( id=repeat_name, comment="from RepBase", type_='Unknown' )
+                    return mcp_line
+
+    elif not '_TE' in repeat_name:
+        mcp_line = create_mcp( id=repeat_name, comment="from RepBase", type_='Unknown' )
+        return mcp_line
+
+    else:
+        print(f"Warning: repeat name '{repeat_name}' not found in MCHelper map and does not match known patterns; classifying as unknown", file=sys.stderr)
+        sys.exit(2)
+
 def main():
     args = parse_args()
     in_path = Path(args.repeatmasker)
@@ -132,10 +288,20 @@ def main():
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    mcp = load_mchelper_map(args.mchelper)
+    # open classification file (tsv file) in a dataframe
+    classification_path = Path(args.classification)
+    if not classification_path.exists():
+        print(f"Error: classification file not found: {classification_path}", file=sys.stderr)
+        sys.exit(2)
+
+    classif_df = pd.read_csv(classification_path, sep=",", header=0, dtype=str, keep_default_na=False)
+
+    # load mchelper mapping if provided
+    mcp = load_mchelper_map(args.mchelper) # mcp = dictionnary with infornations about each family annotated with MCHelper / RepeatModeler
 
     written = 0
     idx = 0
+
     with in_path.open('r', encoding='utf-8', errors='ignore') as fh, out_path.open('w', encoding='utf-8') as outfh:
         for line in fh:
             # skip header or empty lines
@@ -156,80 +322,60 @@ def main():
             score = parsed['score']
             strand = parsed['strand']
             repeat_name = parsed['repeat_name']
-
-            # class/family from .out (fallback) — we keep for GFF type
-            classfamily = parsed['classfamily']
-            gff_type = classify_type(classfamily)
-
-            # phase is '.' for repeats
-            phase = '.'
-
-            # Build attribute field according to requested spec
+            phase = '.' # phase is '.' for repeats
             total_length = end - start + 1
-            # repeat type and code
-            repeatmasker_code = (classfamily or 'NA')
-            repeatmasker_code_norm = repeatmasker_code.capitalize() if repeatmasker_code != 'NA' else 'NA'
-            # determine repeat_type
-            if classfamily is None or classfamily.lower() == 'unknown':
-                repeat_type = 'Unknown'
-                repeat_order = 'NA'
-                repeat_superfamily = 'NA'
-            elif classfamily.startswith('Simple_repeat'):
-                repeat_type = 'Simple_repeat'
-                repeat_order = 'NA'
-                repeat_superfamily = 'NA'
-            elif classfamily.startswith('Low_complexity'):
-                repeat_type = 'Low_complexity'
-                repeat_order = 'NA'
-                repeat_superfamily = 'NA'
-            else:
-                repeat_type = 'Transposable_elements'
-                # parse order/superfamily from classfamily like LTR/Gypsy
-                parts_cf = classfamily.split('/')
-                repeat_order = parts_cf[0] if parts_cf else 'NA'
-                repeat_superfamily = parts_cf[1] if len(parts_cf) > 1 else 'NA'
+
+            # get the classification of mcp
+            classification = check_problematic_repeat_name(repeat_name, mcp, classif_df)
 
             matching_repeat = repeat_name
             # Build ID as RE_<prefix>_<idx>
             prefix = seqid.split('_')[0] if '_' in seqid else seqid
             repeat_id = f"RE_{prefix}_{idx}"
 
-            # If an MCHelper row exists for this repeat id, use it to fill fields
-            mrow = mcp.get(matching_repeat, {}) if isinstance(mcp, dict) else {}
-            def val(row, key, default='NA'):
-                v = row.get(key, '') if isinstance(row, dict) else ''
-                return v if v not in (None, '', 'NA', 'na') else default
-
-            rm2_class = val(mrow, 'rm2_class', 'NA')
-            rm2_order = val(mrow, 'rm2_order', 'NA')
-            rm2_super = val(mrow, 'rm2_superfamily', 'NA')
-            rm2_family = val(mrow, 'rm2_family', 'NA')
-            rm2_subfam = val(mrow, 'rm2_subfamily', 'NA')
-            rm2_subfam2 = val(mrow, 'rm2_subfamily2', 'NA')
-            rm_code = val(mrow, 'rm_code', 'NA')
-            # prefer mchelper row values; otherwise keep computed values
-            out_repeat_class = rm2_class if rm2_class != 'NA' else 'NA'
-            out_repeat_order = rm2_order if rm2_order != 'NA' else repeat_order
-            out_repeat_super = rm2_super if rm2_super != 'NA' else repeat_superfamily
-            out_repeat_family = rm2_family if rm2_family != 'NA' else 'NA'
-            out_repeat_subfam = rm2_subfam if rm2_subfam != 'NA' else 'NA'
-            out_repeat_subfam2 = rm2_subfam2 if rm2_subfam2 != 'NA' else 'NA'
-            out_rm_code = rm_code if rm_code != 'NA' else repeatmasker_code_norm
+            # if classification does not exist, assign 'NA' to all fields
+            if not classification:
+                classification = create_mcp( id=repeat_name, type_='Unknown' )
+            rm2_type = classification.get('rm2_type')
+            rm2_type = rm2_type.replace(' ', '_').lower().replace('tandem_repeat', 'simple_repeat')
+            if rm2_type =='simple_repeat' or rm2_type == 'transposable_element' or rm2_type == 'unknown':
+                feature = 'repetitive_elements'
+            rm2_class = classification.get('rm2_class') or 'NA'
+            if feature == 'repetitive_elements' and rm2_type == 'transposable_element' and rm2_class == 'NA' :
+                rm2_type = 'unknown'
+            rm2_order = classification.get('rm2_order') or 'NA'
+            rm2_super = classification.get('rm2_superfamily') or 'NA'
+            rm2_family = classification.get('rm2_family') or 'NA'
+            rm2_subfam = classification.get('rm2_subfamily') or 'NA'
+            rm2_subfam2 = classification.get('rm2_subfamily2') or 'NA'
+            rm2_code = classification.get('rm_code') or 'NA'
+            comment = classification.get('comment') or 'NA'
+            MCHelper_coding = classification.get('MCHelper_coding') or 'NA'
+            MCHelper_struct = classification.get('MCHelper_struct') or 'NA'
+            MCHelper_other = classification.get('MCHelper_other') or 'NA'
+            MCHelper_Reason = classification.get('MCHelper_Reason') or 'NA'
+            status = classification.get('statut') or 'NA'
 
             attrs = [
                 f"ID={repeat_id}",
                 f"total_length={total_length}",
                 f"matching_repeat={matching_repeat}",
-                f"repeat_type={repeat_type}",
-                f"repeat_class={out_repeat_class}",
-                f"repeat_order={out_repeat_order}",
-                f"repeat_superfamily={out_repeat_super}",
-                f"repeat_family={out_repeat_family}",
-                f"repeat_subfamily={out_repeat_subfam}",
-                f"repeat_subfamily2={out_repeat_subfam2}",
-                f"repeatmasker_code={out_rm_code}",
+                f"repeat_type={rm2_type}",
+                f"repeat_class={rm2_class}",
+                f"repeat_order={rm2_order}",
+                f"repeat_superfamily={rm2_super}",
+                f"repeat_family={rm2_family}",
+                f"repeat_subfamily={rm2_subfam}",
+                f"repeat_subfamily2={rm2_subfam2}",
+                f"repeatmasker_code={rm2_code}",
                 f"position_in_repeat_begin={parsed['rep_begin'] if parsed['rep_begin'] is not None else 'NA'}",
                 f"position_in_repeat_end={parsed['rep_end'] if parsed['rep_end'] is not None else 'NA'}",
+                f"comment={comment}",
+                f"MCHelper_coding={MCHelper_coding}",
+                f"MCHelper_struct={MCHelper_struct}",
+                f"MCHelper_other={MCHelper_other}",
+                f"MCHelper_Reason={MCHelper_Reason}",
+                f"status={status}",
             ]
             # ensure trailing semicolon
             attr_str = ';'.join(attrs) + ';'
@@ -238,7 +384,7 @@ def main():
             outfh.write('\t'.join([
                 seqid,
                 'RepeatMasker',
-                gff_type,
+                feature,
                 str(start),
                 str(end),
                 str(score),

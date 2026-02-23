@@ -13,7 +13,7 @@ process MCHELPER {
     tuple val(id), val(meta), path("classifiedModule/kept_seqs_classified_module_curated.fa"), path("classifiedModule/kept_seqs_classified_module_non_curated.fa"), emit: classfied_additional_results
     tuple val(id), val(meta), path("classifiedModule/fullLengthFrag.txt"), emit: full_length_frag
     tuple val(id), val(meta), path("classifiedModule/MSA_plots"), path("classifiedModule/MSA_seeds"), path("classifiedModule/te_aid"), emit: plots
-
+    tuple val(id), val(meta), path("sequences_with_problems.txt"), emit: seqs_with_problems
     script:
     """
     python3 MCHelper/MCHelper.py \

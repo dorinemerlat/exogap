@@ -10,15 +10,25 @@ include { REFORMAT_GENOME } from "$projectDir/modules/local/module_preprocessing
 include { DOWNLOAD_NEWICK } from "$projectDir/modules/local/module_preprocessing/download_newick.nf"
 
 def extract_lineage(lineage_file) {
-    lineage = lineage_file.splitText()
-    // split each line into a list with tab
-    lineage = lineage.collect { it.replaceAll('\n', '').split('\t') }
-    // filter out the first element (header of the csv)
-    lineage = lineage.findAll { it[0] != 'rank' }
-    // convert to a map with rank as key and name as value
-    lineage = lineage.collect { [ "rank": "${it[0]}", "name": "${it[2]}".replace('\n', ''), "taxid": "${it[1]}" ] }
-    return lineage
+    def lines = lineage_file.text.readLines()
+
+    def dict = [:]
+    lines.each { line ->
+        line = line.trim()
+        if (!line || line.startsWith('#')) return
+
+        def cols = line.split('\t', -1)
+        if (cols[0] == 'rank') return   // header
+
+        def rank  = cols[0]
+        def taxid = cols[1]
+        def name  = cols[2]
+
+        dict[rank] = [ name: name, taxid: taxid ]
+    }
+    return dict
 }
+
 
 def transformList(input) {
     def ids = input[0]
@@ -93,5 +103,7 @@ workflow PREPROCESSING {
 
     emit:
         genomes = REFORMAT_GENOME.out.fasta
+        newick = DOWNLOAD_NEWICK.out
+        genome_stats = SEQKIT_STATS.out
 }
 

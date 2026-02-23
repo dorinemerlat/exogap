@@ -31,13 +31,14 @@ workflow EXOGAPTWO {
 
         if (params.module_repeats == true) {
             print "Running module repeat annotation"
-            REPEATS_ANNOTATION(PREPROCESSING.out.genomes)
+            REPEATS_ANNOTATION(PREPROCESSING.out.genomes, PREPROCESSING.out.newick, PREPROCESSING.out.genome_stats)
+
         }
 
-        // if (params.module_genes == true) {
-        //     print "Running module gene annotation"
-        //     GENES_ANNOTATION()
-        // }
+        if (params.module_genes == true) {
+            print "Running module gene annotation"
+            GENES_ANNOTATION(REPEATS_ANNOTATION.out.unmasked_genomes, REPEATS_ANNOTATION.out.masked_genomes)
+        }
 
         // if (params.module_ncgenes == true) {
         //     print "Running module ncRNA annotation"

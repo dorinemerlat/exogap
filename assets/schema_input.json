@@ -28,22 +28,11 @@
                 "errorMessage": "Fasta file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
                 "unique": true
             },
-            "proteins_set": {
+            "SRA": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^\\S+\\.f(ast|n)?a$",
-                "errorMessage": "Main protein set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
-                "meta": ["protein_set"]
-            },
-            "transcripts_set": {
-                "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^\\S+\\.f(ast|n)?a$",
-                "errorMessage": "Transcriptome set file for reads can be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
-                "unique": true,
-                "meta": ["transcript_set"]
+                "pattern": "^$|^(SRR|ERR|DRR)[0-9]+$|^[^\\n]+$",
+                "errorMessage": "Provide either: (1) a valid SRA run accession (SRR/ERR/DRR...), (2) multiple accessions separated by ';', (3) a path to RNA-seq read files, or leave empty to let the pipeline fetch data automatically.",
+                "meta": ["SRA"]
             },
             "repeats_set": {
                 "type": "string",
