@@ -1,7 +1,6 @@
 process SEQKIT_STATS {
     tag "${id}"
     label "seqkit"
-    scratch false
 
     input:
     tuple val(id), val(meta), val(genome)

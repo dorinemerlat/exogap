@@ -2,7 +2,6 @@ process SUMMARIZE_REPEATS_BY_LEVEL {
     tag "${id}"
     memory { 10.GB }
     maxRetries 5
-    scratch false
 
     input:
     tuple val(id), val(meta), path(gff)

@@ -37,15 +37,30 @@ workflow EXOGAPTWO {
 
         if (params.module_genes == true) {
             print "Running module gene annotation"
-            GENES_ANNOTATION(REPEATS_ANNOTATION.out.unmasked_genomes, REPEATS_ANNOTATION.out.masked_genomes)
-        }
+            if (params.module_repeats == true) {
+            REPEATS_ANNOTATION.out.unmasked_genomes.set { genomes_for_coding_genes_annotation }
+            } else {
+                PREPROCESSING.out.genomes
+                    .join(genomes)
+                    .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1, fasta2] } 
+                    .set { genomes_for_coding_genes_annotation }
+            }
+            GENES_ANNOTATION( genomes_for_coding_genes_annotation )
+        } 
 
-        // if (params.module_ncgenes == true) {
-        //     print "Running module ncRNA annotation"
-        //     genomes.map { id, meta, genome -> [id, meta, file("/enadisk/tempor/merlat/exogaptwo/cache/repeats_annotation/repeatmasker/${id}/genome_${id}.fa.masked")] }
-        //         .set { masked_genomes }
-        //     NCGENES_ANNOTATION(masked_genomes)
-        // }
+        if (params.module_ncgenes == true) {
+            print "Running module ncRNA annotation"
+            if (params.module_repeats == true) {
+            REPEATS_ANNOTATION.out.unmasked_genomes.set { genomes_for_ncgenes_annotation }
+            } else {
+                PREPROCESSING.out.genomes
+                    .join(genomes)
+                    .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1, fasta2] } 
+                    .set { genomes_for_ncgenes_annotation }
+            }
+
+            NCGENES_ANNOTATION( genomes_for_ncgenes_annotation )
+        }
 
         // print "Running module postprocessing"
         // POSTPROCESSING()

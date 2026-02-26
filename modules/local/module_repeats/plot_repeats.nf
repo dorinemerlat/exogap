@@ -3,7 +3,6 @@ nextflow.enable.dsl=2
 process PLOT_REPEATS {
 	tag "plot_repeats"
 	// label 'exogap_tools'
-    scratch false
 	input:
 	tuple val(id), path(gff_files), path(stats_files), path(newick)
 
