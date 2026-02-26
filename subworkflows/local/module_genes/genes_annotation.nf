@@ -29,24 +29,24 @@ workflow GENES_ANNOTATION {
 
         VARUS(varus_input)
 
-        // masked_genomes
-        //     .join(VARUS.out.bam, by: 0)
-        //     .map { id, meta1, fasta, meta2, bam -> [id, meta1, fasta, bam, file(params.protein_set), meta1.lineage.species.name] }
-        //     .branch { id, meta, fasta, bam, proteins, specie_name ->
-        //         with_bam: bam.size() > 0
-        //         without_bam: bam.size() == 0
-        //     }
-        //     .set { annotation_input }
+        masked_genomes
+            .join(VARUS.out.bam, by: 0)
+            .map { id, meta1, fasta, meta2, bam -> [id, meta1, fasta, bam, file(params.protein_set), meta1.lineage.species.name] }
+            .branch { id, meta, fasta, bam, proteins, specie_name ->
+                with_bam: bam.size() > 0
+                without_bam: bam.size() == 0
+            }
+            .set { annotation_input }
 
-        // annotation_input.with_bam
-        //     .set { braker_input }
+        annotation_input.with_bam
+            .set { braker_input }
 
-        // annotation_input.without_bam
-        //     .map { id, meta, fasta, bam, proteins, specie_name -> [id, meta, fasta, proteins, specie_name] }
-        //     .set { galba_input }
+        annotation_input.without_bam
+            .map { id, meta, fasta, bam, proteins, specie_name -> [id, meta, fasta, proteins, specie_name] }
+            .set { galba_input }
 
-        // // annotation with BRAKER if RNA-seq data is available, otherwise with GALBA
-        // // BRAKER(annotation_input.with_bam)
+        // annotation with BRAKER if RNA-seq data is available, otherwise with GALBA
+        BRAKER(annotation_input.with_bam)
         // GALBA(galba_input)
     // emit:
 }

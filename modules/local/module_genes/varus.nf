@@ -4,9 +4,9 @@ process VARUS {
     time '5d'
     label 'varus'
     scratch false
+    memory '600 GB'
     stageInMode 'copy'
-    memory '64 GB'
-
+    
     input:
     tuple val(id), val(meta), path(genome), path(runlist), val(specie_name)
 
@@ -23,6 +23,14 @@ process VARUS {
     """
     mkdir ${name}
     cp ${runlist} ${name}/Runlist.txt
+
+    STAR \
+    --runThreadN 4 \
+    --runMode genomeGenerate \
+    --outTmpDir STARtmp \
+    --genomeDir $id/genome \
+    --genomeFastaFiles $genome \
+    --limitGenomeGenerateRAM 6000000000000
 
     # generate VARUS parameters file
     cat > VARUSparameters.txt <<'EOF'
@@ -60,15 +68,11 @@ EOF
     # Run Varus
     /opt/VARUS/runVARUS.pl --aligner=STAR --readFromTable=0 --createindex=1 \\
         --latinGenus=${genus} --latinSpecies=${species} \\
-        --speciesGenome=${genome} --logfile=varus.log --nocreateRunList \\
+        --speciesGenome=${genome} --logfile=varus.log --nocreateRunList --nocreateindex \\
         > varus.log 
 
-    if [[ -f "${name}/VARUS.bam" ]]; then
-        mv "${name}/VARUS.bam" "${id}.bam"
-        mv "${name}/RunStatistics.csv" "RunStatistics_${id}.csv"
-    else
-        touch "${id}.bam"
-    fi
+    mv "${name}/VARUS.bam" "${id}.bam"
+    mv "${name}/RunStatistics.csv" "RunStatistics_${id}.csv"
     """
 
     stub:
