@@ -1,7 +1,6 @@
 process CLEAN_REPEAT_FAMILIES {
     tag "${id}"
     // label 'hite'
-    scratch 'false'
 
     input:
     tuple val(id), val(meta), path(families), path(classification)

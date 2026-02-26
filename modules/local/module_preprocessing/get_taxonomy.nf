@@ -1,7 +1,6 @@
 process GET_TAXONOMY {
     tag "${id}"
     label 'exogap_tools'
-    scratch false
 
     input:
     tuple val(id), val(meta), val(genome)

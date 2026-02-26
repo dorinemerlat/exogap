@@ -5,21 +5,20 @@ include { GALBA } from '../../../modules/local/module_genes/galba.nf'
 
 workflow GENES_ANNOTATION {
     take:
-        unmasked_genomes
         masked_genomes
     main:
 
-        // filter unmasked_genomes to keep only those where meta.SRA is not null
-        unmasked_genomes
-            .map { id, meta, fasta -> [id, meta] }
+        // filter masked_genomes to keep only those where meta.SRA is not null
+        masked_genomes
+            .map { id, meta, fasta -> [id, meta, meta.lineage.species.name] }
             .set { genomes_with_sra }
 
         GENERATE_RUNLIST(genomes_with_sra)
 
-        // unmasked_genomes
-        //     .combine(GENERATE_RUNLIST.out, by: 0)
-        //     .map { id, meta1, fasta, meta2, runlist -> [id, meta1, fasta, runlist, meta1.lineage.species.name] }
-        //     .set { varus_input }
+        unmasked_genomes
+            .combine(GENERATE_RUNLIST.out, by: 0)
+            .map { id, meta1, fasta, meta2, runlist -> [id, meta1, fasta, runlist, meta1.lineage.species.name] }
+            .set { varus_input }
 
         // VARUS(varus_input)
 
@@ -32,13 +31,16 @@ workflow GENES_ANNOTATION {
         //     }
         //     .set { annotation_input }
 
+        // annotation_input.with_bam
+        //     .set { braker_input }
+
         // annotation_input.without_bam
         //     .map { id, meta, fasta, bam, proteins, specie_name -> [id, meta, fasta, proteins, specie_name] }
         //     .set { galba_input }
 
-        // // annotation with BRAKER if RNA-seq data is available, otherwise with GALBA
-        // BRAKER(annotation_input.with_bam)
-        // GALBA(galba_input)
+        // annotation with BRAKER if RNA-seq data is available, otherwise with GALBA
+        BRAKER(annotation_input.with_bam)
+        GALBA(galba_input)
     // emit:
 }
 

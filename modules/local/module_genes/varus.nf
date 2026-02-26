@@ -3,16 +3,16 @@ process VARUS {
     cpus 30
     time '5d'
     label 'varus'
-    // label 'retry_with_backoff'
     scratch false
+    stageInMode 'copy'
+    memory '64 GB'
 
     input:
     tuple val(id), val(meta), path(genome), path(runlist), val(specie_name)
 
     output:
     tuple val(id), val(meta), path("${id}.bam"), emit: bam
-    tuple val(id), val(meta), path("RunStatistics_${id}.csv"), emit: run_stats, optional: true
-    tuple val(id), val(meta), path("Runlist_${id}.txt"), emit: runlist
+    tuple val(id), val(meta), path("RunStatistics_${id}.csv"), emit: run_stats
 
     script:
     def name    = specie_name.replaceAll(/\s+/, '_').replace('.','')
@@ -21,14 +21,8 @@ process VARUS {
     def species = toks.size() > 1 ? toks[1..-1].join('_') : ''
 
     """
-    # if runlist is already generated
-    if [[ -s ${runlist} ]]; then
-        mkdir ${name}
-        cp ${runlist} ${name}/Runlist.txt
-        runlist_args="--nocreateRunList"
-    else
-        runlist_args=""
-    fi
+    mkdir ${name}
+    cp ${runlist} ${name}/Runlist.txt
 
     # generate VARUS parameters file
     cat > VARUSparameters.txt <<'EOF'
@@ -66,8 +60,8 @@ EOF
     # Run Varus
     /opt/VARUS/runVARUS.pl --aligner=STAR --readFromTable=0 --createindex=1 \\
         --latinGenus=${genus} --latinSpecies=${species} \\
-        --speciesGenome=${genome} --logfile=varus.log \${runlist_args} \\
-        > varus.log 2>&1
+        --speciesGenome=${genome} --logfile=varus.log --nocreateRunList \\
+        > varus.log 
 
     if [[ -f "${name}/VARUS.bam" ]]; then
         mv "${name}/VARUS.bam" "${id}.bam"
@@ -79,6 +73,6 @@ EOF
 
     stub:
     """
-    touch Runlist_${id}.txt
+    touch ${id}.bam RunStatistics_${id}.csv
     """
 }

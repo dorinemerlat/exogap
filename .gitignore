@@ -21,5 +21,7 @@ modules/local/module_repeats/earlgrey.nf
 dev/
 erv_mchelper.fa erv_repeatmodeler.fa
 .vscode/
+work2
+.vscode/
 cache_archve/
 figures/

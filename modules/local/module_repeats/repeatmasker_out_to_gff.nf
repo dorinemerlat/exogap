@@ -1,6 +1,5 @@
 process REPEATMASKER_OUT_TO_GFF {
     tag "${id}"
-    scratch false
 
     input:
     tuple val(id), val(meta), path(out), path(table), path(classification_csv)

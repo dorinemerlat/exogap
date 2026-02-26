@@ -1,7 +1,6 @@
 process ANALYZE_FAMILIES_CLUSTER {
     tag "${id}"
     // label 'exogap_tools'
-    scratch 'false'
 
     input:
     tuple val(id), val(meta), path(cluster), val(out_prefix)

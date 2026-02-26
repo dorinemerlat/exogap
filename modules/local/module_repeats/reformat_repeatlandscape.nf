@@ -1,6 +1,5 @@
 process REFORMAT_REPEATLANDSCAPE {
     tag "${id}"
-    scratch false
 
     input:
     tuple val(id), val(meta), path(tsv), path(classification)

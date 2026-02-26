@@ -1,10 +1,10 @@
 process GALBA {
     tag "${id}"
-    cpus 10
+    cpus 25
     time '10d'
-    label 'braker'
+    label 'galba'
     scratch false
-
+    memory = "140.GB"
     input:
     tuple val(id), val(meta), path(genome), path(proteins), val(specie_name)
 
@@ -21,7 +21,7 @@ process GALBA {
     cp -r /opt/Augustus/config/ .
     AUGUSTUS_CONFIG_PATH="\$PWD/config"
 
-    galba.pl --species=${genus}_${species} --genome=${genome} --prot_seq=${proteins} --gff3
+    galba.pl --species=${genus}_${species} --genome=${genome} --prot_seq=${proteins} --gff3 --threads ${task.cpus} --workingdir galba_${id}
     """
 
     stub:
