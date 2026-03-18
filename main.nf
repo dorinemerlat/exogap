@@ -146,6 +146,65 @@ Channel.fromList(samplesheet)
                 return [(key): value]
             }
         }
+
+        def rnaseqDirPath = updatedNUllMeta['RNASeq-file']
+        if (rnaseqDirPath) {
+            def rnaseqDir = file(rnaseqDirPath, checkIfExists: true)
+            if (!rnaseqDir.isDirectory()) {
+                log.error "RNASeq-file for sample '${updatedNUllMeta.name}' must be a directory: ${rnaseqDirPath}"
+                System.exit(1)
+            }
+
+            def allowedExtPattern = ~/(?i)^.*\.(?:fq|fastq)(?:\.gz)?$/
+            def rnaseqFiles = (rnaseqDir.listFiles() ?: [])
+                .findAll { it.isFile() && (it.name ==~ allowedExtPattern) }
+                .sort { a, b -> a.name <=> b.name }
+
+            def pairedByRun = [:].withDefault { [r1: null, r2: null] }
+            def singleByRun = [:]
+
+            rnaseqFiles.each { readFile ->
+                def readStem = readFile.name.replaceFirst(/(?i)\.(?:fq|fastq)(?:\.gz)?$/, '')
+                def readMatch = (readStem =~ /(?i)^(.*)_r?([12])$/)
+
+                if (readMatch.matches()) {
+                    def runId = readMatch[0][1]
+                    def mateId = readMatch[0][2]
+
+                    if (mateId == '1') {
+                        pairedByRun[runId].r1 = file(readFile)
+                    } else {
+                        pairedByRun[runId].r2 = file(readFile)
+                    }
+                } else {
+                    if (singleByRun.containsKey(readStem)) {
+                        log.warn "Duplicate single-end RNA-seq run id '${readStem}' for sample '${updatedNUllMeta.name}'. Keeping latest file: ${readFile}"
+                    }
+                    singleByRun[readStem] = file(readFile)
+                }
+            }
+
+            def rnaseqRuns = []
+            pairedByRun.keySet().sort().each { runId ->
+                def mates = pairedByRun[runId]
+                if (mates.r1 && mates.r2) {
+                    rnaseqRuns << tuple(runId, mates.r1, mates.r2)
+                } else {
+                    log.warn "Incomplete RNA-seq pair for sample '${updatedNUllMeta.name}', run '${runId}' (r1=${mates.r1}, r2=${mates.r2})"
+                }
+            }
+
+            singleByRun.keySet().sort().each { runId ->
+                rnaseqRuns << tuple(runId, singleByRun[runId])
+            }
+
+            updatedNUllMeta = Utils.updateTopLevelKey(updatedNUllMeta, 'rnaseq_runs', rnaseqRuns ?: null)
+        } else {
+            updatedNUllMeta = Utils.updateTopLevelKey(updatedNUllMeta, 'rnaseq_runs', null)
+        }
+
+        updatedNUllMeta.remove('RNASeq-file')
+
         [id, updatedNUllMeta, file(fasta)]
     }
     .set { genomes }

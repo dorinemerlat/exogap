@@ -25,3 +25,5 @@ work2
 .vscode/
 cache_archve/
 figures/
+plots/
+scripts/

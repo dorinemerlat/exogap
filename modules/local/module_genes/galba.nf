@@ -1,15 +1,19 @@
 process GALBA {
+    containerOptions "--home \$HOME"
     tag "${id}"
     cpus 25
     time '10d'
+    memory '140 GB'
     label 'galba'
     scratch false
-    memory = "140.GB"
+    stageInMode 'copy'
+    maxRetries 5
+    
     input:
     tuple val(id), val(meta), path(genome), path(proteins), val(specie_name)
 
     output:
-    tuple val(id), val(meta), path("galba_${id}"), emit: galba_dir
+    tuple val(id), val(meta), path("galba_${id}/galba.gff3"), emit: gff
 
     script:
     def name    = specie_name.replaceAll(/\s+/, '_').replace('.','')
@@ -21,7 +25,13 @@ process GALBA {
     cp -r /opt/Augustus/config/ .
     AUGUSTUS_CONFIG_PATH="\$PWD/config"
 
-    galba.pl --species=${genus}_${species} --genome=${genome} --prot_seq=${proteins} --gff3 --threads ${task.cpus} --workingdir galba_${id}
+    galba.pl --species=${genus}_${species} \
+        --genome=${genome} \
+        --prot_seq=${proteins} \
+        --gff3 \
+        --threads ${task.cpus} \
+        --workingdir galba_${id} \
+        --AUGUSTUS_CONFIG_PATH=\$AUGUSTUS_CONFIG_PATH
     """
 
     stub:
