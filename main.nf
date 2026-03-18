@@ -76,37 +76,37 @@ if (params.module_repeats == true) {
     }
     // check famdb_path and famdb_to_download
     // if download_famdb is false, check that famdb_path is provided and if it is an existing directory containing dfam39_full.0.h5 and at least one other .h5 file with 1 to 16 in its name
-    if (params.download_famdb == false) {
-        if (params.famdb_path == null) {
-            log.error "Parameter error: You set --download_famdb to false, so you must provide a local path to a FamDB library with --famdb_path."
-            System.exit(1)
-        } else {
-            def famdb_dir = file(params.famdb_path, checkIfExists: true)
-            if (!famdb_dir.isDirectory()) {
-                log.error "Parameter error: --famdb_path must be a path to a directory containing a FamDB .h5 file."
-                System.exit(1)
-            } else {
-                params.famdb_partitions = famdb_dir.listFiles().findAll { it.name ==~ /^dfam39_full(?:\.\d+)?\.h5$/ || it.name ==~ /^dfam39_(?:[1-9]|1[0-6])(?:\.\d+)?\.h5$/ }
-                if (params.famdb_partitions.size() < 2) {
-                    log.error "Parameter error: The directory provided in --famdb_path must contain at least the full FamDB (dfam39_full.0.h5) and one other partitioned FamDB (.h5 file with 1 to 16 in its name)."
-                    System.exit(1)
-                }
-                log.info "Found ${params.famdb_partitions.size()} FamDB partition(s): ${params.famdb_partitions*.name.sort().join(', ')}"
-                // do a list of the available partitions with the path of directory join to files names
-            }
-        }
-    } else {
-        // if download_famdb is true, check that famdb_to_download is valid
-        if (params.famdb_to_download == null) {
-            log.error "Parameter error: You set --download_famdb to true, so you must provide a FamDB ID to download from dfam.org with --famdb_to_download."
-            System.exit(1)
-        } else {
-            if (!(params.famdb_to_download ==~ /^(?:[1-9]|1[0-6])$/)) {
-                log.error "Parameter error: --famdb_to_download must be a string '1'..'16' corresponding to a FamDB library ID on dfam.org."
-                System.exit(1)
-            }
-        }
-    }
+    // if (params.download_famdb == false) {
+    //     if (params.famdb_path == null) {
+    //         log.error "Parameter error: You set --download_famdb to false, so you must provide a local path to a FamDB library with --famdb_path."
+    //         System.exit(1)
+    //     } else {
+    //         def famdb_dir = file(params.famdb_path, checkIfExists: true)
+    //         if (!famdb_dir.isDirectory()) {
+    //             log.error "Parameter error: --famdb_path must be a path to a directory containing a FamDB .h5 file."
+    //             System.exit(1)
+    //         } else {
+    //             params.famdb_partitions = famdb_dir.listFiles().findAll { it.name ==~ /^dfam39_full(?:\.\d+)?\.h5$/ || it.name ==~ /^dfam39_(?:[1-9]|1[0-6])(?:\.\d+)?\.h5$/ }
+    //             if (params.famdb_partitions.size() < 2) {
+    //                 log.error "Parameter error: The directory provided in --famdb_path must contain at least the full FamDB (dfam39_full.0.h5) and one other partitioned FamDB (.h5 file with 1 to 16 in its name)."
+    //                 System.exit(1)
+    //             }
+    //             log.info "Found ${params.famdb_partitions.size()} FamDB partition(s): ${params.famdb_partitions*.name.sort().join(', ')}"
+    //             // do a list of the available partitions with the path of directory join to files names
+    //         }
+    //     }
+    // } else {
+    //     // if download_famdb is true, check that famdb_to_download is valid
+    //     if (params.famdb_to_download == null) {
+    //         log.error "Parameter error: You set --download_famdb to true, so you must provide a FamDB ID to download from dfam.org with --famdb_to_download."
+    //         System.exit(1)
+    //     } else {
+    //         if (!(params.famdb_to_download ==~ /^(?:[1-9]|1[0-6])$/)) {
+    //             log.error "Parameter error: --famdb_to_download must be a string '1'..'16' corresponding to a FamDB library ID on dfam.org."
+    //             System.exit(1)
+    //         }
+    //     }
+    // }
     // check group_consensus_sequences
     if (params.group_consensus_sequences != true && params.group_consensus_sequences != false) {
         log.error "Parameter error: --group_consensus_sequences must be true or false."

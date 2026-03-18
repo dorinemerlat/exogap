@@ -15,12 +15,19 @@ workflow GENES_ANNOTATION {
 
         GENERATE_RUNLIST(genomes_with_sra)
 
-        unmasked_genomes
-            .combine(GENERATE_RUNLIST.out, by: 0)
+        // filter out empty runlists
+        GENERATE_RUNLIST.out
+            .filter { id, meta, file ->
+                file.readLines().size() > 1
+            }
+            .set { runlists_non_empty }
+
+        masked_genomes
+            .combine(runlists_non_empty, by: 0)
             .map { id, meta1, fasta, meta2, runlist -> [id, meta1, fasta, runlist, meta1.lineage.species.name] }
             .set { varus_input }
 
-        // VARUS(varus_input)
+        VARUS(varus_input)
 
         masked_genomes
             .join(VARUS.out.bam, by: 0)
