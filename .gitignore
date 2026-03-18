@@ -22,3 +22,5 @@ dev/
 erv_mchelper.fa erv_repeatmodeler.fa
 .vscode/
 work2
+plots/
+scripts/

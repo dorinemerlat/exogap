@@ -1,6 +1,6 @@
 process VARUS {
     tag "${id}"
-    cpus 30
+    cpus 60
     time '5d'
     label 'varus'
     scratch false
@@ -28,9 +28,9 @@ process VARUS {
     --runThreadN 4 \
     --runMode genomeGenerate \
     --outTmpDir STARtmp \
-    --genomeDir $id/genome \
-    --genomeFastaFiles $genome \
-    --limitGenomeGenerateRAM 6000000000000
+    --genomeDir ${name}/genome \
+    --genomeFastaFiles $genome
+    --limitGenomeGenerateRAM ${task.memory.toBytes()}
 
     # generate VARUS parameters file
     cat > VARUSparameters.txt <<'EOF'
@@ -66,9 +66,9 @@ EOF
     sleep \$(( (RANDOM % 60) + 5 ))
 
     # Run Varus
-    /opt/VARUS/runVARUS.pl --aligner=STAR --readFromTable=0 --createindex=1 \\
+    /opt/VARUS/runVARUS.pl --aligner=STAR --readFromTable=0 --createindex=0 \\
         --latinGenus=${genus} --latinSpecies=${species} \\
-        --speciesGenome=${genome} --logfile=varus.log --nocreateRunList --nocreateindex \\
+        --speciesGenome=${genome} --logfile=varus.log --nocreateRunList \\
         > varus.log 
 
     mv "${name}/VARUS.bam" "${id}.bam"

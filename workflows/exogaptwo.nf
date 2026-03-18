@@ -7,11 +7,11 @@
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { PREPROCESSING } from '../subworkflows/local/module_preprocessing/preprocessing.nf'
-include { REPEATS_ANNOTATION } from '../subworkflows/local/module_repeats/repeats_annotation.nf'
-include { GENES_ANNOTATION } from '../subworkflows/local/module_genes/genes_annotation.nf'
-include { NCGENES_ANNOTATION } from '../subworkflows/local/module_ncgenes/ncgenes_annotation.nf'
-include { POSTPROCESSING } from '../subworkflows/local/module_postprocessing/postprocessing.nf'
+include { PREPROCESSING } from '../subworkflows/local/preprocessing.nf'
+include { REPEATS_ANNOTATION } from '../subworkflows/local/repeats_annotation.nf'
+include { GENES_ANNOTATION } from '../subworkflows/local/genes_annotation.nf'
+include { NCGENES_ANNOTATION } from '../subworkflows/local/ncgenes_annotation.nf'
+include { POSTPROCESSING } from '../subworkflows/local/postprocessing.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
