@@ -17,7 +17,7 @@ Main modules:
 
 Prerequisites:
 - Nextflow (recommended >= 24.04)
-- Singularity / Apptainer 
+- Singularity / Apptainer
 
 Clone the repository:
 ```bash
@@ -30,11 +30,41 @@ cd exogap
 ### Samplesheet CSV file
 
 Prepare a samplesheet CSV describing genomes to annotate.
+## Pipeline inputs & options
 
-Example samplesheet (samplesheet.csv):
+- **Samplesheet (required):** a CSV describing genomes. Required columns: `name`, `taxid`, `fasta`. Optional columns supported: `RNASeq-dir` (path to directory with FASTQ files), `SRA` (SRA accessions), `repeats_set` (FASTA library).
+- **Main config:** `nextflow.config` (or `example/nextflow_example.config`) controls runtime options. Key params:
+	- `input`: path to samplesheet CSV (or pass `--input` on CLI).
+	- `module_repeats`, `module_genes`, `module_ncgenes`: enable/disable modules (booleans).
+	- `group_consensus_sequences`: (repeats) boolean to share consensus across genomes.
+	- `reference_library`: optional repeats library FASTA for repeat annotation.
+	- `protein_set`: (genes) path to protein FASTA used for gene annotation.
+	- `outdir`: output directory (default `out`).
+	- `publish_dir_mode`: how results are published (default `copy`).
+	- `max_memory`, `max_cpus`, `max_time`: global resource caps for processes.
+	- `env.NXF_SINGULARITY_CACHEDIR`: where Singularity/Apptainer caches images (default `$projectDir/.singularity/`).
+
+### Example runs
+
+Run with your config and samplesheet:
+```bash
+nextflow run . -c nextflow.config --input samplesheet.csv -profile singularity
+```
+
+Use the example config:
+```bash
+nextflow run . -c example/nextflow_example.config --input example/samplesheet_example.csv -profile singularity
+```
+
+To continue after fixing an error, add `-resume`:
+```bash
+nextflow run . -c nextflow.config --input samplesheet.csv -profile singularity -resume
+```
+
+Minimal example samplesheet (samplesheet.csv):
 ```
 name,taxid,fasta
-Polydesmus complanatus,510027,/path/to/polydesmus-complanatus.fa
+Felis catus,9685,/path/to/felis-catus.fa
 ```
 
 Column description:
@@ -42,68 +72,12 @@ Column description:
 - name (required): display name used in reports (alphanumeric, spaces, '-' and '_' allowed).
 - taxid (required): NCBI taxon id (use nearest parent taxid if exact id not available).
 - fasta (required): path to fasta assembly file (absolute or relative).
+- RNASeq-dir (optional): path to directory containing RNA-Seq FASTQ files for this genome (single-end or paired-end, .fastq or .fastq.gz).
+- SRA (optional): comma-separated list of SRA accessions for RNA-Seq data
 
 ### Config file
 
-Fill the `nextflow.config` file. Here a describe the main options
-
-*Note*: Use absolute paths when targeting cloud storage (S3/GS).
-
-**Input & output**
-
-| Parameter | Type | Default | Description |
-|---|---:|---|---|
-| input | string | null | Path to samplesheet CSV describing genomes to annotate (required). |
-| outdir | string | 'out' | Output directory for pipeline results. |
-
-**Module activation**
-
-| Parameter | Type | Default | Description |
-|---|---:|---|---|
-| module_repeats | boolean | true | Enable repetitive elements annotation. |
-| module_genes | boolean | true | Enable protein-coding gene annotation. |
-| module_ncgenes | boolean | true | Enable non-coding gene annotation. |
-
-**Options for repetitive element annotation**
-
-| Parameter | Type | Default | Description |
-|---|---:|---|---|
-| download_famdb | boolean | false | true = download a FamDB partition from dfam.org; false = use local `famdb_path`. |
-| famdb_to_download | string | null | FamDB partition id ('1'..'16') to download when `download_famdb` is true. See [FamDB](https://github.com/dorinemerlat/exogap/README.md#####FamDB) |
-| famdb_path | string | null | Local path to FamDB `.h5` file (required when `download_famdb` is false). |
-| group_consensus_sequences | boolean | true | Use a single consensus library across all genomes in the run. |
-
-**Resources & limits**
-
-| Parameter | Type | Default | Description |
-|---|---:|---|---|
-| max_memory | string | '128.GB' | Upper memory limit for jobs (Nextflow format, e.g. "8.GB"). |
-| max_cpus | integer | 16 | Upper CPU limit for jobs. |
-| max_time | string | '240.h' | Upper walltime limit for jobs (e.g. "2.h", "30.m"). |
-
-#### FamDB
-
-Choose the FamDB partition id (1..16) matching your taxonomic scope when using `download_famdb`.
-
-| Partition | Name | Content |
-|---:|---|---|
-| 0 | root | root |
-| 1 | Brachycera | Brachycera |
-| 2 | Archelosauria | Archelosauria |
-| 3 | Hymenoptera | Hymenoptera |
-| 4 | Otomorpha | Otomorpha |
-| 5 | rosids | rosids |
-| 6 | Viridiplantae | Saxifragales, asterids, Proteales, Nymphaeales, Amborellales, Caryophyllales, Ranunculales, Mesostigmatophyceae, Chlorokybophyceae, Charophyceae, Lycopodiopsida, Chlorophyta, Liliopsida, Polypodiopsida, Marchantiophyta, Acrogymnospermae, Bryophyta |
-| 7 | Mammalia | Mammalia |
-| 8 | Noctuoidea | Noctuoidea |
-| 9 | Obtectomera | Bombycoidea, Papilionoidea, Pyraloidea, Hesperioidea, Geometroidea, Drepanoidea, Pterophoroidea |
-| 10 | Eupercaria | Eupercaria |
-| 11 | Ctenosquamata | Ovalentaria, Myctophata, Lampridacea, Carangaria, Holocentrimorphaceae, Batrachoidaria, Anabantaria, Paracanthopterygii, Ophidiaria, Gobiaria, Syngnathiaria, Pelagiaria |
-| 12 | Vertebrata | Chondrichthyes, Lepidosauria, Protacanthopterygii, Coelacanthimorpha, Amphibia, Cladistia, Holostei, Cyclostomata, Osteoglossocephala, Stomiati, Dipnomorpha, Elopocephalai, Chondrostei |
-| 13 | Coleoptera | Coleoptera |
-| 14 | Endopterygota | Gelechioidea, Yponomeutoidea, Incurvarioidea, Tineoidea, Apoditrysia, Nematocera, Strepsiptera, Neuropterida, Siphonaptera, Trichoptera |
-| 15 | Protostomia | Nematoda, Chelicerata, Collembola, Polyneoptera, Monocondylia, Palaeoptera, Crustacea, Paraneoptera, Myriapoda, Scalidophora, Spiralia |
-| 16 | Riboviria | Diverse groups including many unicellular eukaryotes, viruses and bacteria (see original dfam partition descriptions) |
+Fill the `nextflow.config` file.
 
 ### Launch pipeline
 
@@ -113,7 +87,7 @@ nextflow run main.nf -profile <singularity|docker|...> --config nextflow.config
 ```
 
 ## Pipeline output
-Generated outputs include per-genome annotation files (GFF), fasta sequences and summary reports and MultiQC reports. See docs/ for detailed output layout (TODO: add full output list).
+Generated outputs include per-genome annotation files (GFF), fasta sequences and summary reports.
 
 ## Credits
 
