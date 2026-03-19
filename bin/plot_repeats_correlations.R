@@ -5,7 +5,7 @@
 ## ------------------------------------------------------------
 
 # To delete
-setwd("/tempor/merlat/exogaptwo")
+setwd("/tempor/merlat/exogap")
 
 ## ------------------------------------------------------------
 ## Packages
@@ -18,7 +18,7 @@ pacman::p_load(ape, phylogram, dplyr, ggplot2, ggtext, glue)
 ## ------------------------------------------------------------
 ## Load custom functions
 ## ------------------------------------------------------------
-functions_file <- "/enadisk/tempor/merlat/exogaptwo/bin/exostats_functions.R"
+functions_file <- "/enadisk/tempor/merlat/exogap/bin/exostats_functions.R"
 if (file.exists(functions_file)) {
   source(functions_file)
 } else {
@@ -28,9 +28,9 @@ if (file.exists(functions_file)) {
 ## ------------------------------------------------------------
 ## Input files
 ## ------------------------------------------------------------
-newick_file <- "/enadisk/tempor/merlat/exogaptwo/cache/preprocessing/download_newick/newick/tree.nwk"
-stats_file  <- "/tempor/merlat/exogaptwo/cache/preprocessing/merge_stats/all/all.stats"
-summary_all_file <- "/enadisk/tempor/merlat/exogaptwo/cache/repeats_annotation/merge_summaries/repeats_summary_all_only_repetitive_elements/repeats_summary_all_only_repetitive_elements.tsv"
+newick_file <- "/enadisk/tempor/merlat/exogap/cache/preprocessing/download_newick/newick/tree.nwk"
+stats_file  <- "/tempor/merlat/exogap/cache/preprocessing/merge_stats/all/all.stats"
+summary_all_file <- "/enadisk/tempor/merlat/exogap/cache/repeats_annotation/merge_summaries/repeats_summary_all_only_repetitive_elements/repeats_summary_all_only_repetitive_elements.tsv"
 
 ## ------------------------------------------------------------
 ## Load phylogeny and standardize genome names

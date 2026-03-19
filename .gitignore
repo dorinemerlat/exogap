@@ -29,3 +29,9 @@ plots/
 scripts/
 modules/local/testing/*
 modules/local/testing/
+example/log/
+.singularity/*img
+example/log/
+.singularity/.nfs*
+.singularity/.*sif
+.singularity/*sif

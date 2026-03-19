@@ -1,3 +1,4 @@
+include { GENERATE_RUNLIST } from "$projectDir/modules/local/module_genes/generate_runlist.nf"
 include { DOWNLOAD_SRA } from "$projectDir/modules/local/module_genes/download_sra.nf"
 include { STAR_SINGLE } from "$projectDir/modules/local/module_genes/star_single.nf"
 include { STAR_PAIRED } from "$projectDir/modules/local/module_genes/star_paired.nf"
@@ -9,6 +10,7 @@ include { AGAT_STATISTICS } from "$projectDir/modules/local/module_genes/agat_st
 include { AGAT_FILTER_GENE_BY_LENGTH } from "$projectDir/modules/local/module_genes/agat_filter_gene_by_length.nf"
 include { AGAT_FILTER_INCOMPLETE_GENES } from "$projectDir/modules/local/module_genes/agat_filter_incomplete_genes.nf"
 include { EXTRACT_CANONICAL_PROTEINS } from "$projectDir/modules/local/module_genes/extract_canonical_proteins.nf"
+include { DOWNLOAD_OMAMER_DB } from "$projectDir/modules/local/module_genes/download_omamer_db.nf"
 include { OMARK } from "$projectDir/modules/local/module_genes/omark.nf"
 include { BUSCO } from "$projectDir/modules/local/module_genes/busco.nf"
 include { FILTER_OMARK_CONTAMINATIONS } from "$projectDir/modules/local/module_genes/filter_omark_contaminations.nf"
@@ -20,12 +22,13 @@ include { CLASSIFY_GENES_VS_REPEATS } from "$projectDir/modules/local/module_gen
 
 workflow GENES_ANNOTATION {
     take:
+        unmasked_genomes
         masked_genomes
         repeats_gff
 
     main:
         // check if RNASeq-file is provided in the metadata, if not set rnaseq_runs to null
-        masked_genomes
+        unmasked_genomes
             .filter { id, meta, fasta -> meta["rnaseq_runs"] != null }
             .flatMap { id, meta, fasta ->
                 meta["rnaseq_runs"].collect { run_tuple ->

@@ -1,4 +1,4 @@
-setwd("/tempor/merlat/exogaptwo")
+setwd("/tempor/merlat/exogap")
 
 ## Load packages
 if (!require("pacman")) install.packages("pacman")
@@ -12,17 +12,17 @@ BiocManager::install("ComplexHeatmap", ask = FALSE)
 library(ComplexHeatmap)
 
 ## Load custom functions (copied next to this script by the Nextflow module)
-functions_file = "/enadisk/tempor/merlat/exogaptwo/bin/exostats_functions.R"
+functions_file = "/enadisk/tempor/merlat/exogap/bin/exostats_functions.R"
 if (file.exists(functions_file)) {
   source(functions_file)
 }
 
 # Files definition
-newick_file <- "/enadisk/tempor/merlat/exogaptwo/cache/preprocessing/download_newick/newick/tree.nwk"
-stats_file <- "/tempor/merlat/exogaptwo/cache/preprocessing/merge_stats/all/all.stats"
-summary_all_file <- "/enadisk/tempor/merlat/exogaptwo/cache/repeats_annotation/merge_summaries/repeats_summary_all_only_repetitive_elements/repeats_summary_all_only_repetitive_elements.tsv"
-summary_order_file <- "/enadisk/tempor/merlat/exogaptwo/cache/repeats_annotation/merge_summaries/repeats_summary_by_order/repeats_summary_by_order.tsv"
-summary_superfamily_file <- "/enadisk/tempor/merlat/exogaptwo/cache/repeats_annotation/merge_summaries/repeats_summary_by_superfamily/repeats_summary_by_superfamily.tsv"
+newick_file <- "/enadisk/tempor/merlat/exogap/cache/preprocessing/download_newick/newick/tree.nwk"
+stats_file <- "/tempor/merlat/exogap/cache/preprocessing/merge_stats/all/all.stats"
+summary_all_file <- "/enadisk/tempor/merlat/exogap/cache/repeats_annotation/merge_summaries/repeats_summary_all_only_repetitive_elements/repeats_summary_all_only_repetitive_elements.tsv"
+summary_order_file <- "/enadisk/tempor/merlat/exogap/cache/repeats_annotation/merge_summaries/repeats_summary_by_order/repeats_summary_by_order.tsv"
+summary_superfamily_file <- "/enadisk/tempor/merlat/exogap/cache/repeats_annotation/merge_summaries/repeats_summary_by_superfamily/repeats_summary_by_superfamily.tsv"
 
 # Load phylogeny
 phylo <- read.tree(newick_file)

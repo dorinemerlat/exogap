@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/exogaptwo
+    nf-core/exogap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/exogaptwo
-    Website: https://nf-co.re/exogaptwo
-    Slack  : https://nfcore.slack.com/channels/exogaptwo
+    Github : https://github.com/nf-core/exogap
+    Website: https://nf-co.re/exogap
+    Slack  : https://nfcore.slack.com/channels/exogap
 ----------------------------------------------------------------------------------------
 */
 
@@ -69,12 +69,6 @@ if (params.module_repeats == false && params.module_genes == false && params.mod
 
 // if module_repeats is activated, check its parameters
 if (params.module_repeats == true) {
-    // check download_famdb
-    if (params.download_famdb != true && params.download_famdb != false) {
-        log.error "Parameter error: --download_famdb must be true or false."
-        System.exit(1)
-    }
-
     // check group_consensus_sequences
     if (params.group_consensus_sequences != true && params.group_consensus_sequences != false) {
         log.error "Parameter error: --group_consensus_sequences must be true or false."
@@ -183,10 +177,10 @@ Channel.fromList(samplesheet)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { EXOGAPTWO } from './workflows/exogaptwo'
+include { EXOGAPTWO } from './workflows/exogap'
 
 
-// WORKFLOW: Run main nf-core/exogaptwo analysis pipeline
+// WORKFLOW: Run main nf-core/exogap analysis pipeline
 
 workflow {
     print "Starting workflow EXOGAP"

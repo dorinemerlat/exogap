@@ -11,7 +11,7 @@ process HMMSCAN {
 
     output:
     // Save the raw hmmscan table and a filtered table with the grep selection
-    tuple val(id), val(molecule), path(tblout), "${id}_tes_vs_${molecule}.hmm"
+    tuple val(id), val(molecule), path("${id}_tes_vs_${molecule}.hmm")
 
     script:
     """

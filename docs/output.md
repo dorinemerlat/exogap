@@ -1,4 +1,4 @@
-# nf-core/exogaptwo: Output
+# nf-core/exogap: Output
 
 ## Introduction
 

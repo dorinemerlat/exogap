@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the workflow/exogaptwo.nf in the nf-core/exogaptwo pipeline
+// This file holds several functions specific to the workflow/exogap.nf in the nf-core/exogap pipeline
 //
 
 import nextflow.Nextflow

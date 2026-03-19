@@ -6,7 +6,7 @@
 ## ------------------------------------------------------------
 
 ## (Optional) remove if Nextflow sets it
-setwd("/tempor/merlat/exogaptwo")
+setwd("/tempor/merlat/exogap")
 
 ## ------------------------------------------------------------
 ## Packages (minimal for this script)
@@ -20,7 +20,7 @@ pacman::p_load(ape, dplyr, tidyr, ggplot2)
 ## ------------------------------------------------------------
 ## Load custom helper functions
 ## ------------------------------------------------------------
-functions_file <- "/enadisk/tempor/merlat/exogaptwo/bin/exostats_functions.R"
+functions_file <- "/enadisk/tempor/merlat/exogap/bin/exostats_functions.R"
 if (file.exists(functions_file)) {
   source(functions_file)
 } else {
@@ -30,8 +30,8 @@ if (file.exists(functions_file)) {
 ## ------------------------------------------------------------
 ## Input / output paths
 ## ------------------------------------------------------------
-newick_file <- "/enadisk/tempor/merlat/exogaptwo/cache/preprocessing/download_newick/newick/tree.nwk"
-landscape_file <- "/tempor/merlat/exogaptwo/cache/repeats_annotation/merge_repeatlandscape/all/all_repeatlandscape.tsv"
+newick_file <- "/enadisk/tempor/merlat/exogap/cache/preprocessing/download_newick/newick/tree.nwk"
+landscape_file <- "/tempor/merlat/exogap/cache/repeats_annotation/merge_repeatlandscape/all/all_repeatlandscape.tsv"
 
 out_dir <- "repeatlandscape"
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)

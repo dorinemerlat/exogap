@@ -16,7 +16,7 @@
 ##
 ## ---------------------------
 
-setwd("/tempor/merlat/exogaptwo")
+setwd("/tempor/merlat/exogap")
 
 ## Load packages
 if (!require("pacman")) install.packages("pacman")
@@ -28,7 +28,7 @@ library(glue)
 pacman::p_load_gh("jokupwardsergoo/ComplexHeatmap")
 
 ## Load custom functions (copied next to this script by the Nextflow module)
-functions_file = "/enadisk/tempor/merlat/exogaptwo/bin/exostats_functions.R"
+functions_file = "/enadisk/tempor/merlat/exogap/bin/exostats_functions.R"
 if (file.exists(functions_file)) {
   source(functions_file)
 }
@@ -170,7 +170,7 @@ read_n50_df <- function(f) {
   if (is.na(size)) return(NULL)
   tibble(id = id, genome_size = size)
 }
-stats_file <- "/enadisk/tempor/merlat/exogaptwo/size.tsv"
+stats_file <- "/enadisk/tempor/merlat/exogap/size.tsv"
 size <- read.delim(stats_file, header = TRUE, sep = "\t", check.names = FALSE)
 if (nrow(size) > 0) size <- size %>% mutate(id = sapply(id, format_plot_name))
 
@@ -266,7 +266,7 @@ read_gff_df <- function(f, n_test = 50) {
 # repeats <- gff_files %>%
 #   lapply(read_gff_df) %>%
 #   bind_rows()
-repeats_file <-  "/enadisk/tempor/merlat/exogaptwo/repeats.fixed.tsv"
+repeats_file <-  "/enadisk/tempor/merlat/exogap/repeats.fixed.tsv"
 repeats <- read_tsv(repeats_file, show_col_types = FALSE)
 
 if (nrow(repeats) > 0) {
@@ -285,7 +285,7 @@ size <- size %>%
   mutate(id = sapply(id, format_plot_name))
 
 ## Read phylogenetic tree
-newick_file <- "/enadisk/tempor/merlat/exogaptwo/tree.nwk"
+newick_file <- "/enadisk/tempor/merlat/exogap/tree.nwk"
 phylo <- read.tree(newick_file)
 phylo$tip.label <- sub("\\|.*$", "", phylo$tip.label)
 phylo$tip.label <- sapply(phylo$tip.label, format_plot_name)

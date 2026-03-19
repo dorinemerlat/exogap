@@ -7,8 +7,8 @@
         },
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/exogaptwo/master/nextflow_schema.json",
-    "title": "nf-core/exogaptwo pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/nf-core/exogap/master/nextflow_schema.json",
+    "title": "nf-core/exogap pipeline parameters",
     "description": "Annotation tool for eukaryotic non-model species",
     "type": "object",
     "definitions": {
@@ -26,7 +26,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "Path to a samplesheet CSV (header + 3 columns). See the usage docs for the required columns and examples: https://nf-co.re/exogaptwo/usage#samplesheet-input",
+                    "help_text": "Path to a samplesheet CSV (header + 3 columns). See the usage docs for the required columns and examples: https://nf-co.re/exogap/usage#samplesheet-input",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {

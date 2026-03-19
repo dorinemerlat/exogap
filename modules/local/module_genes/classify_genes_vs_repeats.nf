@@ -22,14 +22,14 @@ process CLASSIFY_GENES_VS_REPEATS {
 
     mkdir tmp
 
-    conda run -n python_plots --no-capture-output python /shared/projects/metainvert/exogaptwo/bin/classify_genes_vs_repeats.py \
+    conda run -n python_plots --no-capture-output python /shared/projects/metainvert/exogap/bin/classify_genes_vs_repeats.py \
         --proteins ${proteins} \
         --repeats ${repeats} \
         --output ${id}_${annotation_method}_genes_vs_merged_repeats.tsv \
         --merge-repeats \
         --tmp tmp
 
-    conda run -n python_plots --no-capture-output python /shared/projects/metainvert/exogaptwo/bin/classify_genes_vs_repeats.py \
+    conda run -n python_plots --no-capture-output python /shared/projects/metainvert/exogap/bin/classify_genes_vs_repeats.py \
         --proteins ${proteins} \
         --repeats ${repeats} \
         --output ${id}_${annotation_method}_genes_vs_no_merged_repeats.tsv \

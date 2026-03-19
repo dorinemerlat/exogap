@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/exogaptwo",
-    "homePage": "https://github.com/nf-core/exogaptwo",
+    "name": "nf-core/exogap",
+    "homePage": "https://github.com/nf-core/exogap",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

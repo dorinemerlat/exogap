@@ -19,10 +19,10 @@ process FILTER_OMARK_CONTAMINATIONS {
     def contaminations_filtered = "${id}_${annotation_method}_contaminations_filtered_c_${threshold}"
     """
     module unload nextflow
-    ~/.conda/envs/python_plots/bin/python3 /shared/projects/metainvert/exogaptwo/bin/reformat_gff_for_omark.py -i $gff -o $gff_for_omark
+    ~/.conda/envs/python_plots/bin/python3 /shared/projects/metainvert/exogap/bin/reformat_gff_for_omark.py -i $gff -o $gff_for_omark
 
     # identify contamination and generation of proteins's fasta
-    ~/.conda/envs/python_plots/bin/python3 /shared/projects/metainvert/exogaptwo/bin/contamination_chromosome_filtering.py -i "." -g $gff_for_omark -f $fasta -o $contaminations -t $threshold
+    ~/.conda/envs/python_plots/bin/python3 /shared/projects/metainvert/exogap/bin/contamination_chromosome_filtering.py -i "." -g $gff_for_omark -f $fasta -o $contaminations -t $threshold
     mv ${contaminations}.fa ${contaminations_filtered}.fa
 
     # generation of filtered gff

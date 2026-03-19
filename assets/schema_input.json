@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/exogaptwo/master/assets/schema_input.json",
-    "title": "nf-core/exogaptwo pipeline - input.csv schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/exogap/master/assets/schema_input.json",
+    "title": "nf-core/exogap pipeline - input.csv schema",
     "description": "Schema for the file provided with input.csv",
     "type": "array",
     "items": {
@@ -27,7 +27,7 @@
                 "errorMessage": "Fasta file for reads must be provided, cannot contain spaces and must have extension '.fa', '.fna' or '.fasta'.",
                 "unique": true
             },
-            "RNASeq-file": {
+            "RNASeq-dir": {
                 "type": "string",
                 "pattern": "^$|^\\S+$",
                 "format": "directory-path",

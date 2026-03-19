@@ -2,8 +2,8 @@
 set -euo pipefail
 
 BASE_DIR="/enadisk/gstock/metainvert/results/myriapods_annotation/exogap/intermediate_results/repeats_annotation/repeatmasker"
-STATS_BASE="/tempor/merlat/exogaptwo/cache/preprocessing/seqkit_stats"
-OUT="/tempor/merlat/exogaptwo/cache/preprocessing/merge_stats/all/all.stats"
+STATS_BASE="/tempor/merlat/exogap/cache/preprocessing/seqkit_stats"
+OUT="/tempor/merlat/exogap/cache/preprocessing/merge_stats/all/all.stats"
 
 # (Re)create output
 : > "$OUT"
