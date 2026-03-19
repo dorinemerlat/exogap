@@ -1,5 +1,6 @@
 process POSTPROCESS_MCHELPER {
     tag "${id}"
+    label "exogap_python"
 
     input:
     tuple val(id), val(meta), path(table), path(rm2_families), path(mchelper_classif), path(classified_module), path(unclassified_module), path(gene_tbl), path(rrna_tbl), path(classification)

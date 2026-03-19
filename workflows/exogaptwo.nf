@@ -37,26 +37,25 @@ workflow EXOGAPTWO {
 
         if (params.module_genes == true) {
             print "Running module gene annotation"
+
             if (params.module_repeats == true) {
-            REPEATS_ANNOTATION.out.unmasked_genomes.set { genomes_for_coding_genes_annotation }
+                REPEATS_ANNOTATION.out.unmasked_genomes.set { genomes }
+                REPEATS_ANNOTATION.out.repeat_gff.set { repeat_gff }
             } else {
-                PREPROCESSING.out.genomes
-                    .join(genomes)
-                    .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1, fasta2] } 
-                    .set { genomes_for_coding_genes_annotation }
+                PREPROCESSING.out.genomes.set { genomes }
+                Channel.empty().set { repeat_gff }
             }
-            GENES_ANNOTATION( genomes_for_coding_genes_annotation )
-        } 
+
+            GENES_ANNOTATION( genomes, repeat_gff )
+        }
 
         if (params.module_ncgenes == true) {
             print "Running module ncRNA annotation"
+
             if (params.module_repeats == true) {
-            REPEATS_ANNOTATION.out.unmasked_genomes.set { genomes_for_ncgenes_annotation }
+                REPEATS_ANNOTATION.out.unmasked_genomes.set { genomes_for_ncgenes_annotation }
             } else {
-                PREPROCESSING.out.genomes
-                    .join(genomes)
-                    .map { id, meta1, fasta1, meta2, fasta2 -> [id, meta1, fasta2] } 
-                    .set { genomes_for_ncgenes_annotation }
+                PREPROCESSING.out.genomes.set { genomes_for_ncgenes_annotation }
             }
 
             NCGENES_ANNOTATION( genomes_for_ncgenes_annotation )

@@ -1,6 +1,6 @@
 process GET_TAXONOMY {
     tag "${id}"
-    label 'exogap_tools'
+    label 'exogap_python'
 
     input:
     tuple val(id), val(meta), val(genome)

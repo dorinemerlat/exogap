@@ -2,6 +2,7 @@ process SUMMARIZE_REPEATS_BY_LEVEL {
     tag "${id}"
     memory { 10.GB }
     maxRetries 5
+    label "exogap_python"
 
     input:
     tuple val(id), val(meta), path(gff)
@@ -20,8 +21,7 @@ process SUMMARIZE_REPEATS_BY_LEVEL {
 
     script:
     """
-    module load genomics/bedtools
-    /home/merlat/.conda/envs/biopython/bin/python /tempor/merlat/exogaptwo/bin/summarize_repeats_by_level.py -i $gff -s ${meta.assembly_size}
+    summarize_repeats_by_level.py -i $gff -s ${meta.assembly_size}
     """
 
     stub:

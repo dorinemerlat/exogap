@@ -2,15 +2,16 @@ process REPEATMASKER {
     tag "$id"
     cpus 30
     time '20d'
-    // label 'repeatmasker'
+    label 'repeatmasker'
     errorStrategy 'ignore'
+    scratch false
 
     input:
     tuple val(id), val(meta), path(genome), path(library)
 
     output:
     tuple  val(id), val(meta), path("${genome}.masked"),    emit: masked
-    // tuple  val(id), val(meta), path("${genome}.cat"),       emit: cat
+    tuple  val(id), val(meta), path("${genome}.cat"),       emit: cat
     tuple  val(id), val(meta), path("${genome}.out"),       emit: out
     tuple  val(id), val(meta), path("${genome}.out.gff"),   emit: gff
     tuple  val(id), val(meta), path("${genome}.tbl"),       emit: tbl

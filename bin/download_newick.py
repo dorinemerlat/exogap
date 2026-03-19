@@ -12,7 +12,6 @@ Examples:
 """
 
 import argparse
-from pydoc import classname
 import warnings
 import re
 warnings.filterwarnings("ignore", category=SyntaxWarning)

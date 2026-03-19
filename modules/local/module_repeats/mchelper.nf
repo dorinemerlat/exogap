@@ -2,7 +2,7 @@ process MCHELPER {
     tag "${id}"
     cpus 50
     time '20d'
-    // label 'mchelper'
+    label 'mchelper'
     errorStrategy 'ignore'
 
     input:

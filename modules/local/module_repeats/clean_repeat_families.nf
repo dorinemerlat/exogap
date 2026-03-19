@@ -1,9 +1,10 @@
 process CLEAN_REPEAT_FAMILIES {
     tag "${id}"
-    // label 'hite'
+    label 'exogap_python'
 
     input:
-    tuple val(id), val(meta), path(families), path(classification)
+    tuple val(id), val(meta), path(families)
+    each path(classification)
 
     output:
     tuple val(id), val(meta), path("${families.baseName}.cleaned_for_mchelper.fa"), emit: for_mchelper

@@ -1,10 +1,9 @@
 process DOWNLOAD_NEWICK {
     tag "newick"
-    label 'exogap_tools'
-    scratch false
+    label 'exogap_python'
 
     input:
-    tuple val(taxids)
+    val(taxids)
 
     output:
     path "tree.nwk"

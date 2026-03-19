@@ -1,9 +1,3 @@
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CHECK IF FASTA FILES ARE VALIDS, REFORMATE THEM AND CALCULATE THEIR SIZE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
 include { GET_TAXONOMY } from "$projectDir/modules/local/module_preprocessing/get_taxonomy.nf"
 include { SEQKIT_STATS } from "$projectDir/modules/local/module_preprocessing/seqkit_stats.nf"
 include { REFORMAT_GENOME } from "$projectDir/modules/local/module_preprocessing/reformat_genome.nf"

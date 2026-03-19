@@ -3,19 +3,19 @@
 process HMMSCAN {
     tag "${id}"
     cpus 5
+    label 'hmmer'
     time '2h'
 
     input:
-    tuple val(id), val(meta), path(fasta), path(hmm_db), val(tblout)
+    tuple val(id), val(molecule), path(fasta), path(hmm_db)
 
     output:
     // Save the raw hmmscan table and a filtered table with the grep selection
-    tuple val(id), val(meta), path(tblout)
+    tuple val(id), val(molecule), path(tblout), "${id}_tes_vs_${molecule}.hmm"
 
     script:
     """
-    module load hmmer
     hmmpress ${hmm_db}
-    hmmscan --tblout ${tblout} -E 10 --noali --cpu ${task.cpus} ${hmm_db} ${fasta}
+    hmmscan --tblout ${tblout} -E 10 --noali --cpu ${task.cpus} "${id}_tes_vs_${molecule}.hmm" ${fasta}
     """
 }
