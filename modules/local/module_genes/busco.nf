@@ -14,7 +14,7 @@ process BUSCO {
 
     script:
     """
-    busco -i $proteins -o busco_${id}_${annotation_method} -m prot -l arthropoda_odb10 -c $task.cpus -f
+    busco -i $proteins -o busco_${id}_${annotation_method} -m prot -l arthropoda_odb10 -c ${task.cpus} -f
     mv busco_${id}_${annotation_method}/short_summary*.{json,txt} .
     """
 

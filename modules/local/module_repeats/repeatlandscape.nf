@@ -7,7 +7,7 @@ process REPEATLANDSCAPE {
 
     output:
     tuple val(id), val(meta), path("${id}_TE_repeat_landscape.tsv"), emit: tsv
-    tuple val(id), val(meta), path("${align}.divsum"), emit: divsum
+    // tuple val(id), val(meta), path("${align}.divsum"), emit: divsum
 
     script:
     """

@@ -14,7 +14,7 @@ process INFERNAL {
     script:
     database_size = ${meta.assembly_size} * 2 / 1000000
     """
-    cmscan -Z $database_size --cpu $task.cpus --cut_ga --rfam --nohmmonly --tblout ${id}_infernal.tblout -o ${id}_infernal.out \
+    cmscan -Z $database_size --cpu ${task.cpus} --cut_ga --rfam --nohmmonly --tblout ${id}_infernal.tblout -o ${id}_infernal.out \
             --fmt 2 --clanin ${rfam_clanin} ${rfam_cm} $genome
     """
     

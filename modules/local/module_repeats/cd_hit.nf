@@ -46,7 +46,7 @@ process CD_HIT {
         -sf 1 \
         -d 0 \
         -M 0 \
-        -T $task.cpus
+        -T ${task.cpus}
 
     # c = sequence identity threshold
     # g = length difference cutoff

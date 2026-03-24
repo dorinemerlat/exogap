@@ -14,7 +14,7 @@ process REPEATMODELER {
     """
     BuildDatabase -name $id -engine ncbi $genome
 
-    RepeatModeler -threads $task.cpus -engine ncbi -database $id -LTRStruct
+    RepeatModeler -threads ${task.cpus} -engine ncbi -database $id -LTRStruct
     """
 
     stub:

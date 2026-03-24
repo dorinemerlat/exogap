@@ -2,6 +2,7 @@ include { GET_TAXONOMY } from "$projectDir/modules/local/module_preprocessing/ge
 include { SEQKIT_STATS } from "$projectDir/modules/local/module_preprocessing/seqkit_stats.nf"
 include { REFORMAT_GENOME } from "$projectDir/modules/local/module_preprocessing/reformat_genome.nf"
 include { DOWNLOAD_NEWICK } from "$projectDir/modules/local/module_preprocessing/download_newick.nf"
+include { SELECT_BUSCO_DATASET } from "$projectDir/modules/local/module_preprocessing/select_busco_dataset.nf"
 
 def extract_lineage(lineage_file) {
     def lines = lineage_file.text.readLines()
@@ -95,8 +96,25 @@ workflow PREPROCESSING {
             DOWNLOAD_NEWICK(taxids)
         }
 
+        println params.busco_lineage
+        // If `busco_lineage` is not provided (missing), null, or an empty string
+        if (!params.busco_lineage?.toString()?.trim()) {
+            print "Selecting BUSCO dataset based on taxid"
+            SELECT_BUSCO_DATASET(GET_TAXONOMY.out.lineage)
+            SELECT_BUSCO_DATASET.out
+                .map { id, meta, dataset -> [id, dataset.text.readLines()[0]] }
+                .join (REFORMAT_GENOME.out)
+                .map { id, busco_dataset, meta, genome -> [id, meta + ["busco_dataset": busco_dataset], genome] }
+                .set { genomes }
+        } else {
+            print "Using provided BUSCO lineage: ${params.busco_lineage}"
+            genomes
+                .map { id, meta, genome -> [id, meta + ["busco_dataset": params.busco_lineage], genome] }
+                .set { genomes }
+        }
+        
     emit:
-        genomes = REFORMAT_GENOME.out.fasta
+        genomes = genomes
         newick = DOWNLOAD_NEWICK.out
         genome_stats = SEQKIT_STATS.out
 }

@@ -1,6 +1,8 @@
 include { UNMASK_GENOME } from "$projectDir/modules/local/module_repeats/unmask_genome.nf"
 include { REPEATMODELER } from "$projectDir/modules/local/module_repeats/repeatmodeler.nf"
 include { CLEAN_REPEAT_FAMILIES } from "$projectDir/modules/local/module_repeats/clean_repeat_families.nf"
+include { DOWNLOAD_RRNA_EUKARYOTA } from "$projectDir/modules/local/module_repeats/download_rrna_eukaryota.nf"
+include { DOWNLOAD_BUSCO_HMM } from "$projectDir/modules/local/module_repeats/download_busco_hmm.nf"
 include { MCHELPER } from "$projectDir/modules/local/module_repeats/mchelper.nf"
 include { HMMSCAN } from "$projectDir/modules/local/module_repeats/hmmscan.nf"
 include { POSTPROCESS_MCHELPER } from "$projectDir/modules/local/module_repeats/postprocess_mchelper.nf"
@@ -42,31 +44,41 @@ workflow REPEATS_ANNOTATION {
         // Clean up repeat libraries name
         CLEAN_REPEAT_FAMILIES( REPEATMODELER.out, file("$projectDir/data/repeats_classification.csv") )
 
+        // Download rRNA HMM database and prepare it for hmmscan
+        DOWNLOAD_RRNA_EUKARYOTA()
+        DOWNLOAD_BUSCO_HMM(genomes.map {id, meta, genome -> [meta.busco_dataset, id] }.groupTuple(by: 0) )
+
         CLEAN_REPEAT_FAMILIES.out.for_mchelper
-            .map { id, meta, families -> [id, 'rRNA', families, file("/biolo/mchelper/1.7.1/MCHelper/db/rRNA_Eukaryota.hmm"), "${id}_tes_vs_rRNA.hmm"] }
+            .combine( DOWNLOAD_RRNA_EUKARYOTA.out.map { it -> [it]} )
+            .map { id, meta, families, rRNA_hmm -> [id, 'rRNA', families, rRNA_hmm] }
             .set { hmm_rRNA_inputs }
+            
+        DOWNLOAD_BUSCO_HMM.out
+            .flatMap { dataset_name, species_list, dataset_hmms -> species_list.collect { id -> [id, dataset_hmms] }}
+            .set { busco_hmms }
 
         CLEAN_REPEAT_FAMILIES.out.for_mchelper
-            .map { id, meta, families -> [id, 'gene', families, file("/biolo/mchelper/1.7.1/MCHelper/db/arthropoda_odb10.hmm"), "${id}_tes_vs_genes.hmm"] }
+            .join(busco_hmms, by: 0)
+            .map { id, meta, families, busco_hmm -> [id, 'genes', families, busco_hmm] }
             .set { hmm_genes_inputs }
-
+ 
         hmm_rRNA_inputs.concat( hmm_genes_inputs )
             .set { all_hmmscan_inputs }
 
         HMMSCAN( all_hmmscan_inputs )
 
         // Run MCHelper
-        REPEATMODELER.out
-            .join(genomes)
-            .map {id, meta1, families, meta2, genome -> [id, meta1, families, genome] }
+        CLEAN_REPEAT_FAMILIES.out.for_mchelper
+            .join(genomes, by: [0, 1])
+            .map {id, meta, families, genome -> [id, meta, families, genome] }
             .set { all_families }
 
         MCHELPER( all_families )
 
         // Collect all results for process MChelper
-        HMMSCAN.out.branch {id, meta, tblout ->
-            gene: meta == 'gene'
-            rrna: meta == 'rrna'
+        HMMSCAN.out.branch {id, molecule, tblout ->
+            gene: molecule == 'genes'
+            rrna: molecule == 'rRNA'
             }
             .set { hmmscan_results }
 
@@ -75,7 +87,7 @@ workflow REPEATS_ANNOTATION {
             .join(MCHELPER.out.main_results, by: [0,1])
             .join(hmmscan_results.gene, by: [0])
             .join(hmmscan_results.rrna, by: [0])
-            .map {id, meta, table, rm2_families, mchelper_classif, classified_module, unclassified_module, meta_gene, gene_tbl, meta_rrna, rrna_tbl ->
+            .map {id, meta, table, rm2_families, mchelper_classif, classified_module, unclassified_module, gene_name, gene_tbl, rrna_name, rrna_tbl ->
                 [id, meta, table, rm2_families, mchelper_classif, classified_module, unclassified_module, gene_tbl, rrna_tbl, file("$projectDir/data/repeats_classification.csv")]
             }
             .set { postprocess_mchelper_inputs }
@@ -99,7 +111,7 @@ workflow REPEATS_ANNOTATION {
 
         CD_HIT(all_repeat_libraries)
 
-        // // ANALYZE_FAMILIES_CLUSTER(CD_HIT.out.clusters.map { id, meta, cluster -> [id, meta, cluster, 'repeat_cluster' ] } )
+    //     // // ANALYZE_FAMILIES_CLUSTER(CD_HIT.out.clusters.map { id, meta, cluster -> [id, meta, cluster, 'repeat_cluster' ] } )
 
         genomes
             .combine( CD_HIT.out.library.map { id, meta, library -> library } )
@@ -180,8 +192,8 @@ workflow REPEATS_ANNOTATION {
         MERGE_REPEATLANDSCAPE( tables_for_merge_repeatlandscape )
 
     emit:
-    unmasked_genomes = UNMASK_GENOME.out
-    masked_genomes = REPEATMASKER.out.masked
-    repeat_gff = REPEATMASKER_OUT_TO_GFF.out
+        unmasked_genomes = UNMASK_GENOME.out
+        masked_genomes = REPEATMASKER.out.masked
+        repeat_gff = REPEATMASKER_OUT_TO_GFF.out
 }
 

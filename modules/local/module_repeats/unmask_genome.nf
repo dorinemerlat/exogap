@@ -5,15 +5,15 @@ process UNMASK_GENOME {
     tuple  val(id), val(meta), path(genome)
 
     output:
-    tuple val(id), val(meta), path(genome)
+    tuple val(id), val(meta), path("${id}_unmasked.fa")
 
     script:
     """
-    mv $genome ${id}_softmasked.fa 
-    awk '{if (\$0 ~ /^>/) print \$0; else print toupper(\$0)}' ${id}_softmasked.fa > $genome
+    awk '{if (\$0 ~ /^>/) print \$0; else print toupper(\$0)}' $genome > ${id}_unmasked.fa
     """
 
     stub:
     """
+    touch ${id}_unmasked.fa
     """
 }
