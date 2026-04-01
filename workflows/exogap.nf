@@ -35,21 +35,21 @@ workflow EXOGAPTWO {
 
         }
 
-        // if (params.module_genes == true) {
-        //     print "Running module gene annotation"
+        if (params.module_genes == true) {
+            print "Running module gene annotation"
 
-        //     if (params.module_repeats == true) {
-        //         REPEATS_ANNOTATION.out.unmasked_genomes.set { unmasked_genomes }
-        //         REPEATS_ANNOTATION.out.masked_genomes.set { masked_genomes }
-        //         REPEATS_ANNOTATION.out.repeat_gff.set { repeat_gff }
-        //     } else {
-        //         PREPROCESSING.out.genomes.set { unmasked_genomes }
-        //         PREPROCESSING.out.masked_genomes.set { masked_genomes }
-        //         Channel.empty().set { repeat_gff }
-        //     }
+            if (params.module_repeats == true) {
+                REPEATS_ANNOTATION.out.unmasked_genomes.set { unmasked_genomes }
+                REPEATS_ANNOTATION.out.masked_genomes.set { masked_genomes }
+                REPEATS_ANNOTATION.out.repeat_gff.set { repeat_gff }
+            } else {
+                PREPROCESSING.out.genomes.set { unmasked_genomes }
+                PREPROCESSING.out.masked_genomes.set { masked_genomes }
+                Channel.empty().set { repeat_gff }
+            }
 
-        //     GENES_ANNOTATION( unmasked_genomes, masked_genomes, repeat_gff )
-        // }
+            GENES_ANNOTATION( unmasked_genomes, masked_genomes, repeat_gff )
+        }
 
         // if (params.module_ncgenes == true) {
         //     print "Running module ncRNA annotation"

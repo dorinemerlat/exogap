@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import gffutils
 from Bio import SeqIO
 import os

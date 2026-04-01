@@ -13,7 +13,7 @@ process CLEAN_REPEAT_FAMILIES {
     script:
     """
     clean_repeat_families.py -f ${families} -c ${classification} -m ${meta.mnemonic.exogap}
-    """
+    """ 
 
     stub:
     """

@@ -2,9 +2,7 @@ process MERGE_BAM {
     tag "${id}"
     time '2d'
     label 'varus'
-    scratch false
     memory { (10 * task.attempt).GB }
-    stageInMode 'copy'
     maxRetries 5
     cpus 4
 

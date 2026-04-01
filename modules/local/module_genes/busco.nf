@@ -9,18 +9,19 @@ process BUSCO {
     tuple val(id), val(meta), val(annotation_method), path(proteins)
 
     output:
-    tuple val(id), val(meta), val(annotation_method), path("short_summary.specific.arthropoda_odb10.busco_${id}_${annotation_method}.json")
-    tuple val(id), val(meta), val(annotation_method), path("short_summary.specific.arthropoda_odb10.busco_${id}_${annotation_method}.txt")
+    tuple val(id), val(meta), val(annotation_method), path("${id}_${annotation_method}_busco.json")
+    tuple val(id), val(meta), val(annotation_method), path("${id}_${annotation_method}_busco.txt")
 
     script:
     """
     busco -i $proteins -o busco_${id}_${annotation_method} -m prot -l arthropoda_odb10 -c ${task.cpus} -f
-    mv busco_${id}_${annotation_method}/short_summary*.{json,txt} .
+    mv busco_${id}_${annotation_method}/short_summary*.json,txt busco_${id}_${annotation_method}_busco.json
+    mv busco_${id}_${annotation_method}/short_summary*.txt busco_${id}_${annotation_method}_busco.txt
     """
 
     stub:
     """
-    touch short_summary.specific.arthropoda_odb10.busco_${id}_${annotation_method}.json
-    touch short_summary.specific.arthropoda_odb10.busco_${id}_${annotation_method}.txt
+    touch busco_${id}_${annotation_method}_busco.json
+    touch busco_${id}_${annotation_method}_busco.txt
     """
 }

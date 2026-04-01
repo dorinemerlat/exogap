@@ -16,7 +16,8 @@ process MCHELPER {
     tuple val(id), val(meta), path("sequences_with_problems.txt"), emit: seqs_with_problems
     script:
     """
-    python3 MCHelper/MCHelper.py \
+    conda run -p /opt/conda/envs/MCHelper \
+        python3 MCHelper/MCHelper.py \
         -g ${genome} \
         -l ${families} \
         -o . \

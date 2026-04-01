@@ -5,8 +5,6 @@ process GALBA {
     time '10d'
     memory '140 GB'
     label 'galba'
-    scratch false
-    stageInMode 'copy'
     maxRetries 5
     
     input:

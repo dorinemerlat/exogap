@@ -10,15 +10,19 @@ include { AGAT_STATISTICS } from "$projectDir/modules/local/module_genes/agat_st
 include { AGAT_FILTER_GENE_BY_LENGTH } from "$projectDir/modules/local/module_genes/agat_filter_gene_by_length.nf"
 include { AGAT_FILTER_INCOMPLETE_GENES } from "$projectDir/modules/local/module_genes/agat_filter_incomplete_genes.nf"
 include { EXTRACT_CANONICAL_PROTEINS } from "$projectDir/modules/local/module_genes/extract_canonical_proteins.nf"
+include { AGAT_ADD_INTRONS } from "$projectDir/modules/local/module_genes/agat_add_introns.nf"
 include { DOWNLOAD_OMAMER_DB } from "$projectDir/modules/local/module_genes/download_omamer_db.nf"
 include { OMARK } from "$projectDir/modules/local/module_genes/omark.nf"
 include { BUSCO } from "$projectDir/modules/local/module_genes/busco.nf"
 include { FILTER_OMARK_CONTAMINATIONS } from "$projectDir/modules/local/module_genes/filter_omark_contaminations.nf"
+include { FILTER_OMARK_CONTAMINATIONS_IN_GFF } from "$projectDir/modules/local/module_genes/filter_omark_contaminations_in_gff.nf"
 include { OMARK as OMARK_ON_CONTAMINATION_FILTERED } from "$projectDir/modules/local/module_genes/omark.nf"
 include { BUSCO as BUSCO_ON_CONTAMINATION_FILTERED } from "$projectDir/modules/local/module_genes/busco.nf"
 include { CLASSIFY_GENES_VS_REPEATS } from "$projectDir/modules/local/module_genes/classify_genes_vs_repeats.nf"
-// include { INTERPROSCAN } from "$projectDir/modules/local/module_genes/interproscan.nf"
-// include { BLASTP } from "$projectDir/modules/local/module_genes/blastp.nf"
+include { BLASTP } from "$projectDir/modules/local/module_genes/blastp.nf"
+include { BUILD_BLASTP_TAXONOMY } from "$projectDir/modules/local/module_genes/build_blastp_taxonomy.nf"
+include { ADD_TAXONOMY_TO_BLASTP } from "$projectDir/modules/local/module_genes/add_taxonomy_to_blastp.nf"
+include { INTERPROSCAN } from "$projectDir/modules/local/module_genes/interproscan.nf"
 
 workflow GENES_ANNOTATION {
     take:
@@ -110,11 +114,13 @@ workflow GENES_ANNOTATION {
         masked_genomes
             .join(all_bams, by: [0, 1])
             .map { id, meta, genome, bam -> [id, meta, "star", genome, bam[0], file(params.protein_set), meta.lineage.species.name] }
+            .filter {it[0] != "ommatoiulus-sabulosus"}
             .set { braker_with_star_input }
 
         masked_genomes
             .join(all_bams, by:[0, 1])
             .map { id, meta, genome, bam -> [id, meta, "varus", genome, bam[0], file(params.protein_set), meta.lineage.species.name] }
+            .filter {!it[0] in ["agaricogonopus-acrotrifoliolatus", "ommatoiulus-sabulosus"]}
             .set { braker_with_varus_input }
 
         braker_with_star_input
@@ -127,10 +133,17 @@ workflow GENES_ANNOTATION {
             .map { id, meta, genome -> [id, meta, genome, file(params.protein_set), meta.lineage.species.name] }
             .set { braker2_and_galba_input }
 
-        BRAKER2(braker2_and_galba_input)
-        GALBA(braker2_and_galba_input)
+        braker2_and_galba_input
+            .filter {it[0] != "agaricogonopus-acrotrifoliolatus"} // filter out the two genomes that cause braker2 to fail
+            .set { braker2_input }
+        BRAKER2(braker2_input)
 
-        BRAKER3.out.gff.map { id, meta, rnaseq_aligner, gff -> [id, meta, "braker_with_" + rnaseq_aligner, gff] }
+        braker2_and_galba_input
+            .filter { !(it[0] in ["glomeris-maerens", "helicorthomorpha-holstii", "trigoniulus-corallinus"]) }// filter out the two genomes that cause braker2 to fail
+            .set { galba_input }
+        GALBA(galba_input)
+
+        BRAKER3.out.gff.map { id, meta, rnaseq_aligner, gff -> [id, meta, "braker-with-" + rnaseq_aligner, gff] }
             .concat(BRAKER2.out.gff.map { id, meta, gff -> [id, meta, "braker2", gff] })
             .concat(GALBA.out.gff.map { id, meta, gff -> [id,  meta, "galba", gff] })
             .set { all_gff }
@@ -146,7 +159,8 @@ workflow GENES_ANNOTATION {
 
         EXTRACT_CANONICAL_PROTEINS(gff_and_genome)
         AGAT_FILTER_INCOMPLETE_GENES(gff_and_genome)
-
+        AGAT_ADD_INTRONS(AGAT_FILTER_GENE_BY_LENGTH.out)
+        
         DOWNLOAD_OMAMER_DB()
         EXTRACT_CANONICAL_PROTEINS.out.fasta
             .combine(DOWNLOAD_OMAMER_DB.out)
@@ -166,13 +180,22 @@ workflow GENES_ANNOTATION {
 
         contamination_filtering_input
             .concat (contamination_filtering_input.map{id, meta, annotation_method, gff, fasta, ump, threshold -> [id, meta, annotation_method, gff, fasta, ump, "0.1"]})
-            .map {id, meta, annotation_method, gff, fasta, ump, threshold -> [ id, meta, annotation_method + "_filtered_c_"+ threshold, gff, fasta, ump, threshold ] }
+            .map {id, meta, annotation_method, gff, fasta, ump, threshold -> [ id, meta, annotation_method, gff, fasta, ump, threshold ] }
             .set{contamination_filtering_input}
 
-       // Check if OMARK filters enough contaminations
-        FILTER_OMARK_CONTAMINATIONS(contamination_filtering_input)
-        BUSCO_ON_CONTAMINATION_FILTERED(FILTER_OMARK_CONTAMINATIONS.out.fasta)
-        OMARK_ON_CONTAMINATION_FILTERED(FILTER_OMARK_CONTAMINATIONS.out.fasta.map{id, meta, annotation_method, proteins -> [id, meta, annotation_method, proteins, luca_db] })
+    //    // Check if OMARK filters enough contaminations
+    //     FILTER_OMARK_CONTAMINATIONS(contamination_filtering_input)
+    //     FILTER_OMARK_CONTAMINATIONS.out.contaminations
+    //         .join ( EXTRACT_CANONICAL_PROTEINS.out.gff, by: [0, 1, 2] )
+    //         .set { filter_omark_contaminations_in_gff_input }
+        
+        // FILTER_OMARK_CONTAMINATIONS_IN_GFF(filter_omark_contaminations_in_gff_input)
+
+        // EXTRACT_CANONICAL_PROTEINS.out.gff
+        //     .join(FILTER_OMARK_CONTAMINATIONS.out.contaminations, by: [0, 1])
+        //     .map { id, meta, annotation_method, gff, annotation_method_filtered, contaminants -> [id, meta, annotation_method_filtered, gff, contaminants] }
+        // BUSCO_ON_CONTAMINATION_FILTERED(FILTER_OMARK_CONTAMINATIONS.out.fasta)
+        // OMARK_ON_CONTAMINATION_FILTERED(FILTER_OMARK_CONTAMINATIONS.out.fasta.map{id, meta, annotation_method, proteins -> [id, meta, annotation_method, proteins, luca_db] })
 
         if (params.module_repeats == true) {
             // Analysis overlapping between genes annotations and repeats
@@ -182,6 +205,32 @@ workflow GENES_ANNOTATION {
 
             CLASSIFY_GENES_VS_REPEATS(genes_vs_repeats_input)
         }
+
+        // Functional annotation
+        EXTRACT_CANONICAL_PROTEINS.out.fasta
+            .map { id, meta, annotation_method, fasta -> [id, meta, annotation_method, fasta, "uniprot_sprot", "1e-6", "3", "20"] }
+            .set { blastp_input }
+
+        BLASTP(blastp_input)
+
+        BLASTP.out.tsv
+            .map{id, meta, annotation_method, blastp -> blastp }
+            .collect()
+            .set { blastp_tsv_outputs }
+
+        BUILD_BLASTP_TAXONOMY(blastp_tsv_outputs)
+        BUILD_BLASTP_TAXONOMY.out.taxonomy.view()
+
+        //  ADD_TAXONOMY_TO_BLASTP(BLASTP.out.tsv, BUILD_BLASTP_TAXONOMY.out.taxonomy)
+        // ADD_TAXONOMY_TO_BLASTP(BLASTP.out.tsv, BUILD_BLASTP_TAXONOMY.out.taxonomy)
+
+        //  INTERPROSCAN(EXTRACT_CANONICAL_PROTEINS.out.fasta)
+        // ADD_TAXONOMY_TO_BLASTP(BLASTP.out.tsv, BUILD_BLASTP_TAXONOMY.out.taxonomy)
+        // INTERPROSCAN(EXTRACT_CANONICAL_PROTEINS.out.fasta)
+
+        // SIGNALP(EXTRACT_CANONICAL_PROTEINS.out.fasta)
+        // EGGNOG_MAPPER(EXTRACT_CANONICAL_PROTEINS.out.fasta)
+        // KOFAM_KOALA(EXTRACT_CANONICAL_PROTEINS.out.fasta)
     // emit:
 }
 
