@@ -183,8 +183,8 @@ workflow GENES_ANNOTATION {
             .map {id, meta, annotation_method, gff, fasta, ump, threshold -> [ id, meta, annotation_method, gff, fasta, ump, threshold ] }
             .set{contamination_filtering_input}
 
-    //    // Check if OMARK filters enough contaminations
-    //     FILTER_OMARK_CONTAMINATIONS(contamination_filtering_input)
+       // Check if OMARK filters enough contaminations
+        FILTER_OMARK_CONTAMINATIONS(contamination_filtering_input)
     //     FILTER_OMARK_CONTAMINATIONS.out.contaminations
     //         .join ( EXTRACT_CANONICAL_PROTEINS.out.gff, by: [0, 1, 2] )
     //         .set { filter_omark_contaminations_in_gff_input }

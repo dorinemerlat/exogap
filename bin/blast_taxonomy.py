@@ -325,6 +325,10 @@ def run_mode_2(args):
 
     for input_path in args.input:
         out_path = output_path_for_input(input_path, args.output, multiple_inputs)
+        # check if output already exists
+        if os.path.exists(out_path):
+            print(f"Output already exists, skipping: {out_path}")
+            continue
         process_one_file(input_path, out_path, taxonomy_df)
 
 
